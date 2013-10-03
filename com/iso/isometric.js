@@ -6,7 +6,6 @@ function Isometric(ctx,tile_width,tile_height,map_array,images,tile_dict){
 	this.dict = tile_dict;
 	this.map = map_array;
 	this.tiles = images;
-	this.blank_tile;
 	this.zero_is_blank = 0;
 	this.stack_numbers = 0;
 	this.draw_x =0;
@@ -17,9 +16,16 @@ function Isometric(ctx,tile_width,tile_height,map_array,images,tile_dict){
 	this.mouse_used = 0;
 	this.xmouse = 0;
 	this.ymouse = 0;
-	this.planeGraphic = null;
+
+	this.applyIneractions = false;
+
 	this.alpha_mouse_behind = 0;
-	this.objectShadows = 0;
+
+	this.objectShadows = null;
+
+	this.tilesHide = null; 
+
+	this.planeGraphic = null;
 	this.hideStart;
 	this.hideEnd;
 	
@@ -49,7 +55,7 @@ function Isometric(ctx,tile_width,tile_height,map_array,images,tile_dict){
 													this.context.globalAlpha = 0.3;		
 												}
 										}
-										if(!this.planeGraphic){
+										if(!this.tilesHide){
 											this.context.drawImage(this.tiles[this.dict[image_num]],0,0,this.tiles[this.dict[image_num]].width,this.tiles[this.dict[image_num]].height,xpos,ypos+(k*((this.tileH-resized_height)*this.curZoom)),(this.tileW*this.curZoom),(resized_height*this.curZoom));
 										}else{
 											if(image_num >= this.hideStart && image_num <= this.hideEnd){
@@ -106,7 +112,11 @@ function Isometric(ctx,tile_width,tile_height,map_array,images,tile_dict){
 	this.getLayout = function() {
 		return this.map;
 	}
-	
+
+	this.getTile = function(posX,posY) {
+		return this.map[posX][posY];
+	}
+
 	this.setZoom = function(dir){
 		if(Number(dir)){
 			this.curZoom = dir;	
@@ -145,21 +155,21 @@ function Isometric(ctx,tile_width,tile_height,map_array,images,tile_dict){
 		}
 	}
 	
-	this.hideGraphics = function(setting,rangeStart,rangeEnd,graphic){
-		if(setting){
-			this.planeGraphic = graphic;
-			this.hideStart = rangeStart;
-			this.hideEnd = rangeEnd;
-		}else{
-			this.planeGraphic = null;
+	this.hideGraphics = function(hide, settings){
+		this.tilesHide = hide;
+		if(settings){
+			this.planeGraphic = settings.graphic;
+			this.hideStart = settings.rangeStart;
+			this.hideEnd = settings.rangeEnd;
 		}
 	}
 
-	this.applyObjectShadow = function(setting){
-		if(setting){
-			this.objectShadows = 1;
-		}else{
-			this.objectShadows = 0;
+	this.applyObjectShadow = function(shadow){
+		if (shadow){
+			this.objectShadows = true;
+		}
+    else{
+			this.objectShadows = false;
 		}
 	}
 	
