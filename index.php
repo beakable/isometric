@@ -5,11 +5,11 @@
     <title></title>
     <style type="text/css">
      body{
-     	margin: 0;
-     	padding: 0;
+      margin: 0;
+      padding: 0;
      }
     </style>
-    <script type="text/javascript" src="com/CanvasInput/CanvasInput.js"></script>	
+    <script type="text/javascript" src="com/CanvasInput/CanvasInput.js"></script> 
     <script type="text/javascript" src="com/xml/XMLPopulate.js" ></script>
     <script type="text/javascript" src="com/img/ImageLoader.js"></script>
     <script tppe="text/javascript" src="com/iso/Isometric.js"></script>
@@ -105,173 +105,168 @@
 
       input.keyboard(function(pressed) {
         switch(pressed) {
-        case 38:
-          self.keyCommand(1);	
-        break;
-        case 39:
-          self.keyCommand(2);	
-        break;
-        case 40:
-          self.keyCommand(3);	
-        break;
-        case 37:
-          self.keyCommand(4);	
-        break;
-        case 65:
-          self.keyCommand(5);	
-        break;
-        case 83:
-          self.keyCommand(6);	
-        break;
-        case 49:
-        self.keyCommand(7);	
-        break;
-        case 50:
-        self.keyCommand(8);	
-        break;
-        case 81:
-        self.keyCommand(9);	
-        break;
+          case 38:
+            self.keyCommand(1);
+          break;
+          case 39:
+            self.keyCommand(2);
+          break;
+          case 40:
+            self.keyCommand(3);
+          break;
+          case 37:
+            self.keyCommand(4);
+          break;
+          case 65:
+            self.keyCommand(5);
+          break;
+          case 83:
+            self.keyCommand(6);
+          break;
+          case 49:
+            self.keyCommand(7);
+          break;
+          case 50:
+            self.keyCommand(8);
+          break;
+          case 81:
+            self.keyCommand(9);
+          break;
         }
+      });
 
-    	});
-    	
-    	
-    	this.keyCommand = function(dir) {
-    		switch(dir) {
-    			case 1:
-    				mapLayers.map(function(layer) {
-    					layer.draw_y += 20; 
-    				});
-    			break;
-    			case 2:
-    				mapLayers.map(function(layer) {
-    					layer.draw_x -= 20; 
-    				});
-    			break;
-    			case 3:
-    				mapLayers.map(function(layer) {
-    					layer.draw_y -= 20; 
-    				});
-    			break;
-    			case 4:
-    				mapLayers.map(function(layer) {
-    					layer.draw_x += 20; 
-    				});
-    			break;
-    			case 5:
-    				mapLayers.map(function(layer) {
-    					layer.setZoom("out");
-    					layer.align("h-center",canvas.width);
-    					layer.align("v-center",canvas.height);
-    				});
-    			break;
-    			case 6:
-    				mapLayers.map(function(layer) {
-    					layer.setZoom("in");
-    					layer.align("h-center",canvas.width);
-    					layer.align("v-center",canvas.height);
-    				})
-    			break;
-    			case 7:
-    				mapLayers.map(function(layer) {
-    					if (layer.tilesHide !== null) {
-    						layer.hideGraphics(true);
-    					}
-    					if (layer.objectShadows !== null) {
-    						layer.applyObjectShadow(true);
-    					}
-    				});
-    			break;
-    			case 8:
-    				mapLayers.map(function(layer) {
-    					if(layer.tilesHide !== null) {
-    						layer.hideGraphics(false);
-    					}
-    					if (layer.objectShadows !== null) {
-    						layer.applyObjectShadow(false);
-    					}
-    				});
-    			break;
-    			case 9:
-    				mapLayers.map(function(layer) {
-    					layer.rotate("left");
-    				});
-    			break;
-    		}
-    		// -- loop to browser suggested rate of redraw.
-    		requestAnimFrame(self.draw);
-    	}
-    	
+      this.keyCommand = function(dir) {
+        switch(dir) {
+          case 1:
+            mapLayers.map(function(layer) {
+              layer.draw_y += 20; 
+            });
+          break;
+          case 2:
+            mapLayers.map(function(layer) {
+              layer.draw_x -= 20; 
+            });
+          break;
+          case 3:
+            mapLayers.map(function(layer) {
+              layer.draw_y -= 20; 
+            });
+          break;
+          case 4:
+            mapLayers.map(function(layer) {
+              layer.draw_x += 20; 
+            });
+          break;
+          case 5:
+            mapLayers.map(function(layer) {
+              layer.setZoom("out");
+              layer.align("h-center",canvas.width);
+              layer.align("v-center",canvas.height);
+            });
+          break;
+          case 6:
+            mapLayers.map(function(layer) {
+              layer.setZoom("in");
+              layer.align("h-center",canvas.width);
+              layer.align("v-center",canvas.height);
+            })
+          break;
+          case 7:
+            mapLayers.map(function(layer) {
+              if (layer.tilesHide !== null) {
+                layer.hideGraphics(true);
+              }
+              if (layer.objectShadows !== null) {
+                layer.applyObjectShadow(true);
+              }
+            });
+          break;
+          case 8:
+          mapLayers.map(function(layer) {
+            if(layer.tilesHide !== null) {
+              layer.hideGraphics(false);
+            }
+            if (layer.objectShadows !== null) {
+              layer.applyObjectShadow(false);
+            }
+          });
+          break;
+          case 9:
+            mapLayers.map(function(layer) {
+              layer.rotate("left");
+            });
+          break;
+        }
+        requestAnimFrame(self.draw);
+      }
 
-    	
-    	this.draw = function() {
-    		context.clearRect(0,0,canvas.width,canvas.height);
-    		mapLayers.map(function(layer) {
-    			layer.draw();
-    		});
-    		context.fillStyle = "rgb(255,255,255)";
-    		if (tile_coordinates.x < mapLayers[0].getLayout().length && tile_coordinates.x >= 0 && tile_coordinates.y < mapLayers[0].getLayout().length && tile_coordinates.y >= 0) {
-    			mapLayers.map( function(layer) {
-    				if (layer.applyIneractions) {
-    					if (layer.getTile([tile_coordinates.x],[tile_coordinates.y]) > 0) {
-    						context.drawImage(gui["popup-box.png"],mouse_coordinates.x,mouse_coordinates.y);
-    						context.font = "8pt Arial";
-    						context.fillText("Hover box",mouse_coordinates.x+14,mouse_coordinates.y+25);
-    					}
-    				}
-    			});
-    		}
-    	}
-    	
+      this.draw = function() {
+       context.clearRect(0,0,canvas.width,canvas.height);
+       mapLayers.map(function(layer) {
+         layer.draw();
+       });
+       context.fillStyle = "rgb(255,255,255)";
+       if (tile_coordinates.x < mapLayers[0].getLayout().length && tile_coordinates.x >= 0 && tile_coordinates.y < mapLayers[0].getLayout().length && tile_coordinates.y >= 0) {
+         mapLayers.map( function(layer) {
+          if (layer.applyIneractions) {
+            if (layer.getTile([tile_coordinates.x],[tile_coordinates.y]) > 0) {
+             context.drawImage(gui["popup-box.png"],mouse_coordinates.x,mouse_coordinates.y);
+             context.font = "8pt Arial";
+             context.fillText("Hover box",mouse_coordinates.x+14,mouse_coordinates.y+25);
+            }
+          }
+         });
+       }
+      }
+      
       this.createLayer = function(settings) {
-    		layer = new Isometric(context, settings.height, settings.width, settings.layout, settings.graphics, settings.graphicsDictionary);
-    		layer.setZoom(1);
-    		layer.zero_is_blank = settings.zero_is_blank;
-    		layer.alpha_mouse_behind = settings.alpha_mouse_behind;
-    		if(settings.objectShadow) {
-    			layer.applyObjectShadow(settings.objectShadow);
-    		}
-    		if (settings.heightMap) {
-    			layer.stack_tiles(settings.heightMap, 1);
-    		}
-    		if(settings.hideGraphics) {
-    			layer.hideGraphics(true, {
-    				rangeStart: settings.hideGraphics.rangeMin, 
-    				rangeEnd: settings.hideGraphics.rangeMax, 
-    				graphic: settings.hideGraphics.graphic
-    			});
-    		}
+       layer = new Isometric(context, settings.height, settings.width, settings.layout, settings.graphics, settings.graphicsDictionary);
+       layer.setZoom(1);
+       layer.zero_is_blank = settings.zero_is_blank;
+       layer.alpha_mouse_behind = settings.alpha_mouse_behind;
+       if(settings.objectShadow) {
+         layer.applyObjectShadow(settings.objectShadow);
+       }
+       if (settings.heightMap) {
+         layer.stack_tiles(settings.heightMap, 1);
+       }
+       if(settings.hideGraphics) {
+         layer.hideGraphics(true, {
+          rangeStart: settings.hideGraphics.rangeMin, 
+          rangeEnd: settings.hideGraphics.rangeMax, 
+          graphic: settings.hideGraphics.graphic
+         });
+       }
 
-    		if(settings.applyIneractions) {
-    			layer.applyIneractions = settings.applyIneractions;
-    			input.mouse_move(function(coords) {
-    				tile_coordinates = layer.applyMouse(coords.x,coords.y);
-    				mouse_coordinates = coords;
-    				requestAnimFrame(self.draw);
-    			});	
-    			input.mobile(function(coords) {
-    				tile_coordinates = layer.applyMouse(coords.x,coords.y);
-    				mouse_coordinates = coords;
-    				requestAnimFrame(self.draw);
-    			});
-    		}
+       if(settings.applyIneractions) {
+         layer.applyIneractions = settings.applyIneractions;
+         input.mouse_move(function(coords) {
+          tile_coordinates = layer.applyMouse(coords.x,coords.y);
+          mouse_coordinates = coords;
+          requestAnimFrame(self.draw);
+         });  
+         input.mobile(function(coords) {
+          tile_coordinates = layer.applyMouse(coords.x,coords.y);
+          mouse_coordinates = coords;
+          requestAnimFrame(self.draw);
+         });
+       }
 
-    		layer.align("h-center", canvas.width);
-    		layer.align("v-center", canvas.height);
-    		return layer;
+       layer.align("h-center", canvas.width);
+       layer.align("v-center", canvas.height);
+       return layer;
       }
 
 
-    	this.init = function(settings) {
-    		mapLayers = settings.layers;
-    		gui = settings.gui;
-    		this.draw();
-    	}
-    	
+      this.init = function(settings) {
+       mapLayers = settings.layers;
+       gui = settings.gui;
+       this.draw();
+      }
+      
     }
     </script>
   </head>
-  <body onLoad="launch()">	
+  <body onLoad="launch()">  
   </body>
 </html>
