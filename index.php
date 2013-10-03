@@ -32,15 +32,13 @@
       var imgLoader = new ImageLoader();
 
       XML.loadXML('com/xml/XMLFiles.php?folder=img/ground/');
-      var ground_dict = XML.getContent('files', 'file');
-      var ground_images = imgLoader.loadImageArray('img/ground/', ground_dict);
+      var groundImages = imgLoader.loadImageArray('img/ground/', XML.getContent('files', 'file'));
 
       XML.loadXML('com/xml/XMLFiles.php?folder=img/city/');
-      var city_dict = XML.getContent('files','file');
-      var city_images = imgLoader.loadImageArray('img/city/', city_dict);
+      var cityImages = imgLoader.loadImageArray('img/city/', XML.getContent('files','file'));
 
       XML.loadXML('com/xml/XMLFiles.php?folder=img/gui/');
-      var gui_images = imgLoader.loadImageArray('img/gui/', XML.getContent('files','file'));
+      var guiImages = imgLoader.loadImageArray('img/gui/', XML.getContent('files','file'));
       
       var loadTimer = setInterval(loadAll, 100);
 
@@ -55,16 +53,16 @@
               game.createLayer({
                 zIndex: 0,
                 layout: XML.getContent('ground_map','row'),
-                graphics: ground_images,
-                graphicsDictionary: ground_dict,
+                graphics: groundImages.files,
+                graphicsDictionary: groundImages.dictionary,
                 height: 50,
                 width: 25
               }),
               game.createLayer({
                 zIndex: 1,
                 layout: XML.getContent('steps_dates','row'),
-                graphics: city_images,
-                graphicsDictionary: city_dict,
+                graphics: cityImages.files,
+                graphicsDictionary: cityImages.dictionary,
                 height: 50,
                 width: 25,
                 zero_is_blank: true,
@@ -79,7 +77,7 @@
                 applyIneractions: true
               })
             ],
-            gui: gui_images
+            gui: guiImages.files
           });
         }
       }
@@ -97,7 +95,6 @@
       canvas.width = 706;
       canvas.height = 425;
       canvas.style.border = "#333 2px solid";
-      canvas.style.background = "url(img/canvas-background.jpg)"
       var context = canvas.getContext('2d');
       document.body.appendChild(canvas);
 
@@ -182,14 +179,14 @@
             });
           break;
           case 8:
-          mapLayers.map(function(layer) {
-            if(layer.tilesHide !== null) {
-              layer.hideGraphics(false);
-            }
-            if (layer.objectShadows !== null) {
-              layer.applyObjectShadow(false);
-            }
-          });
+            mapLayers.map(function(layer) {
+              if(layer.tilesHide !== null) {
+                layer.hideGraphics(false);
+              }
+              if (layer.objectShadows !== null) {
+                layer.applyObjectShadow(false);
+              }
+            });
           break;
           case 9:
             mapLayers.map(function(layer) {

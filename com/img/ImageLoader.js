@@ -12,7 +12,7 @@ function ImageLoader() {
         _loaded++;
       };
     });
-    return images;
+    return {files: images, dictionary: dict};
   }
 
   return {
