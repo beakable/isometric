@@ -1,4 +1,4 @@
-function isometric(ctx,tile_width,tile_height,map_array,images,tile_dict){
+function Isometric(ctx,tile_width,tile_height,map_array,images,tile_dict){
 	this.context = ctx;
 	
 	this.tileW = tile_width;
@@ -101,6 +101,10 @@ function isometric(ctx,tile_width,tile_height,map_array,images,tile_dict){
 		this.height_map = map;
 		this.height_divider = divider;
 		
+	}
+
+	this.getLayout = function() {
+		return this.map;
 	}
 	
 	this.setZoom = function(dir){

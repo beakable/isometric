@@ -13,7 +13,7 @@
 <script type="text/javascript" src="com/canvas_input/canvas_input.js"></script>	
 <script type="text/javascript" src="com/xml/XMLPopulate.js" ></script>
 <script type="text/javascript" src="com/img/image_loader.js"></script>
-<script tppe="text/javascript" src="com/iso/isometric.js"></script>
+<script tppe="text/javascript" src="com/iso/Isometric.js"></script>
 <script tppe="text/javascript" src="com/url/url.js"></script>
 <script type="text/javascript">
 var context;
@@ -42,50 +42,56 @@ function init(){
 
 
 function launch(){
-	//  -- XMLPopulate: takes in XML data and allows manipulation through getContent and getAttribute.
+
 	var XML = new XMLPopulate();
-	var image_root_path = 'img';
-	var image_path = 'img';
 
-
-// -- image_loader: returns an associated array from the ground images folder - file name is index.
-// -- as tiles are represented by numbers we store the related graphic number in ground_dict.
-	XML.loadXML('com/xml/XMLFiles.php?folder=' + image_root_path + '/ground/');
+	XML.loadXML('com/xml/XMLFiles.php?folder=' + "img" + '/ground/');
 	var ground = new image_loader();
 	var ground_dict = XML.getContent('files','file');
-	var ground_images = ground.load_array(image_path + '/ground/', ground_dict);
+	var ground_images = ground.load_array("img" + '/ground/', ground_dict);
 
 // -- image_loader: returns an associated array from the city images folder - file name is index.
 // -- as tiles are represented by numbers we store the related graphic number in city_dict.
-	XML.loadXML('com/xml/XMLFiles.php?folder=' + image_root_path + '/city/');
+	XML.loadXML('com/xml/XMLFiles.php?folder=' + "img" + '/city/');
 	var city = new image_loader();
 	var city_dict = XML.getContent('files','file');
-	var city_images = city.load_array(image_path + '/city/', city_dict);
+	var city_images = city.load_array("img" + '/city/', city_dict);
 	
 
 // -- image_loader: returns an associated array from the gui images folder - file name is index.
-	XML.loadXML('com/xml/XMLFiles.php?folder=' + image_root_path + '/gui/');
+	XML.loadXML('com/xml/XMLFiles.php?folder=' + "img" + '/gui/');
 	var gui = new image_loader();
-	var gui_images = city.load_array(image_path + '/gui/', XML.getContent('files','file'));
-	
-
-
-// -- city-read.php: reads table data and parses output as XML.
-	var user = new url();
-	XML.loadXML('city-read.php');
-	var ground_map = XML.getContent('ground_map','row');
-	var city_height = XML.getContent('steps_made','row');
-	var city_map = XML.getContent('steps_dates','row');
-		
+	var gui_images = city.load_array("img" + '/gui/', XML.getContent('files','file'));
 	
 
 // -- loadTimer: required for polling if images are preloaded.
 	var loadTimer = setInterval(loadAll,100);
-	function loadAll(){
-		if(ground.loaded == ground.to_load && city.loaded == city.to_load){
+	function loadAll () {
+		if(ground.loaded === ground.to_load && city.loaded === city.to_load){
 				clearInterval(loadTimer);
 				var game = new main();
-				game.init(ground_map,city_map,city_height,ground_images,ground_dict,city_images,city_dict,gui_images);
+        XML.loadXML('map-read.php');
+      
+				game.init(
+  				game.createLayer({
+            zIndex: 0,
+            layout: XML.getContent('ground_map','row'),
+            graphics: ground_images,
+            graphicsDictionary: ground_dict,
+            height: 50,
+            width: 25
+          }),
+          game.createLayer({
+            zIndex: 1,
+            layout: XML.getContent('steps_dates','row'),
+            graphics: city_images,
+            graphicsDictionary: city_dict,
+            height: 50,
+            width: 25
+          }),
+          XML.getContent('ground_height','row'),
+					gui_images
+				);
 		}
 	}
 }
@@ -232,36 +238,34 @@ function main(){
 		context.restore();
 	}
 	
-	this.init = function(ground_map_layout,city_map_layout,city_height_layout,ground_graphics,ground_dict,city_graphics,city_dict,gui_graphics){
-		// -- isometric: contains the functions to output an isometric map.
-		// -- takes both the associated index array and the numbered index array in order to look up
-		// -- tile number and return corresponding image.
-		ground_level = new isometric(context,50,25,ground_map_layout, ground_graphics,ground_dict);
-		ground_level.setZoom(1);
-		
-		city_level = new isometric(context,50,25,city_map_layout,city_graphics,city_dict);
+  this.createLayer = function(settings) {
+		layer = new Isometric(context, settings.height, settings.width, settings.layout, settings.graphics, settings.graphicsDictionary);
+		layer.setZoom(1);
+		return layer;
+  }
+
+
+	this.init = function(ground, city, city_height_layout, gui_graphics) {
+		ground_level = ground;
+		city_level = city;
 		city_level.setZoom(1);
 		city_level.zero_is_blank = 1;
 		city_level.alpha_mouse_behind = 1;
-		// -- stack_graphics: sets iso map stack_numbers = 1 and passes height map to use, divider makes heights more acceptable.
+
 		city_level.stack_tiles(city_height_layout,1);
 		city_level.hideGraphics(true,0,6,"7-normal.png");
 		city_level.applyObjectShadow(true);
 		
-		
-		
 		city_details_steps = city_height_layout;
-		city_details_dates = city_map_layout;
+		city_details_dates = city.getLayout();
 		input.mouse_move(function(coords){
 				tile_coordinates = city_level.applyMouse(coords.x,coords.y);
 				mouse_coordinates = coords;
-				// -- loop to browser suggested rate of redraw.
 				requestAnimFrame(self.draw);
 		});	
 		input.mobile(function(coords){
 				tile_coordinates = city_level.applyMouse(coords.x,coords.y);
 				mouse_coordinates = coords;
-				// -- loop to browser suggested rate of redraw.
 				requestAnimFrame(self.draw);
 		});		
 		ground_level.align("h-center",706);

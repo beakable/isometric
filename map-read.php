@@ -35,9 +35,9 @@ while ($get = mysql_fetch_array($getall)) {
 			$_xml .="<ground_map>";
 					$_xml .= $get['ground_map'];
 			$_xml .="</ground_map>";	
-			$_xml .="<steps_made>";
+			$_xml .="<ground_height>";
 					$_xml .= $get['city_height'];
-			$_xml .="</steps_made>";
+			$_xml .="</ground_height>";
 			$_xml .="<steps_dates>";
 					$_xml .= $get['city_structure'];
 			$_xml .="</steps_dates>";			
@@ -75,7 +75,7 @@ header('Content-type: text/xml');
 	<row>2,4,4,3,2,1,4,0,1,4,0,4,2,0,0,3</row>
 	<row>1,3,0,1,1,0,4,1,4,1,2,3,2,1,4,4</row>
 	</ground_map>
-	<steps_made>
+	<ground_height>
 	<row>0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0</row>
 	<row>0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0</row>
 	<row>0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0</row>
@@ -92,7 +92,7 @@ header('Content-type: text/xml');
 	<row>0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0</row>
 	<row>0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0</row>
 	<row>0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0</row>
-	</steps_made>
+	</ground_height>
 	<steps_dates>
 	<row>0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0</row>
 	<row>0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0</row>
