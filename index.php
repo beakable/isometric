@@ -55,25 +55,35 @@
                 layout: XML.getContent('ground_map','row'),
                 graphics: groundImages.files,
                 graphicsDictionary: groundImages.dictionary,
+                objectShadow: true,
+                
+                heightMap: {
+                  map: XML.getContent('ground_height','row'),
+                  offset: 0
+                },
                 height: 50,
-                width: 25
+                width: 25,
+
               }),
               game.createLayer({
                 zIndex: 1,
-                layout: XML.getContent('steps_dates','row'),
+                layout: XML.getContent('object_map','row'),
                 graphics: cityImages.files,
                 graphicsDictionary: cityImages.dictionary,
                 height: 50,
                 width: 25,
                 zero_is_blank: true,
                 alpha_mouse_behind: true,
-                heightMap: XML.getContent('ground_height','row'),
-                objectShadow: true,
-                hideGraphics: {
-                  rangeMin: 0,
-                  rangeMax: 6,
-                  graphic: '7-normal.png'
+                heightMap: {
+                  map: XML.getContent('ground_height','row'),
+                  offset: 10,
+                  heightMapOnTop: true
                 },
+                //hideGraphics: {
+                //  rangeMin: 0,
+                //  rangeMax: 6,
+                //  graphic: '7-normal.png'
+                //},
                 applyIneractions: true
               })
             ],
@@ -199,9 +209,13 @@
 
       this.draw = function() {
        context.clearRect(0,0,canvas.width,canvas.height);
-       mapLayers.map(function(layer) {
-         layer.draw();
-       });
+       for (var i = 0; i <  mapLayers[0].getLayout().length; i++) {
+          for (var j = 0; j < mapLayers[0].getLayout().length; j++) {
+           mapLayers.map(function(layer) {
+             layer.draw(i,j);
+           });
+         }
+       }
        context.fillStyle = "rgb(255,255,255)";
        if (tile_coordinates.x < mapLayers[0].getLayout().length && tile_coordinates.x >= 0 && tile_coordinates.y < mapLayers[0].getLayout().length && tile_coordinates.y >= 0) {
          mapLayers.map( function(layer) {
@@ -225,7 +239,7 @@
          layer.applyObjectShadow(settings.objectShadow);
        }
        if (settings.heightMap) {
-         layer.stack_tiles(settings.heightMap, 1);
+         layer.stack_tiles(settings.heightMap);
        }
        if(settings.hideGraphics) {
          layer.hideGraphics(true, {

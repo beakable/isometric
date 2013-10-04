@@ -7,11 +7,14 @@ function Isometric(ctx,tile_width,tile_height,map_array,images,tile_dict) {
   this.map = map_array;
   this.tiles = images;
   this.zero_is_blank = 0;
-  this.stack_numbers = 0;
+  this.stackTiles = false;
   this.draw_x =0;
   this.draw_y =0;
-  this.height_divider;
-  this.height_map =[];
+  
+  this.heightMap = null;
+  this.heightOffset = 0;
+  this.heightMapOnTop = false;
+  
   this.curZoom =1;
   this.mouse_used = 0;
   this.xmouse = 0;
@@ -29,82 +32,110 @@ function Isometric(ctx,tile_width,tile_height,map_array,images,tile_dict) {
   this.hideStart;
   this.hideEnd;
   
-  this.draw = function() {
-    for (var i = 0; i < this.map.length; i++) {
-      for (var j = 0; j <this.map[i].length; j++) {
-        var image_num = Number(this.map[i][j]);
-        if ((!this.zero_is_blank) || (this.zero_is_blank && image_num)) {
-          if (this.zero_is_blank) {
-            image_num--;
+  this.draw = function(i, j) {
+    var image_num = Number(this.map[i][j]);
+    if ((!this.zero_is_blank) || (this.zero_is_blank && image_num)) {
+      if (this.zero_is_blank) {
+        image_num--;
+      }
+      var resized_height = this.tiles[this.dict[image_num]].height / (this.tiles[this.dict[image_num]].width / this.tileW);
+      var xpos = (i - j) * (this.tileH * this.curZoom) + this.draw_x;
+      var ypos = (i + j) * (this.tileW / 4 * this.curZoom) + this.draw_y;
+      if (!this.stackTiles) {
+        this.context.drawImage(this.tiles[this.dict[image_num]], 0, 0, this.tiles[this.dict[image_num]].width, this.tiles[this.dict[image_num]].height, xpos, (ypos + ((this.tileH - resized_height) * this.curZoom)), (this.tileW * this.curZoom), (resized_height * this.curZoom));
+      }
+      else {
+        var stack = Math.round(Number(this.heightMap[i][j]));
+        if (stack < 1) {
+          stack = 1;
+        }
+        for (var k = 1; k <= stack; k++) {
+          this.context.save();
+          if (this.alpha_mouse_behind) {
+            if (i == this.xmouse + 1 && j == this.ymouse + 1) {
+              this.context.globalAlpha = 0.3;
+            }
           }
-          var resized_height = this.tiles[this.dict[image_num]].height / (this.tiles[this.dict[image_num]].width / this.tileW);
-          var xpos = (i - j) * (this.tileH * this.curZoom) + this.draw_x;
-          var ypos = (i + j) * (this.tileW / 4 * this.curZoom) + this.draw_y;
-          if (!this.stack_numbers) {
-            this.context.drawImage(this.tiles[this.dict[image_num]], 0, 0, this.tiles[this.dict[image_num]].width, this.tiles[this.dict[image_num]].height, xpos, (ypos + ((this.tileH - resized_height) * this.curZoom)), (this.tileW * this.curZoom), (resized_height * this.curZoom));
+          if (!this.tilesHide) {
+            if (this.heightMapOnTop && k === stack){
+              this.context.drawImage(this.tiles[this.dict[image_num]], 0, 0,this.tiles[this.dict[image_num]].width, this.tiles[this.dict[image_num]].height, xpos, ypos + (k *(this.tileH - this.heightOffset - this.tileH)) * this.curZoom - (resized_height  - this.tileH) * this.curZoom, (this.tileW * this.curZoom), (resized_height * this.curZoom));
+            }
+            else if(!this.heightMapOnTop) {
+              this.context.drawImage(this.tiles[this.dict[image_num]], 0, 0,this.tiles[this.dict[image_num]].width, this.tiles[this.dict[image_num]].height, xpos, ypos + (k * ((this.tileH - this.heightOffset - resized_height) * this.curZoom)), (this.tileW * this.curZoom), (resized_height * this.curZoom));
+            }
           }
           else {
-            var stack = Math.round(Number(this.height_map[i][j]) / this.height_divider);
-            if (stack < 1) {
-              stack = 1;
+            if (image_num >= this.hideStart && image_num <= this.hideEnd) {
+              if (this.heightMapOnTop && k === stack){
+               this.context.drawImage(this.tiles[this.planeGraphic], 0, 0, this.tiles[this.planeGraphic].width, this.tiles[this.planeGraphic].height, xpos, ypos + (k *(this.tileH - this.heightOffset - this.tileH)) * this.curZoom - (resized_height  - this.tileH) * this.curZoom, (this.tileW * this.curZoom), (resized_height * this.curZoom));
+              }
+              else if(!this.heightMapOnTop) {
+                this.context.drawImage(this.tiles[this.planeGraphic], 0, 0, this.tiles[this.planeGraphic].width, this.tiles[this.planeGraphic].height, xpos, ypos + (k * ((this.tileH - this.heightOffset- resized_height) * this.curZoom)), (this.tileW * this.curZoom), (resized_height * this.curZoom));
+              }               
             }
-            for (var k = 1; k <= stack; k++) {
-              this.context.save();
-              if (this.alpha_mouse_behind) {
-                if (i == this.xmouse + 1 && j == this.ymouse + 1) {
-                  this.context.globalAlpha = 0.3;
-                }
-              }
-              if (!this.tilesHide) {
-                this.context.drawImage(this.tiles[this.dict[image_num]], 0, 0,this.tiles[this.dict[image_num]].width, this.tiles[this.dict[image_num]].height, xpos, ypos + (k * ((this.tileH - resized_height) * this.curZoom)), (this.tileW * this.curZoom), (resized_height * this.curZoom));
-              }
-              else {
-                if (image_num >= this.hideStart && image_num <= this.hideEnd) {
-                  this.context.drawImage(this.tiles[this.planeGraphic], 0, 0, this.tiles[this.planeGraphic].width, this.tiles[this.planeGraphic].height, xpos, ypos + (k * ((this.tileH - resized_height) * this.curZoom)), (this.tileW * this.curZoom), (resized_height * this.curZoom));
-                }
-                else {
-                  this.context.drawImage(this.tiles[this.dict[image_num]], 0, 0, this.tiles[this.dict[image_num]].width, this.tiles[this.dict[image_num]].height, xpos, ypos + (k * ((this.tileH - resized_height) * this.curZoom)), (this.tileW * this.curZoom), (resized_height * this.curZoom));
-                }
-              }
-              this.context.restore();
-            }
-            if (this.mouse_used) {
-              if (i == this.xmouse && j == this.ymouse) {
-                --k;
-                ctx.fillStyle = 'rgba(255, 255, 120, 0.7)';
-                ctx.beginPath();
-                ctx.moveTo(xpos, ypos + (k * ((this.tileH - resized_height) * this.curZoom)) + (this.tileH * this.curZoom) / 2);
-                ctx.lineTo(xpos + (this.tileH * this.curZoom), ypos + (k * ((this.tileH - resized_height) * this.curZoom)));
-                ctx.lineTo(xpos + (this.tileH * this.curZoom) * 2, ypos + (k * ((this.tileH - resized_height) * this.curZoom)) + (this.tileH * this.curZoom) / 2);
-                ctx.lineTo(xpos + (this.tileH * this.curZoom), ypos + (k * ((this.tileH - resized_height) * this.curZoom)) + (this.tileH * this.curZoom));
-                ctx.fill();
+            else {
+              if (this.heightMapOnTop && k === stack){
+                this.context.drawImage(this.tiles[this.dict[image_num]], 0, 0, this.tiles[this.dict[image_num]].width, this.tiles[this.dict[image_num]].height, xpos, ypos + (k *(this.tileH - this.heightOffset - this.tileH)) * this.curZoom - (resized_height  - this.tileH) * this.curZoom, (this.tileW * this.curZoom), (resized_height * this.curZoom));
+              } 
+              else if(!this.heightMapOnTop) {
+                this.context.drawImage(this.tiles[this.dict[image_num]], 0, 0, this.tiles[this.dict[image_num]].width, this.tiles[this.dict[image_num]].height, xpos, ypos + (k * ((this.tileH - this.heightOffset - resized_height) * this.curZoom)), (this.tileW * this.curZoom), (resized_height * this.curZoom)); 
               }
             }
           }
+          this.context.restore();
         }
-        if (this.objectShadows) {
-          var neighStack = Math.round(Number(this.height_map[i][j - 1]) / this.height_divider);
-          var currStack = Math.floor(Number(this.height_map[i][j]) / this.height_divider);
-          if (currStack < neighStack) {
-            var shadowXpos = (i - j) * (this.tileH * this.curZoom) + this.draw_x;
-            var shadowYpos = (i + j) * (this.tileW / 4 * this.curZoom) + this.draw_y;
-            ctx.fillStyle = 'rgba(50, 60, 60, 0.6)';
+        if (this.mouse_used) {
+          if (i == this.xmouse && j == this.ymouse) {
+            --k;
+            ctx.fillStyle = 'rgba(255, 255, 120, 0.7)';
             ctx.beginPath();
-            ctx.moveTo(shadowXpos, shadowYpos + (currStack * ((this.tileH - resized_height) * this.curZoom)) + (this.tileH * this.curZoom) / 2);
-            ctx.lineTo(shadowXpos + (this.tileH * this.curZoom), shadowYpos + (currStack * ((this.tileH - resized_height) * this.curZoom)));
-            ctx.lineTo(shadowXpos + (this.tileH * this.curZoom) * 2, shadowYpos + (currStack * ((this.tileH - resized_height) * this.curZoom)) + (this.tileH * this.curZoom) / 2);
-            ctx.lineTo(shadowXpos + (this.tileH * this.curZoom), shadowYpos + (currStack * ((this.tileH - resized_height) * this.curZoom)) + (this.tileH * this.curZoom));
+            ctx.moveTo(xpos, ypos + (k * ((this.tileH - resized_height) * this.curZoom)) + (this.tileH * this.curZoom) / 2);
+            ctx.lineTo(xpos + (this.tileH * this.curZoom), ypos + (k * ((this.tileH - resized_height) * this.curZoom)));
+            ctx.lineTo(xpos + (this.tileH * this.curZoom) * 2, ypos + (k * ((this.tileH - resized_height) * this.curZoom)) + (this.tileH * this.curZoom) / 2);
+            ctx.lineTo(xpos + (this.tileH * this.curZoom), ypos + (k * ((this.tileH - resized_height) * this.curZoom)) + (this.tileH * this.curZoom));
             ctx.fill();
           }
         }
       }
     }
+    if (this.objectShadows) {
+      if(this.heightMap) {
+        var nextStack = Math.round(Number(this.heightMap[i][j - 1]));
+        var currStack = Math.floor(Number(this.heightMap[i][j]));
+        if (currStack < nextStack) {
+          var shadowXpos = (i - j) * (this.tileH * this.curZoom) + this.draw_x;
+          var shadowYpos = (i + j) * (this.tileW / 4 * this.curZoom) + this.draw_y;
+          ctx.fillStyle = 'rgba(50, 60, 60, 0.6)';
+          ctx.beginPath();
+          ctx.moveTo(shadowXpos, shadowYpos + (currStack * ((this.tileH - resized_height) * this.curZoom)) + (this.tileH * this.curZoom) / 2);
+          ctx.lineTo(shadowXpos + (this.tileH * this.curZoom), shadowYpos + (currStack * ((this.tileH - resized_height) * this.curZoom)));
+          ctx.lineTo(shadowXpos + (this.tileH * this.curZoom) * 2, shadowYpos + (currStack * ((this.tileH - resized_height) * this.curZoom)) + (this.tileH * this.curZoom) / 2);
+          ctx.lineTo(shadowXpos + (this.tileH * this.curZoom), shadowYpos + (currStack * ((this.tileH - resized_height) * this.curZoom)) + (this.tileH * this.curZoom));
+          ctx.fill();
+        }
+      }
+      else {
+        var currStack = Math.floor(Number(this.map[i][j - 1]));
+        if(currStack > 0) {
+          var shadowXpos = (i - j) * (this.tileH * this.curZoom) + this.draw_x;
+          var shadowYpos = (i + j) * (this.tileW / 4 * this.curZoom) + this.draw_y;
+          ctx.fillStyle = 'rgba(50, 60, 60, 0.6)';
+          ctx.beginPath();
+          ctx.moveTo(shadowXpos, shadowYpos + (currStack * ((this.tileH - resized_height) * this.curZoom)) + (this.tileH * this.curZoom) / 2);
+          ctx.lineTo(shadowXpos + (this.tileH * this.curZoom), shadowYpos + (currStack * ((this.tileH - resized_height) * this.curZoom)));
+          ctx.lineTo(shadowXpos + (this.tileH * this.curZoom) * 2, shadowYpos + (currStack * ((this.tileH - resized_height) * this.curZoom)) + (this.tileH * this.curZoom) / 2);
+          ctx.lineTo(shadowXpos + (this.tileH * this.curZoom), shadowYpos + (currStack * ((this.tileH - resized_height) * this.curZoom)) + (this.tileH * this.curZoom));
+          ctx.fill();
+        }
+      }
+    }
   }
 
-  this.stack_tiles = function(map,divider) {
-    this.stack_numbers = 1;
-    this.height_map = map;
-    this.height_divider = divider;
+  this.stack_tiles = function(settings) {
+    this.stackTiles = true;
+    this.heightMap = settings.map;
+    this.heightOffset = settings.offset;
+    this.heightMapOnTop = settings.heightMapOnTop || false;
     
   }
 
@@ -181,19 +212,19 @@ function Isometric(ctx,tile_width,tile_height,map_array,images,tile_dict) {
       for (var i = this.map.length - 1; i >= 0; i--) {
         for (var j = this.map[i].length - 1; j >= 0; j--) {
           tempLine.push(this.map[i][j]);
-          if (this.stack_numbers) {
-            tempLineTwo.push(this.height_map[i][j]);
+          if (this.stackTiles) {
+            tempLineTwo.push(this.heightMap[i][j]);
           }
         }
         tempArray.push(tempLine);
         tempLine = [];
-        if (this.stack_numbers) {
+        if (this.stackTiles) {
           tempArrayTwo.push(tempLineTwo);
           tempLineTwo = [];
         }
       }
-      if (this.stack_numbers) {
-        this.height_map = tempArrayTwo;
+      if (this.stackTiles) {
+        this.heightMap = tempArrayTwo;
       }
       this.map = tempArray;
     }
