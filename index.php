@@ -55,8 +55,9 @@
                 layout: XML.getContent('ground_map','row'),
                 graphics: groundImages.files,
                 graphicsDictionary: groundImages.dictionary,
-                objectShadow: true,
-                
+                heightShadow: {
+                  offset: 10
+                },
                 heightMap: {
                   map: XML.getContent('ground_height','row'),
                   offset: 0
@@ -74,6 +75,9 @@
                 width: 25,
                 zero_is_blank: true,
                 alpha_mouse_behind: true,
+                //heightShadow: {
+                //  offset: 10
+                //},
                 heightMap: {
                   map: XML.getContent('ground_height','row'),
                   offset: 10,
@@ -183,8 +187,8 @@
               if (layer.tilesHide !== null) {
                 layer.hideGraphics(true);
               }
-              if (layer.objectShadows !== null) {
-                layer.applyObjectShadow(true);
+              if (layer.heightShadow !== null) {
+                layer.applyHeightShadow(true);
               }
             });
           break;
@@ -193,8 +197,8 @@
               if(layer.tilesHide !== null) {
                 layer.hideGraphics(false);
               }
-              if (layer.objectShadows !== null) {
-                layer.applyObjectShadow(false);
+              if (layer.heightShadow !== null) {
+                layer.applyHeightShadow(false);
               }
             });
           break;
@@ -235,8 +239,8 @@
        layer.setZoom(1);
        layer.zero_is_blank = settings.zero_is_blank;
        layer.alpha_mouse_behind = settings.alpha_mouse_behind;
-       if(settings.objectShadow) {
-         layer.applyObjectShadow(settings.objectShadow);
+       if(settings.heightShadow) {
+         layer.applyHeightShadow(settings.heightShadow);
        }
        if (settings.heightMap) {
          layer.stack_tiles(settings.heightMap);

@@ -12,7 +12,10 @@ function Isometric(ctx,tile_width,tile_height,map_array,images,tile_dict) {
   this.draw_y =0;
   
   this.heightMap = null;
+
   this.heightOffset = 0;
+  this.shadowOffset = 0;
+
   this.heightMapOnTop = false;
   
   this.curZoom =1;
@@ -46,10 +49,7 @@ function Isometric(ctx,tile_width,tile_height,map_array,images,tile_dict) {
       }
       else {
         var stack = Math.round(Number(this.heightMap[i][j]));
-        if (stack < 1) {
-          stack = 1;
-        }
-        for (var k = 1; k <= stack; k++) {
+        for (var k = 0; k <= stack; k++) {
           this.context.save();
           if (this.alpha_mouse_behind) {
             if (i == this.xmouse + 1 && j == this.ymouse + 1) {
@@ -111,6 +111,14 @@ function Isometric(ctx,tile_width,tile_height,map_array,images,tile_dict) {
           ctx.lineTo(shadowXpos + (this.tileH * this.curZoom), shadowYpos + (currStack * ((this.tileH - resized_height) * this.curZoom)));
           ctx.lineTo(shadowXpos + (this.tileH * this.curZoom) * 2, shadowYpos + (currStack * ((this.tileH - resized_height) * this.curZoom)) + (this.tileH * this.curZoom) / 2);
           ctx.lineTo(shadowXpos + (this.tileH * this.curZoom), shadowYpos + (currStack * ((this.tileH - resized_height) * this.curZoom)) + (this.tileH * this.curZoom));
+          ctx.fill();
+          ctx.fillStyle = 'rgba(50, 60, 60, 0.9)';
+          ctx.beginPath();
+          ctx.moveTo(shadowXpos + (this.tileH * this.curZoom), shadowYpos + (currStack * ((this.tileH - resized_height) * this.curZoom)));
+          ctx.lineTo(shadowXpos + (this.tileH * this.curZoom), shadowYpos - (nextStack * ((this.tileH - this.shadowOffset)/1.5  * this.curZoom)));
+          ctx.lineTo(shadowXpos + (this.tileH * this.curZoom) * 2, shadowYpos - (nextStack * (this.tileH - this.shadowOffset)/1.5 * this.curZoom) + (this.tileH * this.curZoom) / 2);
+          ctx.lineTo(shadowXpos + (this.tileH * this.curZoom) * 2, shadowYpos + (currStack * ((this.tileH - resized_height) * this.curZoom)) + (this.tileH * this.curZoom) / 2);
+
           ctx.fill();
         }
       }
@@ -194,12 +202,15 @@ function Isometric(ctx,tile_width,tile_height,map_array,images,tile_dict) {
     }
   }
 
-  this.applyObjectShadow = function(shadow) {
+  this.applyHeightShadow = function(shadow) {
     if (shadow) {
       this.objectShadows = true;
     }
     else{
       this.objectShadows = false;
+    }
+    if(shadow.offset) {
+      this.shadowOffset = shadow.offset;
     }
   }
   
