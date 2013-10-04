@@ -52,6 +52,7 @@
             layers: [
               game.createLayer({
                 zIndex: 0,
+                title: "Ground Layer",
                 layout: XML.getContent('ground_map','row'),
                 graphics: groundImages.files,
                 graphicsDictionary: groundImages.dictionary,
@@ -64,17 +65,19 @@
                 },
                 height: 50,
                 width: 25,
+                applyIneractions: true
 
               }),
               game.createLayer({
                 zIndex: 1,
+                title: "Object Layer",
                 layout: XML.getContent('object_map','row'),
                 graphics: cityImages.files,
                 graphicsDictionary: cityImages.dictionary,
                 height: 50,
                 width: 25,
                 zero_is_blank: true,
-                alpha_mouse_behind: true,
+                //alpha_mouse_behind: true,
                 //heightShadow: {
                 //  offset: 10
                 //},
@@ -224,6 +227,7 @@
        if (tile_coordinates.x < mapLayers[0].getLayout().length && tile_coordinates.x >= 0 && tile_coordinates.y < mapLayers[0].getLayout().length && tile_coordinates.y >= 0) {
          mapLayers.map( function(layer) {
           if (layer.applyIneractions) {
+            console.log(layer.title);
             if (layer.getTile([tile_coordinates.x],[tile_coordinates.y]) > 0) {
              context.drawImage(gui["popup-box.png"],mouse_coordinates.x,mouse_coordinates.y);
              context.font = "8pt Arial";
@@ -235,7 +239,8 @@
       }
       
       this.createLayer = function(settings) {
-       layer = new Isometric(context, settings.height, settings.width, settings.layout, settings.graphics, settings.graphicsDictionary);
+       var layer = new Isometric(context, settings.height, settings.width, settings.layout, settings.graphics, settings.graphicsDictionary);
+       layer.title = settings.title;
        layer.setZoom(1);
        layer.zero_is_blank = settings.zero_is_blank;
        layer.alpha_mouse_behind = settings.alpha_mouse_behind;
@@ -256,13 +261,18 @@
        if(settings.applyIneractions) {
          layer.applyIneractions = settings.applyIneractions;
          input.mouse_move(function(coords) {
-          tile_coordinates = layer.applyMouse(coords.x,coords.y);
+          tile_coordinates = layer.applyMouse(coords.x, coords.y);
           mouse_coordinates = coords;
           requestAnimFrame(self.draw);
          });  
          input.mobile(function(coords) {
-          tile_coordinates = layer.applyMouse(coords.x,coords.y);
+          tile_coordinates = layer.applyMouse(coords.x, coords.y);
           mouse_coordinates = coords;
+          requestAnimFrame(self.draw);
+         });
+         input.mouse_action(function(coords) {
+          tile_coordinates = layer.applyMouse(coords.x, coords.y);
+          layer.applyMouseClick(tile_coordinates.x, tile_coordinates.y);
           requestAnimFrame(self.draw);
          });
        }

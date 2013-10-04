@@ -1,6 +1,8 @@
 function Isometric(ctx,tile_width,tile_height,map_array,images,tile_dict) {
   this.context = ctx;
   
+  this.title = "";
+
   this.tileW = tile_width;
   this.tileH = tile_height;
   this.dict = tile_dict;
@@ -27,7 +29,7 @@ function Isometric(ctx,tile_width,tile_height,map_array,images,tile_dict) {
 
   this.alpha_mouse_behind = 0;
 
-  this.objectShadows = null;
+  this.heightShadow = null;
 
   this.tilesHide = null;
 
@@ -75,7 +77,7 @@ function Isometric(ctx,tile_width,tile_height,map_array,images,tile_dict) {
             }
             else {
               if (this.heightMapOnTop && k === stack){
-                this.context.drawImage(this.tiles[this.dict[image_num]], 0, 0, this.tiles[this.dict[image_num]].width, this.tiles[this.dict[image_num]].height, xpos, ypos + (k *(this.tileH - this.heightOffset - this.tileH)) * this.curZoom - (resized_height  - this.tileH) * this.curZoom, (this.tileW * this.curZoom), (resized_height * this.curZoom));
+                this.context.drawImage(this.tiles[this.dict[image_num]], 0, 0,this.tiles[this.dict[image_num]].width, this.tiles[this.dict[image_num]].height, xpos, ypos + (k *(this.tileH - this.heightOffset - this.tileH)) * this.curZoom - (resized_height  - this.tileH) * this.curZoom, (this.tileW * this.curZoom), (resized_height * this.curZoom));
               } 
               else if(!this.heightMapOnTop) {
                 this.context.drawImage(this.tiles[this.dict[image_num]], 0, 0, this.tiles[this.dict[image_num]].width, this.tiles[this.dict[image_num]].height, xpos, ypos + (k * ((this.tileH - this.heightOffset - resized_height) * this.curZoom)), (this.tileW * this.curZoom), (resized_height * this.curZoom)); 
@@ -180,6 +182,10 @@ function Isometric(ctx,tile_width,tile_height,map_array,images,tile_dict) {
     coords.x = this.xmouse;
     coords.y = this.ymouse;
     return(coords);
+  }
+
+  this.applyMouseClick = function(x, y) {
+    this.heightMap[x][y] = Number(this.heightMap[x][y]) + 1;
   }
   
   this.align = function(position,screen_dimension) {
