@@ -58,8 +58,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
       XML.loadXML('com/xml/XMLFiles.php?folder=img/ground/');
       var groundImages = imgLoader.loadImageArray('img/ground/', XML.getContent('files', 'file'));
 
-      XML.loadXML('com/xml/XMLFiles.php?folder=img/city/');
-      var cityImages = imgLoader.loadImageArray('img/city/', XML.getContent('files','file'));
+      XML.loadXML('com/xml/XMLFiles.php?folder=img/objects/');
+      var objectImages = imgLoader.loadImageArray('img/objects/', XML.getContent('files','file'));
 
       XML.loadXML('com/xml/XMLFiles.php?folder=img/gui/');
       var guiImages = imgLoader.loadImageArray('img/gui/', XML.getContent('files','file'));
@@ -69,7 +69,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
       function loadAll() {
         if (imgLoader.loaded === imgLoader.to_load) {
           clearInterval(loadTimer);
-          var game = new main();
+          var game = new main(0, 0, 14, 14, 100, 50);
           XML.loadXML('map-read.php');
           
           game.init({
@@ -81,14 +81,20 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 graphics: groundImages.files,
                 graphicsDictionary: groundImages.dictionary,
                 heightShadow: {
-                  offset: 10
+                  offset: 20
                 },
                 heightMap: {
                   map: XML.getContent('ground_height','row'),
-                  offset: 0
+                  offset: 0,
+                  //heightMapOnTop: true
                 },
-                height: 50,
-                width: 25,
+                hideGraphics: {
+                  //rangeMin: 0,
+                  //rangeMax: 6,
+                  //graphic: '5-concrete.png'
+                },
+                height: 100,
+                width: 50,
                 applyIneractions: true
 
               }),
@@ -96,10 +102,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 zIndex: 1,
                 title: "Object Layer",
                 layout: XML.getContent('object_map','row'),
-                graphics: cityImages.files,
-                graphicsDictionary: cityImages.dictionary,
-                height: 50,
-                width: 25,
+                graphics: objectImages.files,
+                graphicsDictionary: objectImages.dictionary,
+                height: 100,
+                width: 50,
                 zero_is_blank: true,
                 //alpha_mouse_behind: true,
                 //heightShadow: {
@@ -107,14 +113,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 //},
                 heightMap: {
                   map: XML.getContent('ground_height','row'),
-                  offset: 10,
+                  offset: 20,
                   heightMapOnTop: true
                 },
-                //hideGraphics: {
-                //  rangeMin: 0,
-                //  rangeMax: 6,
-                //  graphic: '7-normal.png'
-                //},
+                hideGraphics: {
+                  rangeMin: 0,
+                  rangeMax: 11,
+                  graphic: '7-normal.png'
+                },
                 applyIneractions: true
               })
             ],
@@ -125,16 +131,21 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     }
 
 
-    function main() {
+    function main(x, y, xrange, yrange) {
       self = this;
       var mapLayers = [];
       var gui = [];
       var tile_coordinates = {};
       var mouse_coordinates = {};
+      var startY = y;
+      var startX = x;
+      var rangeX = xrange;
+      var rangeY = yrange;
+      var defaultRangeY = rangeY;
 
       var canvas = document.createElement('canvas');
-      canvas.width = 706;
-      canvas.height = 425;
+      canvas.width = 920;
+      canvas.height = 600;
       canvas.style.border = "#333 2px solid";
       var context = canvas.getContext('2d');
       document.body.appendChild(canvas);
@@ -170,43 +181,70 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
           case 81:
             self.keyCommand(9);
           break;
+          case 87:
+            self.keyCommand(10);
+          break;
         }
       });
 
       this.keyCommand = function(dir) {
         switch(dir) {
           case 1:
-            mapLayers.map(function(layer) {
-              layer.draw_y += 20; 
-            });
+            if (startY > 0) {
+              mapLayers.map(function(layer) {
+                layer.draw_y += layer.tileH/2 * layer.curZoom;
+                layer.draw_x += layer.tileH * layer.curZoom;
+              });
+              startY --;
+            }
           break;
           case 2:
-            mapLayers.map(function(layer) {
-              layer.draw_x -= 20; 
-            });
+            if (startX > 0) {
+              mapLayers.map(function(layer) {
+                layer.draw_y += layer.tileH/2 * layer.curZoom;
+                layer.draw_x -= layer.tileH * layer.curZoom;
+              });
+              startX --;
+            }
           break;
           case 3:
+          if (startY + rangeY < mapLayers[0].getLayout().length) {
             mapLayers.map(function(layer) {
-              layer.draw_y -= 20; 
+              layer.draw_y -= layer.tileH/2 * layer.curZoom;
+              layer.draw_x -= layer.tileH * layer.curZoom;
             });
+            startY ++;
+          }
           break;
           case 4:
-            mapLayers.map(function(layer) {
-              layer.draw_x += 20; 
-            });
+            if (startX + rangeX < mapLayers[0].getLayout().length ) {
+              mapLayers.map(function(layer) {
+                layer.draw_y -= layer.tileH/2 * layer.curZoom;
+                layer.draw_x += layer.tileH * layer.curZoom;
+              });
+              startX ++;
+            }
           break;
           case 5:
             mapLayers.map(function(layer) {
-              layer.setZoom("out");
-              layer.align("h-center",canvas.width);
-              layer.align("v-center",canvas.height);
+              if (startY + rangeY + 1 < mapLayers[0].getLayout().length - 1) {
+                layer.setZoom("out");
+                layer.align("h-center", canvas.width, xrange, -60);
+                layer.align("v-center", canvas.height,  yrange, 35);
+                rangeX +=  1
+                rangeY +=  1
+              }
             });
           break;
           case 6:
             mapLayers.map(function(layer) {
-              layer.setZoom("in");
-              layer.align("h-center",canvas.width);
-              layer.align("v-center",canvas.height);
+              if (rangeY - 1 > defaultRangeY - 1) {
+                layer.setZoom("in");
+                layer.align("h-center", canvas.width, xrange, -60);
+                layer.align("v-center", canvas.height,  yrange, 35);
+                rangeX -=  1
+                rangeY -=  1
+              }
             })
           break;
           case 7:
@@ -232,6 +270,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
           case 9:
             mapLayers.map(function(layer) {
               layer.rotate("left");
+              //startY = mapLayers[0].getLayout().length - startY - rangeX;
+              //startX = startY;
+            });
+          break;
+          case 10:
+            mapLayers.map(function(layer) {
+              layer.rotate("right");
+              //startY = mapLayers[0].getLayout().length - startX - rangeX;
             });
           break;
         }
@@ -240,8 +286,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
       this.draw = function() {
        context.clearRect(0,0,canvas.width,canvas.height);
-       for (var i = 0; i <  mapLayers[0].getLayout().length; i++) {
-          for (var j = 0; j < mapLayers[0].getLayout().length; j++) {
+        for(i = startY; i < startY + rangeY; i++) {
+          for(j = startX; j < startX + rangeX; j++) {
            mapLayers.map(function(layer) {
              layer.draw(i,j);
            });
@@ -251,7 +297,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
        if (tile_coordinates.x < mapLayers[0].getLayout().length && tile_coordinates.x >= 0 && tile_coordinates.y < mapLayers[0].getLayout().length && tile_coordinates.y >= 0) {
          mapLayers.map( function(layer) {
           if (layer.applyIneractions) {
-            console.log(layer.title);
             if (layer.getTile([tile_coordinates.x],[tile_coordinates.y]) > 0) {
              context.drawImage(gui["popup-box.png"],mouse_coordinates.x,mouse_coordinates.y);
              context.font = "8pt Arial";
@@ -301,8 +346,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
          });
        }
 
-       layer.align("h-center", canvas.width);
-       layer.align("v-center", canvas.height);
+       layer.align("h-center", canvas.width, xrange, -60);
+       layer.align("v-center", canvas.height,  yrange, 35);
        return layer;
       }
 

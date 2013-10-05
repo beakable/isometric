@@ -17,16 +17,21 @@
 header('Content-type: text/xml');
 
 function returnimages($dirname) {
-  $pattern="(\.jpg$)|(\.png$)|(\.jpeg$)|(\.gif$)";
+  $files = array();
+  $pattern = "(\.jpg$)|(\.png$)|(\.jpeg$)|(\.gif$)";
     foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator(realpath("../../" . $dirname))) as $filepath) {
       if (eregi($pattern, $filepath)) {
         $file =  explode("/", $filepath);
-        echo "<file>" . $file[count($file)-1] . "</file>";
+        array_push($files, "<file>" . $file[count($file)-1] . "</file>");
     }
   }
+  natsort($files);
+  return $files;
 }
 
 echo '<files>';
-  returnimages($_GET['folder']);
+  foreach (returnimages($_GET['folder']) as $file) {
+    echo $file;
+  }
 echo '</files>';
 ?>
