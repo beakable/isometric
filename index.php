@@ -20,6 +20,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 - Author : Iain M Hamilton - <iain@beakable.com> - http://www.beakable.com
 
+  Twitter: @beakable
+
 */
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -229,6 +231,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             mapLayers.map(function(layer) {
               if (startY + rangeY + 1 < mapLayers[0].getLayout().length - 1) {
                 layer.setZoom("out");
+
+                //TODO: Make alignment offsets automatically generated
                 layer.align("h-center", canvas.width, xrange, -60);
                 layer.align("v-center", canvas.height,  yrange, 35);
                 rangeX +=  1
@@ -240,6 +244,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             mapLayers.map(function(layer) {
               if (rangeY - 1 > defaultRangeY - 1) {
                 layer.setZoom("in");
+                //TODO: Make alignment offsets automatically generated
                 layer.align("h-center", canvas.width, xrange, -60);
                 layer.align("v-center", canvas.height,  yrange, 35);
                 rangeX -=  1
@@ -270,6 +275,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
           case 9:
             mapLayers.map(function(layer) {
               layer.rotate("left");
+              //TODO: Work out the correct calculations for rotating and keeping current view when rotated using a minimized range.
               //startY = mapLayers[0].getLayout().length - startY - rangeX;
               //startX = startY;
             });
@@ -277,6 +283,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
           case 10:
             mapLayers.map(function(layer) {
               layer.rotate("right");
+              //TODO: Work out the correct calculations for rotating and keeping current view but rotated when using a minimized range.
               //startY = mapLayers[0].getLayout().length - startX - rangeX;
             });
           break;

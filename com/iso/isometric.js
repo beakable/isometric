@@ -14,6 +14,9 @@
     along with Iain Hamiltons Isometric HTML5 App.  If not, see <http://www.gnu.org/licenses/>. */
 
 function Isometric(ctx, tile_width, tile_height, map_array, images, tile_dict) {
+  
+  //TODO: Greatly tidy this up and remove maximum power to accessible variables
+
   this.context = ctx;
 
   this.title = "";
