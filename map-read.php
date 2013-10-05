@@ -1,47 +1,33 @@
+<?
+require("dbinfo.php");
+// require contains - add or uncomment and update:
+// mysql_connect("localhost","user","pass");
+// mysql_select_db("DBNAME");
+?>
 <?php
-/*
 // -------------------------------------------
 header('Content-type: text/xml');
 // -------------------------------------------
 // -- connect to the DB and select the correct map via GET
-mysql_connect("localhost","*****","*******");
-mysql_select_db("beakers_*******");
-$id = $_GET['username'];
-// -------------------------------------------
-// -------------------------------------------
-$getall = mysql_query("SELECT * FROM user_data WHERE username='$id'");
-function check_dates($stored_date){
-	date_default_timezone_set('GMT');
 
-	$today = date( 'Y-m-d');
-	$timestamp = strtotime($stored_date);
-	$stored = date("Y-m-d", $timestamp);
-		if($stored == $today){
-			$dateposted = "Today";	
-		}
-		else {
-			$dateposted = $stored;
-		}
-		return $dateposted;	
-}
+// -------------------------------------------
+// -------------------------------------------
+$getall = mysql_query("SELECT * FROM map_data");
 
 // -------------------------------------------
 // -- Begin executing XML output --
 $_xml = '<?xml version="1.0" encoding="utf-8"?>';
 $_xml .= "<user_data>";
 while ($get = mysql_fetch_array($getall)) {
-	$date_check = check_dates($get['distance_walked_timestamp']);
-	$_xml .= "<user id='".$get['id']."' name='".$get['username']."' walked_total='".$get['distance_walked_total']."' walked_today ='".$get['distance_walked_today']."' walked_target ='".$get['distance_target']."'  walked_timestamp='". $date_check ."' next_reward='". $get['next_reward'] ."'>";
 			$_xml .="<ground_map>";
 					$_xml .= $get['ground_map'];
 			$_xml .="</ground_map>";	
 			$_xml .="<ground_height>";
-					$_xml .= $get['city_height'];
+					$_xml .= $get['height_map'];
 			$_xml .="</ground_height>";
 			$_xml .="<object_map>";
-					$_xml .= $get['city_structure'];
+					$_xml .= $get['object_map'];
 			$_xml .="</object_map>";			
-	$_xml .= "</user>";
 	}
 		
 $_xml .= "</user_data>";
@@ -49,13 +35,9 @@ $_xml .= "</user_data>";
 // -- Spit out the XML 
 print  $_xml;
 // -------------------------------------------	
-*/ ?>
-<?php
-// -------------------------------------------
-header('Content-type: text/xml');
-// -------------------------------------------
-// -- connect to the DB and select the correct map via GET	
-?>
+
+/// TEST DATA - comment the above and use the following: 
+/*
 <user_data>
 	<ground_map>
 	<row>5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5</row>
@@ -160,3 +142,4 @@ header('Content-type: text/xml');
 	<row>0,0,10,0,0,0,0,0,0,0,0,0,0,0,0,11,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0</row>
 	</object_map>
 </user_data>
+*/ ?>
