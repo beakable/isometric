@@ -13,275 +13,382 @@
     You should have received a copy of the GNU General Public License
     along with Iain Hamiltons Isometric HTML5 App.  If not, see <http://www.gnu.org/licenses/>. */
 
-function Isometric(ctx, tile_width, tile_height, map_array, images, tile_dict) {
+function Isometric(ctx, tileWidth, tileHeight, mapLayout, tileImages, tileImagesDictionary) {
   
-  //TODO: Greatly tidy this up and remove maximum power to accessible variables
+  var title = "";
 
-  this.context = ctx;
+  var zero_is_blank = 0;
+  var stackTiles = false;
+  var draw_x =0;
+  var draw_y =0;
 
-  this.title = "";
+  var heightMap = null;
 
-  this.tileW = tile_width;
-  this.tileH = tile_height;
-  this.dict = tile_dict;
-  this.map = map_array;
-  this.tiles = images;
-  this.zero_is_blank = 0;
-  this.stackTiles = false;
-  this.draw_x =0;
-  this.draw_y =0;
+  var heightOffset = 0;
+  var heightShadows = null;
+  var shadowSettings = null;
+  
 
-  this.heightMap = null;
+  var heightMapOnTop = false;
 
-  this.heightOffset = 0;
-  this.shadowOffset = 0;
+  var curZoom = 1;
+  var mouse_used = 0;
+  var MouseTilePosX = 0;
+  var MouseTilePosY = 0;
+  var xMouse = 0;
+  var yMouse = 0;
 
-  this.heightMapOnTop = false;
+  var applyIneractions = false;
 
-  this.curZoom =1;
-  this.mouse_used = 0;
-  this.MouseTilePosX = 0;
-  this.MouseTilePosY = 0;
-  this.xMouse = 0;
-  this.yMouse = 0;
+  var mouseBehindAlpha = 0;
 
-  this.applyIneractions = false;
+  var tilesHide = null;
 
-  this.alpha_mouse_behind = 0;
+  var planeGraphic = null;
+  var hideStart = null;
+  var hideEnd = null;
 
-  this.heightShadow = null;
+  function _setup(settings) {
+       title = settings.title;
+       zero_is_blank = settings.zero_is_blank;
+       //mouseBehindAlpha = settings.mouseBehindAlpha;
+  }
 
-  this.tilesHide = null;
-
-  this.planeGraphic = null;
-  this.hideStart = null;
-  this.hideEnd = null;
-
-  this.draw = function(i, j) {
+  function _draw(i, j) {
     i = Math.floor(i);
     j = Math.floor(j);
-    if (i > this.map.length - 1) {
-      i = this.map.length - 1;
+    if (i > mapLayout.length - 1) {
+      i = mapLayout.length - 1;
     }
-    if (j > this.map[i].length - 1) {
-      j = this.map[i].length - 1;
+    if (j > mapLayout[i].length - 1) {
+      j = mapLayout[i].length - 1;
     }
     var resized_height;
     var stackGraphic = null;
-    var image_num = Number(this.map[i][j]);
-    if ((!this.zero_is_blank) || (this.zero_is_blank && image_num)) {
-      if (this.zero_is_blank) {
+    var image_num = Number(mapLayout[i][j]);
+    if ((!zero_is_blank) || (zero_is_blank && image_num)) {
+      if (zero_is_blank) {
         image_num--;
       }
-      if(this.tilesHide && image_num >= this.hideStart && image_num <= this.hideEnd) {
-        stackGraphic = this.tiles[this.planeGraphic];
-        resized_height = this.tiles[this.planeGraphic].height / (this.tiles[this.planeGraphic].width / this.tileW);
+      if(tilesHide && image_num >= hideStart && image_num <= hideEnd) {
+        stackGraphic = tileImages[planeGraphic];
+        resized_height = tileImages[planeGraphic].height / (tileImages[planeGraphic].width / tileWidth);
       }
       else {
-        stackGraphic = this.tiles[this.dict[image_num]];
-        resized_height = this.tiles[this.dict[image_num]].height / (this.tiles[this.dict[image_num]].width / this.tileW);
+        stackGraphic = tileImages[tileImagesDictionary[image_num]];
+        resized_height = tileImages[tileImagesDictionary[image_num]].height / (tileImages[tileImagesDictionary[image_num]].width / tileWidth);
       }
-      var xpos = (i - j) * (this.tileH * this.curZoom) + this.draw_x;
-      var ypos = (i + j) * (this.tileW / 4 * this.curZoom) + this.draw_y;
-      if (!this.stackTiles) {
-        this.context.drawImage(this.tiles[this.dict[image_num]], 0, 0, this.tiles[this.dict[image_num]].width, this.tiles[this.dict[image_num]].height, xpos, (ypos + ((this.tileH - resized_height) * this.curZoom)), (this.tileW * this.curZoom), (resized_height * this.curZoom));
+      var xpos = (i - j) * (tileHeight * curZoom) + draw_x;
+      var ypos = (i + j) * (tileWidth / 4 * curZoom) + draw_y;
+      if (!stackTiles) {
+        ctx.drawImage(tileImages[tileImagesDictionary[image_num]], 0, 0, tileImages[tileImagesDictionary[image_num]].width, tileImages[tileImagesDictionary[image_num]].height, xpos, (ypos + ((tileHeight - resized_height) * curZoom)), (tileWidth * curZoom), (resized_height * curZoom));
       }
       else {
-        var stack = Math.round(Number(this.heightMap[i][j]));
+        var stack = Math.round(Number(heightMap[i][j]));
         for (var k = 0; k <= stack; k++) {
-          this.context.save();
-          if (this.alpha_mouse_behind) {
-            if (i == this.MouseTilePosX + 1 && j == this.MouseTilePosY + 1) {
-              this.context.globalAlpha = 0.3;
+          ctx.save();
+          if (mouseBehindAlpha) {
+            if (i == MouseTilePosX + 1 && j == MouseTilePosY + 1) {
+              ctx.globalAlpha = 0.3;
             }
           }
-          if (this.heightMapOnTop && k === stack){
-            this.context.drawImage(stackGraphic, 0, 0, stackGraphic.width, stackGraphic.height, xpos, ypos + (k *(this.tileH - this.heightOffset - this.tileH)) * this.curZoom - (resized_height  - this.tileH) * this.curZoom, (this.tileW * this.curZoom), (resized_height * this.curZoom));
+          if (heightMapOnTop && k === stack){
+            ctx.drawImage(stackGraphic, 0, 0, stackGraphic.width, stackGraphic.height, xpos, ypos + (k *(tileHeight - heightOffset - tileHeight)) * curZoom - (resized_height  - tileHeight) * curZoom, (tileWidth * curZoom), (resized_height * curZoom));
           }
-          else if(!this.heightMapOnTop) {
-            this.context.drawImage(stackGraphic, 0, 0, stackGraphic.width, stackGraphic.height, xpos, ypos + (k * ((this.tileH - this.heightOffset - resized_height) * this.curZoom)), (this.tileW * this.curZoom), (resized_height * this.curZoom));
+          else if(!heightMapOnTop) {
+            ctx.drawImage(stackGraphic, 0, 0, stackGraphic.width, stackGraphic.height, xpos, ypos + (k * ((tileHeight - heightOffset - resized_height) * curZoom)), (tileWidth * curZoom), (resized_height * curZoom));
           }
-          this.context.restore();
+          ctx.restore();
         }
-        if (this.mouse_used) {
-          if (i == this.MouseTilePosX && j == this.MouseTilePosY) {
+        if (mouse_used) {
+          if (i == MouseTilePosX && j == MouseTilePosY) {
             --k;
             ctx.fillStyle = 'rgba(255, 255, 120, 0.7)';
             ctx.beginPath();
-            ctx.moveTo(xpos, ypos + (k * ((this.tileH - resized_height) * this.curZoom)) + (this.tileH * this.curZoom) / 2);
-            ctx.lineTo(xpos + (this.tileH * this.curZoom), ypos + (k * ((this.tileH - resized_height) * this.curZoom)));
-            ctx.lineTo(xpos + (this.tileH * this.curZoom) * 2, ypos + (k * ((this.tileH - resized_height) * this.curZoom)) + (this.tileH * this.curZoom) / 2);
-            ctx.lineTo(xpos + (this.tileH * this.curZoom), ypos + (k * ((this.tileH - resized_height) * this.curZoom)) + (this.tileH * this.curZoom));
+            ctx.moveTo(xpos, ypos + (k * ((tileHeight - resized_height) * curZoom)) + (tileHeight * curZoom) / 2);
+            ctx.lineTo(xpos + (tileHeight * curZoom), ypos + (k * ((tileHeight - resized_height) * curZoom)));
+            ctx.lineTo(xpos + (tileHeight * curZoom) * 2, ypos + (k * ((tileHeight - resized_height) * curZoom)) + (tileHeight * curZoom) / 2);
+            ctx.lineTo(xpos + (tileHeight * curZoom), ypos + (k * ((tileHeight - resized_height) * curZoom)) + (tileHeight * curZoom));
             ctx.fill();
           }
         }
       }
     }
-    if (this.objectShadows) {
-      if(this.heightMap) {
-        var nextStack = Math.round(Number(this.heightMap[i][j - 1]));
-        var currStack = Math.floor(Number(this.heightMap[i][j]));
+    if (heightShadows) {
+      if (heightMap) {
+        var nextStack = Math.round(Number(heightMap[i][j - 1]));
+        var currStack = Math.floor(Number(heightMap[i][j]));
         if (currStack < nextStack) {
-          var shadowXpos = (i - j) * (this.tileH * this.curZoom) + this.draw_x;
-          var shadowYpos = (i + j) * (this.tileW / 4 * this.curZoom) + this.draw_y;
-          ctx.fillStyle = 'rgba(50, 60, 60, 0.5)';
-          ctx.beginPath();
-          ctx.moveTo(shadowXpos, shadowYpos + (currStack * ((this.tileH - resized_height) * this.curZoom)) + (this.tileH * this.curZoom) / 2);
-          ctx.lineTo(shadowXpos + (this.tileH * this.curZoom), shadowYpos + (currStack * ((this.tileH - resized_height) * this.curZoom)));
-          ctx.lineTo(shadowXpos + (this.tileH * this.curZoom) * 2, shadowYpos + (currStack * ((this.tileH - resized_height) * this.curZoom)) + (this.tileH * this.curZoom) / 2);
-          ctx.lineTo(shadowXpos + (this.tileH * this.curZoom), shadowYpos + (currStack * ((this.tileH - resized_height) * this.curZoom)) + (this.tileH * this.curZoom));
-          ctx.fill();
-          ctx.fillStyle = 'rgba(50, 60, 60, 0.7)';
-          ctx.beginPath();
-          ctx.moveTo(shadowXpos + (this.tileH * this.curZoom), shadowYpos + (currStack * ((this.tileH - resized_height) * this.curZoom)));
-          ctx.lineTo(shadowXpos + (this.tileH * this.curZoom), shadowYpos - (nextStack * ((this.tileH - this.shadowOffset) / ((this.tileH - this.shadowOffset) / this.shadowOffset)  * this.curZoom)));
-          ctx.lineTo(shadowXpos + (this.tileH * this.curZoom) * 2, shadowYpos - (nextStack * (this.tileH - this.shadowOffset) / ((this.tileH - this.shadowOffset) / this.shadowOffset) * this.curZoom) + (this.tileH * this.curZoom) / 2);
-          ctx.lineTo(shadowXpos + (this.tileH * this.curZoom) * 2, shadowYpos + (currStack * ((this.tileH - resized_height) * this.curZoom)) + (this.tileH * this.curZoom) / 2);
-          ctx.fill();
+          var shadowXpos = (i - j) * (tileHeight * curZoom) + draw_x;
+          var shadowYpos = (i + j) * (tileWidth / 4 * curZoom) + draw_y;
+          if (shadowSettings.verticalColor) {
+            ctx.fillStyle = shadowSettings.verticalColor;
+            ctx.beginPath();
+            ctx.moveTo(shadowXpos, shadowYpos + (currStack * ((tileHeight - resized_height) * curZoom)) + (tileHeight * curZoom) / 2);
+            ctx.lineTo(shadowXpos + (tileHeight * curZoom), shadowYpos + (currStack * ((tileHeight - resized_height) * curZoom)));
+            ctx.lineTo(shadowXpos + (tileHeight * curZoom) * 2, shadowYpos + (currStack * ((tileHeight - resized_height) * curZoom)) + (tileHeight * curZoom) / 2);
+            ctx.lineTo(shadowXpos + (tileHeight * curZoom), shadowYpos + (currStack * ((tileHeight - resized_height) * curZoom)) + (tileHeight * curZoom));
+            ctx.fill();
+          }
+          if (shadowSettings.horizontalColor) {
+            ctx.fillStyle = shadowSettings.horizontalColor;
+            ctx.beginPath();
+            ctx.moveTo(shadowXpos + (tileHeight * curZoom), shadowYpos + (currStack * ((tileHeight - resized_height) * curZoom)));
+            ctx.lineTo(shadowXpos + (tileHeight * curZoom), shadowYpos - (nextStack * ((tileHeight - shadowSettings.offset) / ((tileHeight - shadowSettings.offset) / shadowSettings.offset)  * curZoom)));
+            ctx.lineTo(shadowXpos + (tileHeight * curZoom) * 2, shadowYpos - (nextStack * (tileHeight - shadowSettings.offset) / ((tileHeight - shadowSettings.offset) / shadowSettings.offset) * curZoom) + (tileHeight * curZoom) / 2);
+            ctx.lineTo(shadowXpos + (tileHeight * curZoom) * 2, shadowYpos + (currStack * ((tileHeight - resized_height) * curZoom)) + (tileHeight * curZoom) / 2);
+            ctx.fill();
+          }
         }
       }
       else {
-        var currStack = Math.floor(Number(this.map[i][j - 1]));
+        var currStack = Math.floor(Number(mapLayout[i][j - 1]));
         if(currStack > 0) {
-          var shadowXpos = (i - j) * (this.tileH * this.curZoom) + this.draw_x;
-          var shadowYpos = (i + j) * (this.tileW / 4 * this.curZoom) + this.draw_y;
-          ctx.fillStyle = 'rgba(50, 60, 60, 0.6)';
+          var shadowXpos = (i - j) * (tileHeight * curZoom) + draw_x;
+          var shadowYpos = (i + j) * (tileWidth / 4 * curZoom) + draw_y;
+          ctx.fillStyle = shadowSettings.verticalColor;
           ctx.beginPath();
-          ctx.moveTo(shadowXpos, shadowYpos + (currStack * ((this.tileH - resized_height) * this.curZoom)) + (this.tileH * this.curZoom) / 2);
-          ctx.lineTo(shadowXpos + (this.tileH * this.curZoom), shadowYpos + (currStack * ((this.tileH - resized_height) * this.curZoom)));
-          ctx.lineTo(shadowXpos + (this.tileH * this.curZoom) * 2, shadowYpos + (currStack * ((this.tileH - resized_height) * this.curZoom)) + (this.tileH * this.curZoom) / 2);
-          ctx.lineTo(shadowXpos + (this.tileH * this.curZoom), shadowYpos + (currStack * ((this.tileH - resized_height) * this.curZoom)) + (this.tileH * this.curZoom));
+          ctx.moveTo(shadowXpos, shadowYpos + (currStack * ((tileHeight - resized_height) * curZoom)) + (tileHeight * curZoom) / 2);
+          ctx.lineTo(shadowXpos + (tileHeight * curZoom), shadowYpos + (currStack * ((tileHeight - resized_height) * curZoom)));
+          ctx.lineTo(shadowXpos + (tileHeight * curZoom) * 2, shadowYpos + (currStack * ((tileHeight - resized_height) * curZoom)) + (tileHeight * curZoom) / 2);
+          ctx.lineTo(shadowXpos + (tileHeight * curZoom), shadowYpos + (currStack * ((tileHeight - resized_height) * curZoom)) + (tileHeight * curZoom));
           ctx.fill();
         }
       }
     }
-  };
+  }
 
-  this.stack_tiles = function(settings) {
-    this.stackTiles = true;
-    this.heightMap = settings.map;
-    this.heightOffset = settings.offset;
-    this.heightMapOnTop = settings.heightMapOnTop || false;
-  };
+  function _stackTiles(settings) {
+    stackTiles = true;
+    heightMap = settings.map;
+    heightOffset = settings.offset;
+    heightMapOnTop = settings.heightMapOnTop || false;
+  }
 
-  this.getLayout = function() {
-    return this.map;
-  };
+  function _getLayout() {
+    return mapLayout;
+  }
 
-  this.getTile = function(posX, posY) {
-    return this.map[posX][posY];
-  };
+  function _getHeightLayout() {
+    return heightMap;
+  }
 
-  this.setZoom = function(dir) {
+  function _getTile(posX, posY) {
+    return mapLayout[posX][posY];
+  }
+
+  function _setZoom(dir) {
     if (Number(dir)) {
-      this.curZoom = dir;
+      curZoom = dir;
     }
     else if (dir == "in") {
-      if (this.curZoom < 1) {
-        this.curZoom += 0.1;
+      if (curZoom < 1) {
+        curZoom += 0.1;
       }
     }else if (dir == "out") {
-      if (this.curZoom > 0.2) {
-        this.curZoom -= 0.1;
+      if (curZoom > 0.2) {
+        curZoom -= 0.1;
       }
     }
-  };
+  }
 
-  this.applyMouse = function(x, y) {
+  function _applyMouse(x, y) {
     var coords = {};
-    this.mouse_used = 1;
-    this.xMouse = x;
-    this.yMouse = y;
-    this.MouseTilePosY = (2 * (y - this.draw_y) - x + this.draw_x) / 2;
-    this.MouseTilePosX = x + this.MouseTilePosY - this.draw_x - (this.tileH * this.curZoom);
-    this.MouseTilePosY = Math.round(this.MouseTilePosY / (this.tileH * this.curZoom));
-    this.MouseTilePosX = Math.round(this.MouseTilePosX / (this.tileH * this.curZoom));
-    coords.x = this.MouseTilePosX;
-    coords.y = this.MouseTilePosY;
+    mouse_used = 1;
+    xMouse = x;
+    yMouse = y;
+    MouseTilePosY = (2 * (y - draw_y) - x + draw_x) / 2;
+    MouseTilePosX = x + MouseTilePosY - draw_x - (tileHeight * curZoom);
+    MouseTilePosY = Math.round(MouseTilePosY / (tileHeight * curZoom));
+    MouseTilePosX = Math.round(MouseTilePosX / (tileHeight * curZoom));
+    coords.x = MouseTilePosX;
+    coords.y = MouseTilePosY;
     return(coords);
-  };
+  }
 
-  this.applyMouseClick = function(x, y) {
-    this.heightMap[x][y] = Number(this.heightMap[x][y]) + 1;
-  };
+  function _applyMouseClick(x, y) {
+    // mapLayout[x][y] = Math.floor(Math.random()*6);
+    // heightMap[x][y] = Number(heightMap[x][y]) + 1;
+  }
 
-  this.align = function(position, screen_dimension, size, offset) {
+  function _align(position, screen_dimension, size, offset) {
     switch(position) {
       case "h-center":
-        this.draw_x = ((screen_dimension / 2) - (this.tileW * (size-1) )/(this.tileH/4)* this.curZoom) - offset;
+        draw_x = ((screen_dimension / 2) - (tileWidth * (size-1) )/(tileHeight/4)* curZoom) - offset;
       break;
       case "v-center":
-        this.draw_y = ((screen_dimension / 2) - (this.tileH * (size-1) * this.curZoom) / 2) - offset;
+        draw_y = ((screen_dimension / 2) - (tileHeight * (size-1) * curZoom) / 2) - offset;
       break;
     }
-  };
+  }
 
-  this.hideGraphics = function(hide, settings) {
-    this.tilesHide = hide;
+  function _hideGraphics(toggle, settings) {
+    tilesHide = toggle;
     if (settings) {
-      this.planeGraphic = settings.graphic;
-      this.hideStart = settings.rangeStart;
-      this.hideEnd = settings.rangeEnd;
+      planeGraphic = settings.graphic;
+      hideStart = settings.rangeStart;
+      hideEnd = settings.rangeEnd;
     }
-  };
+  }
 
-  this.applyHeightShadow = function(shadow) {
-    if (shadow) {
-      this.objectShadows = true;
+  function _applyHeightShadow(toggle, settings) {
+    if (toggle) {
+      if(settings || shadow) {
+        console.log("Hi")
+        heightShadows = true;
+      }
     }
     else{
-      this.objectShadows = false;
+      if(settings || shadow) {
+        console.log("hello")
+        heightShadows = false;
+      }
     }
-    if(shadow.offset) {
-      this.shadowOffset = shadow.offset;
+    if (settings) {
+      shadowSettings = settings;
     }
-  };
+  }
 
-  this.rotate = function(setting) {
+  function _rotate(setting) {
     var tempArray = [];
     var tempLine = [];
     var tempArrayTwo = [];
     var tempLineTwo = [];
     var i,j ;
     if (setting == "left") {
-      for (i = 0; i < this.map.length; i++) {
-        for (j = this.map[i].length - 1; j >= 0; j--) {
-          tempLine.push(this.map[j][i]);
-          if (this.stackTiles) {
-            tempLineTwo.push(this.heightMap[j][i]);
+      for (i = 0; i < mapLayout.length; i++) {
+        for (j = mapLayout[i].length - 1; j >= 0; j--) {
+          tempLine.push(mapLayout[j][i]);
+          if (stackTiles) {
+            tempLineTwo.push(heightMap[j][i]);
           }
         }
         tempArray.push(tempLine);
         tempLine = [];
-        if (this.stackTiles) {
+        if (stackTiles) {
           tempArrayTwo.push(tempLineTwo);
           tempLineTwo = [];
         }
       }
-      if (this.stackTiles) {
-        this.heightMap = tempArrayTwo;
+      if (stackTiles) {
+        heightMap = tempArrayTwo;
       }
-      this.map = tempArray;
+      mapLayout = tempArray;
     }
-    else {
-      for (i = this.map.length -1; i >= 0; i--) {
-        for (j = 0; j < this.map.length; j++) {
-          tempLine.push(this.map[j][i]);
-          if (this.stackTiles) {
-            tempLineTwo.push(this.heightMap[j][i]);
+    else if (setting == "right") {
+      for (i = mapLayout.length -1; i >= 0; i--) {
+        for (j = 0; j < mapLayout.length; j++) {
+          tempLine.push(mapLayout[j][i]);
+          if (stackTiles) {
+            tempLineTwo.push(heightMap[j][i]);
           }
         }
         tempArray.push(tempLine);
         tempLine = [];
-        if (this.stackTiles) {
+        if (stackTiles) {
           tempArrayTwo.push(tempLineTwo);
           tempLineTwo = [];
         }
       }
-      if (this.stackTiles) {
-        this.heightMap = tempArrayTwo;
+      if (stackTiles) {
+        heightMap = tempArrayTwo;
       }
-      this.map = tempArray;
+      mapLayout = tempArray;
     }
+  }
+
+
+  return {
+
+    setupProperties: function(settings) {
+      return _setup(settings);
+    },
+
+    draw: function(tileX, tileY) {
+      return _draw(tileX, tileY);
+    },
+
+    stackTiles: function(settings) {
+      return _stackTiles(settings);
+    },
+
+    getLayout: function() {
+      return _getLayout();
+    },
+
+    getHeightLayout: function() {
+      return _getHeightLayout();
+    },
+
+    getTile: function(tileX, tileY) {
+      return _getTile(tileX, tileY);
+    },
+
+    setZoom: function(direction) {
+      // in || out
+      return _setZoom(direction);
+    },
+
+    applyMouse: function(tileX, tileY) {
+      return _applyMouse(tileX, tileY);
+    },
+
+    applyMouseClick: function(tileX, tileY) {
+      return _applyMouseClick(tileX, tileY);
+    },
+
+    align: function(position, screen_dimension, size, offset) {
+      return _align(position, screen_dimension, size, offset);
+    },
+
+    hideGraphics: function(toggle, settings) {
+      return _hideGraphics(toggle, settings);
+    },
+
+    applyHeightShadow: function(toggle, settings) {
+      return _applyHeightShadow(toggle, settings);
+    },
+
+    rotate: function(direction) {
+      // left || right
+      return _rotate(direction);
+    },
+
+    toggleGraphicsHide: function(toggle) {
+      if (tilesHide !== null) {
+        _hideGraphics(toggle);
+      }
+    },
+
+    toggleHeightShadow: function(toggle) {
+      if (heightShadows !== null) {
+        _applyHeightShadow(toggle);
+      }
+    },
+
+    move: function(direction) {
+      // left || right || up || down
+      if (direction === "up") {
+        draw_y += tileHeight/2 * curZoom;
+        draw_x += tileHeight * curZoom;
+      }
+      else if (direction === "down") {
+        draw_y += tileHeight/2 * curZoom;
+        draw_x -= tileHeight * curZoom;
+      }
+      else if (direction === "left") {
+        draw_y -= tileHeight/2 * curZoom;
+        draw_x -= tileHeight * curZoom;
+      }
+      else if (direction === "right") {
+        draw_y -= tileHeight/2 * curZoom;
+        draw_x += tileHeight * curZoom;
+      }
+
+
+    }
+
   };
+
+
 }

@@ -51,7 +51,59 @@ function XMLPopulate() {
 	this.length = function(name){
 		return xmlDoc.getElementsByTagName(name).length;
 	}
-	
+
+  this.saveMap = function (id, groundTiles, heightTiles, objectTiles) {
+    var groundMap ="";
+    for(var i =0;i<groundTiles.length;i++){
+      groundMap += "<row>";
+			for(var j=0;j<groundTiles[i].length;j++){
+				groundMap += groundTiles[i][j];
+				if(j!= groundTiles[i].length-1){
+          groundMap += ",";
+        }
+			}
+			groundMap += "</row>";
+		}
+
+    var heightMap ="";
+    for(var i =0;i<heightTiles.length;i++){
+      heightMap += "<row>";
+      for(var j=0;j<heightTiles[i].length;j++){
+        heightMap += heightTiles[i][j];
+        if(j!= heightTiles[i].length-1){
+          heightMap += ",";
+        }
+      }
+      heightMap += "</row>";
+    }
+
+    var objectMap ="";
+    for(var i =0;i<objectTiles.length;i++){
+      objectMap += "<row>";
+      for(var j=0;j<objectTiles[i].length;j++){
+        objectMap += objectTiles[i][j];
+        if(j!= objectTiles[i].length-1){
+          objectMap += ",";
+        }
+      }
+      objectMap += "</row>";
+    }
+
+
+    xmlhttp=new XMLHttpRequest();
+    data = "id=" + id + "&groundMap=" + groundMap + "&heightMap=" + heightMap + "&objectMap=" + objectMap;
+
+    xmlhttp.open("POST","map-save.php",true);
+    xmlhttp.setRequestHeader("Connection", "close");
+    xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+
+    xmlhttp.onreadystatechange = function() {
+      if(xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+        alert("Map Saved");
+      }
+    };
+    xmlhttp.send(data);
+  };
 
 }
 

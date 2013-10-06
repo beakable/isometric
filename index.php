@@ -41,6 +41,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     <script tppe="text/javascript" src="com/iso/Isometric.js"></script>
     <script type="text/javascript">
 
+    var globalTile = 1;
+
     window.requestAnimFrame = (function() {
       return window.requestAnimationFrame || 
       window.webkitRequestAnimationFrame  || 
@@ -82,8 +84,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 layout: XML.getContent('ground_map','row'),
                 graphics: groundImages.files,
                 graphicsDictionary: groundImages.dictionary,
-                heightShadow: {
-                  offset: 20
+                shadow: {
+                  offset: 20,
+                  verticalColor: 'rgba(5, 5, 30, 0.4)',
+                  horizontalColor: 'rgba(6, 5, 50, 0.5)'
                 },
                 heightMap: {
                   map: XML.getContent('ground_height','row'),
@@ -118,12 +122,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                   offset: 20,
                   heightMapOnTop: true
                 },
-                hideGraphics: {
-                  rangeMin: 0,
-                  rangeMax: 11,
-                  graphic: '7-normal.png'
-                },
-                applyIneractions: true
+                //hideGraphics: {
+                //  rangeMin: 0,
+                //  rangeMax: 11,
+                //  graphic: '7-normal.png'
+                //},
+                //applyIneractions: true
               })
             ],
             gui: guiImages.files
@@ -186,6 +190,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
           case 87:
             self.keyCommand(10);
           break;
+          case 75:
+            self.keyCommand(11);
+          break;
+          case 219:
+            self.keyCommand(12);
+          break;
+          case 221:
+            self.keyCommand(13);
+          break;
         }
       });
 
@@ -194,8 +207,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
           case 1:
             if (startY > 0) {
               mapLayers.map(function(layer) {
-                layer.draw_y += layer.tileH/2 * layer.curZoom;
-                layer.draw_x += layer.tileH * layer.curZoom;
+                layer.move("up");
               });
               startY --;
             }
@@ -203,8 +215,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
           case 2:
             if (startX > 0) {
               mapLayers.map(function(layer) {
-                layer.draw_y += layer.tileH/2 * layer.curZoom;
-                layer.draw_x -= layer.tileH * layer.curZoom;
+                layer.move("down");
               });
               startX --;
             }
@@ -212,8 +223,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
           case 3:
           if (startY + rangeY < mapLayers[0].getLayout().length) {
             mapLayers.map(function(layer) {
-              layer.draw_y -= layer.tileH/2 * layer.curZoom;
-              layer.draw_x -= layer.tileH * layer.curZoom;
+              layer.move("left");
             });
             startY ++;
           }
@@ -221,8 +231,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
           case 4:
             if (startX + rangeX < mapLayers[0].getLayout().length ) {
               mapLayers.map(function(layer) {
-                layer.draw_y -= layer.tileH/2 * layer.curZoom;
-                layer.draw_x += layer.tileH * layer.curZoom;
+                layer.move("right");
               });
               startX ++;
             }
@@ -254,22 +263,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
           break;
           case 7:
             mapLayers.map(function(layer) {
-              if (layer.tilesHide !== null) {
-                layer.hideGraphics(true);
-              }
-              if (layer.heightShadow !== null) {
-                layer.applyHeightShadow(true);
-              }
+              layer.toggleGraphicsHide(true);
+              layer.toggleHeightShadow(true);
             });
           break;
           case 8:
             mapLayers.map(function(layer) {
-              if(layer.tilesHide !== null) {
-                layer.hideGraphics(false);
-              }
-              if (layer.heightShadow !== null) {
-                layer.applyHeightShadow(false);
-              }
+              layer.toggleGraphicsHide(false);
+              layer.toggleHeightShadow(false);
             });
           break;
           case 9:
@@ -287,6 +288,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
               //startY = mapLayers[0].getLayout().length - startX - rangeX;
             });
           break;
+          case 11:
+            var XML = new XMLPopulate();
+            XML.saveMap(43, mapLayers[0].getLayout(), mapLayers[0].getHeightLayout(), mapLayers[1].getLayout());
+          break;
+          case 12:
+          if(globalTile > 0) {
+            globalTile -= 1
+          }
+          break;
+          case 13:
+            globalTile ++;
+          break;
         }
         requestAnimFrame(self.draw);
       }
@@ -303,28 +316,26 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
        context.fillStyle = "rgb(255,255,255)";
        if (tile_coordinates.x < mapLayers[0].getLayout().length && tile_coordinates.x >= 0 && tile_coordinates.y < mapLayers[0].getLayout().length && tile_coordinates.y >= 0) {
          mapLayers.map( function(layer) {
-          if (layer.applyIneractions) {
-            if (layer.getTile([tile_coordinates.x],[tile_coordinates.y]) > 0) {
-             context.drawImage(gui["popup-box.png"],mouse_coordinates.x,mouse_coordinates.y);
-             context.font = "8pt Arial";
-             context.fillText("Hover box",mouse_coordinates.x+14,mouse_coordinates.y+25);
-            }
-          }
+          //if (layer.applyIneractions) {
+            //if (layer.getTile([tile_coordinates.x],[tile_coordinates.y]) > 0) {
+            // context.drawImage(gui["popup-box.png"],mouse_coordinates.x,mouse_coordinates.y);
+            // context.font = "8pt Arial";
+            // context.fillText("Hover box",mouse_coordinates.x+14,mouse_coordinates.y+25);
+            layer.applyMouseClick(tile_coordinates.x, tile_coordinates.y);
+            //}
+         // }
          });
        }
       }
       
       this.createLayer = function(settings) {
        var layer = new Isometric(context, settings.height, settings.width, settings.layout, settings.graphics, settings.graphicsDictionary);
-       layer.title = settings.title;
-       layer.setZoom(1);
-       layer.zero_is_blank = settings.zero_is_blank;
-       layer.alpha_mouse_behind = settings.alpha_mouse_behind;
-       if(settings.heightShadow) {
-         layer.applyHeightShadow(settings.heightShadow);
+       layer.setupProperties(settings);
+       if(settings.shadow) {
+         layer.applyHeightShadow(true, settings.shadow);
        }
        if (settings.heightMap) {
-         layer.stack_tiles(settings.heightMap);
+         layer.stackTiles(settings.heightMap);
        }
        if(settings.hideGraphics) {
          layer.hideGraphics(true, {
@@ -343,7 +354,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
          });  
          input.mobile(function(coords) {
           tile_coordinates = layer.applyMouse(coords.x, coords.y);
-          mouse_coordinates = coords;
+          layer.applyMouseClick(tile_coordinates.x, tile_coordinates.y);
           requestAnimFrame(self.draw);
          });
          input.mouse_action(function(coords) {
