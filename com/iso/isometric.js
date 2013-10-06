@@ -28,6 +28,8 @@ function Isometric(ctx, tileWidth, tileHeight, mapLayout, tileImages, tileImages
   var heightShadows = null;
   var shadowSettings = null;
 
+  var shadowDistance = false;
+
   var heightMapOnTop = false;
 
   var curZoom = 1;
@@ -46,12 +48,16 @@ function Isometric(ctx, tileWidth, tileHeight, mapLayout, tileImages, tileImages
 
 
   function _setup(settings) {
-       title = settings.title;
-       zeroIsBlank = settings.zeroIsBlank;
-       //mouseBehindAlpha = settings.mouseBehindAlpha;
+      shadowDistance = settings.shadowDistance;
+      title = settings.title;
+      zeroIsBlank = settings.zeroIsBlank;
+      //mouseBehindAlpha = settings.mouseBehindAlpha;
   }
 
   function _draw(i, j) {
+
+    var xpos, ypos;
+
     i = Math.floor(i);
     j = Math.floor(j);
     if (i > mapLayout.length - 1) {
@@ -75,8 +81,8 @@ function Isometric(ctx, tileWidth, tileHeight, mapLayout, tileImages, tileImages
         stackGraphic = tileImages[tileImagesDictionary[image_num]];
         resized_height = tileImages[tileImagesDictionary[image_num]].height / (tileImages[tileImagesDictionary[image_num]].width / tileWidth);
       }
-      var xpos = (i - j) * (tileHeight * curZoom) + drawX;
-      var ypos = (i + j) * (tileWidth / 4 * curZoom) + drawY;
+      xpos = (i - j) * (tileHeight * curZoom) + drawX;
+      ypos = (i + j) * (tileWidth / 4 * curZoom) + drawY;
       if (!stackTiles) {
         ctx.drawImage(tileImages[tileImagesDictionary[image_num]], 0, 0, tileImages[tileImagesDictionary[image_num]].width, tileImages[tileImagesDictionary[image_num]].height, xpos, (ypos + ((tileHeight - resized_height) * curZoom)), (tileWidth * curZoom), (resized_height * curZoom));
       }
@@ -97,16 +103,33 @@ function Isometric(ctx, tileWidth, tileHeight, mapLayout, tileImages, tileImages
           }
           ctx.restore();
         }
+        if (shadowDistance) {
+          var  dist = Math.sqrt((Math.floor(i - MouseTilePosX) * Math.floor(i - MouseTilePosX)) + (Math.floor(j - MouseTilePosY) * Math.floor(j - MouseTilePosY)));
+          if(dist > 10){
+            dist = 10;
+          }
+          -- k;
+          dist = dist/(20+stack*2);
+          ctx.save();
+          ctx.globalCompositeOperation = 'source-atop';
+          ctx.fillStyle = 'rgba(0, 0, 33,'+dist+')';
+          ctx.beginPath();
+          ctx.moveTo(xpos, ypos + (k * ((tileHeight - resized_height) * curZoom)) + (tileHeight * curZoom) / 2);
+          ctx.lineTo(xpos + (tileHeight * curZoom), ypos + (k * ((tileHeight - resized_height) * curZoom)));
+          ctx.lineTo(xpos + (tileHeight * curZoom) * 2, ypos + (k * ((tileHeight - resized_height) * curZoom)) + (tileHeight * curZoom) / 2);
+          ctx.lineTo(xpos + (tileHeight * curZoom), ypos + (k * ((tileHeight - resized_height) * curZoom)) + (tileHeight * curZoom));
+          ctx.fill();
+          ctx.restore();
+        }
         if (mouseUsed) {
           if (i == MouseTilePosX && j == MouseTilePosY) {
-            --k;
             ctx.fillStyle = 'rgba(255, 255, 120, 0.7)';
             ctx.beginPath();
             ctx.moveTo(xpos, ypos + (k * ((tileHeight - resized_height) * curZoom)) + (tileHeight * curZoom) / 2);
             ctx.lineTo(xpos + (tileHeight * curZoom), ypos + (k * ((tileHeight - resized_height) * curZoom)));
             ctx.lineTo(xpos + (tileHeight * curZoom) * 2, ypos + (k * ((tileHeight - resized_height) * curZoom)) + (tileHeight * curZoom) / 2);
             ctx.lineTo(xpos + (tileHeight * curZoom), ypos + (k * ((tileHeight - resized_height) * curZoom)) + (tileHeight * curZoom));
-            ctx.fill();
+           // ctx.fill();
           }
         }
       }

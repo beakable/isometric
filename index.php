@@ -84,6 +84,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 layout: XML.getContent('ground_map','row'),
                 graphics: groundImages.files,
                 graphicsDictionary: groundImages.dictionary,
+                shadowDistance: true,
                 shadow: {
                   offset: 20,
                   verticalColor: 'rgba(5, 5, 30, 0.4)',
