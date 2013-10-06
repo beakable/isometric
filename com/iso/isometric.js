@@ -17,22 +17,21 @@ function Isometric(ctx, tileWidth, tileHeight, mapLayout, tileImages, tileImages
   
   var title = "";
 
-  var zero_is_blank = 0;
+  var zeroIsBlank = false;
   var stackTiles = false;
-  var draw_x =0;
-  var draw_y =0;
+  var drawX = 0;
+  var drawY = 0;
 
   var heightMap = null;
 
   var heightOffset = 0;
   var heightShadows = null;
   var shadowSettings = null;
-  
 
   var heightMapOnTop = false;
 
   var curZoom = 1;
-  var mouse_used = 0;
+  var mouseUsed = false;
   var MouseTilePosX = 0;
   var MouseTilePosY = 0;
   var xMouse = 0;
@@ -40,17 +39,15 @@ function Isometric(ctx, tileWidth, tileHeight, mapLayout, tileImages, tileImages
 
   var applyIneractions = false;
 
-  var mouseBehindAlpha = 0;
+  var mouseBehindAlpha =  false;
 
   var tilesHide = null;
+  var hideSettings = null;
 
-  var planeGraphic = null;
-  var hideStart = null;
-  var hideEnd = null;
 
   function _setup(settings) {
        title = settings.title;
-       zero_is_blank = settings.zero_is_blank;
+       zeroIsBlank = settings.zeroIsBlank;
        //mouseBehindAlpha = settings.mouseBehindAlpha;
   }
 
@@ -66,20 +63,20 @@ function Isometric(ctx, tileWidth, tileHeight, mapLayout, tileImages, tileImages
     var resized_height;
     var stackGraphic = null;
     var image_num = Number(mapLayout[i][j]);
-    if ((!zero_is_blank) || (zero_is_blank && image_num)) {
-      if (zero_is_blank) {
+    if ((!zeroIsBlank) || (zeroIsBlank && image_num)) {
+      if (zeroIsBlank) {
         image_num--;
       }
-      if(tilesHide && image_num >= hideStart && image_num <= hideEnd) {
-        stackGraphic = tileImages[planeGraphic];
-        resized_height = tileImages[planeGraphic].height / (tileImages[planeGraphic].width / tileWidth);
+      if(tilesHide && image_num >= hideSettings.hideStart && image_num <= hideSettings.hideEnd) {
+        stackGraphic = tileImages[hideSettings.planeGraphic];
+        resized_height = tileImages[hideSettings.planeGraphic].height / (tileImages[hideSettings.planeGraphic].width / tileWidth);
       }
       else {
         stackGraphic = tileImages[tileImagesDictionary[image_num]];
         resized_height = tileImages[tileImagesDictionary[image_num]].height / (tileImages[tileImagesDictionary[image_num]].width / tileWidth);
       }
-      var xpos = (i - j) * (tileHeight * curZoom) + draw_x;
-      var ypos = (i + j) * (tileWidth / 4 * curZoom) + draw_y;
+      var xpos = (i - j) * (tileHeight * curZoom) + drawX;
+      var ypos = (i + j) * (tileWidth / 4 * curZoom) + drawY;
       if (!stackTiles) {
         ctx.drawImage(tileImages[tileImagesDictionary[image_num]], 0, 0, tileImages[tileImagesDictionary[image_num]].width, tileImages[tileImagesDictionary[image_num]].height, xpos, (ypos + ((tileHeight - resized_height) * curZoom)), (tileWidth * curZoom), (resized_height * curZoom));
       }
@@ -100,7 +97,7 @@ function Isometric(ctx, tileWidth, tileHeight, mapLayout, tileImages, tileImages
           }
           ctx.restore();
         }
-        if (mouse_used) {
+        if (mouseUsed) {
           if (i == MouseTilePosX && j == MouseTilePosY) {
             --k;
             ctx.fillStyle = 'rgba(255, 255, 120, 0.7)';
@@ -119,8 +116,8 @@ function Isometric(ctx, tileWidth, tileHeight, mapLayout, tileImages, tileImages
         var nextStack = Math.round(Number(heightMap[i][j - 1]));
         var currStack = Math.floor(Number(heightMap[i][j]));
         if (currStack < nextStack) {
-          var shadowXpos = (i - j) * (tileHeight * curZoom) + draw_x;
-          var shadowYpos = (i + j) * (tileWidth / 4 * curZoom) + draw_y;
+          var shadowXpos = (i - j) * (tileHeight * curZoom) + drawX;
+          var shadowYpos = (i + j) * (tileWidth / 4 * curZoom) + drawY;
           if (shadowSettings.verticalColor) {
             ctx.fillStyle = shadowSettings.verticalColor;
             ctx.beginPath();
@@ -144,8 +141,8 @@ function Isometric(ctx, tileWidth, tileHeight, mapLayout, tileImages, tileImages
       else {
         var currStack = Math.floor(Number(mapLayout[i][j - 1]));
         if(currStack > 0) {
-          var shadowXpos = (i - j) * (tileHeight * curZoom) + draw_x;
-          var shadowYpos = (i + j) * (tileWidth / 4 * curZoom) + draw_y;
+          var shadowXpos = (i - j) * (tileHeight * curZoom) + drawX;
+          var shadowYpos = (i + j) * (tileWidth / 4 * curZoom) + drawY;
           ctx.fillStyle = shadowSettings.verticalColor;
           ctx.beginPath();
           ctx.moveTo(shadowXpos, shadowYpos + (currStack * ((tileHeight - resized_height) * curZoom)) + (tileHeight * curZoom) / 2);
@@ -194,11 +191,11 @@ function Isometric(ctx, tileWidth, tileHeight, mapLayout, tileImages, tileImages
 
   function _applyMouse(x, y) {
     var coords = {};
-    mouse_used = 1;
+    mouseUsed = true;
     xMouse = x;
     yMouse = y;
-    MouseTilePosY = (2 * (y - draw_y) - x + draw_x) / 2;
-    MouseTilePosX = x + MouseTilePosY - draw_x - (tileHeight * curZoom);
+    MouseTilePosY = (2 * (y - drawY) - x + drawX) / 2;
+    MouseTilePosX = x + MouseTilePosY - drawX - (tileHeight * curZoom);
     MouseTilePosY = Math.round(MouseTilePosY / (tileHeight * curZoom));
     MouseTilePosX = Math.round(MouseTilePosX / (tileHeight * curZoom));
     coords.x = MouseTilePosX;
@@ -214,10 +211,10 @@ function Isometric(ctx, tileWidth, tileHeight, mapLayout, tileImages, tileImages
   function _align(position, screen_dimension, size, offset) {
     switch(position) {
       case "h-center":
-        draw_x = ((screen_dimension / 2) - (tileWidth * (size-1) )/(tileHeight/4)* curZoom) - offset;
+        drawX = ((screen_dimension / 2) - (tileWidth * (size-1) )/(tileHeight/4)* curZoom) - offset;
       break;
       case "v-center":
-        draw_y = ((screen_dimension / 2) - (tileHeight * (size-1) * curZoom) / 2) - offset;
+        drawY = ((screen_dimension / 2) - (tileHeight * (size-1) * curZoom) / 2) - offset;
       break;
     }
   }
@@ -225,22 +222,18 @@ function Isometric(ctx, tileWidth, tileHeight, mapLayout, tileImages, tileImages
   function _hideGraphics(toggle, settings) {
     tilesHide = toggle;
     if (settings) {
-      planeGraphic = settings.graphic;
-      hideStart = settings.rangeStart;
-      hideEnd = settings.rangeEnd;
+      hideSettings = settings;
     }
   }
 
   function _applyHeightShadow(toggle, settings) {
     if (toggle) {
-      if(settings || shadow) {
-        console.log("Hi")
+      if(settings || shadowSettings) {
         heightShadows = true;
       }
     }
     else{
-      if(settings || shadow) {
-        console.log("hello")
+      if(settings || shadowSettings) {
         heightShadows = false;
       }
     }
@@ -369,20 +362,20 @@ function Isometric(ctx, tileWidth, tileHeight, mapLayout, tileImages, tileImages
     move: function(direction) {
       // left || right || up || down
       if (direction === "up") {
-        draw_y += tileHeight/2 * curZoom;
-        draw_x += tileHeight * curZoom;
+        drawY += tileHeight/2 * curZoom;
+        drawX += tileHeight * curZoom;
       }
       else if (direction === "down") {
-        draw_y += tileHeight/2 * curZoom;
-        draw_x -= tileHeight * curZoom;
+        drawY += tileHeight/2 * curZoom;
+        drawX -= tileHeight * curZoom;
       }
       else if (direction === "left") {
-        draw_y -= tileHeight/2 * curZoom;
-        draw_x -= tileHeight * curZoom;
+        drawY -= tileHeight/2 * curZoom;
+        drawX -= tileHeight * curZoom;
       }
       else if (direction === "right") {
-        draw_y -= tileHeight/2 * curZoom;
-        draw_x += tileHeight * curZoom;
+        drawY -= tileHeight/2 * curZoom;
+        drawX += tileHeight * curZoom;
       }
 
 

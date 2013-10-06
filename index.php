@@ -112,7 +112,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 graphicsDictionary: objectImages.dictionary,
                 height: 100,
                 width: 50,
-                zero_is_blank: true,
+                zeroIsBlank: true,
                 //alpha_mouse_behind: true,
                 //heightShadow: {
                 //  offset: 10
