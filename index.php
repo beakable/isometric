@@ -86,14 +86,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 graphicsDictionary: groundImages.dictionary,
                 shadowDistance: {
                   color: '0, 0, 33',
-                  distance: 15,
-                  darkness: 0.7
+                  distance: 10,
+                  darkness: 0.9
                 },
                 shadow: {
                   offset: 20,
                   verticalColor: 'rgba(5, 5, 30, 0.4)',
                   horizontalColor: 'rgba(6, 5, 50, 0.5)'
                 },
+                lightMap: [[5, 5, 13, 0.7], [20, 20, 15, 0.7]],
                 heightMap: {
                   map: XML.getContent('ground_height','row'),
                   offset: 0,
@@ -125,9 +126,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 //},
                 shadowDistance: {
                   color: '0, 0, 33',
-                  distance: 15,
+                  distance: 12,
                   darkness: 0.7
                 },
+                lightMap: [[5, 5, 13, 0.7], [20, 20, 15, 0.7]],
                 heightMap: {
                   map: XML.getContent('ground_height','row'),
                   offset: 20,
