@@ -249,7 +249,7 @@ function Isometric(ctx, tileWidth, tileHeight, mapLayout, tileImages, tileImages
 
   function _applyMouseClick(x, y) {
     // mapLayout[x][y] = Math.floor(Math.random()*6);
-    // heightMap[x][y] = Number(heightMap[x][y]) + 1;
+    heightMap[x][y] = Number(heightMap[x][y]) + 1;
   }
 
   function _align(position, screen_dimension, size, offset) {

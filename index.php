@@ -333,7 +333,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             // context.drawImage(gui["popup-box.png"],mouse_coordinates.x,mouse_coordinates.y);
             // context.font = "8pt Arial";
             // context.fillText("Hover box",mouse_coordinates.x+14,mouse_coordinates.y+25);
-            layer.applyMouseClick(tile_coordinates.x, tile_coordinates.y);
+            // layer.applyMouseClick(tile_coordinates.x, tile_coordinates.y);
             //}
          // }
          });
