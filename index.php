@@ -73,7 +73,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
       function loadAll() {
         if (imgLoader.loaded === imgLoader.to_load) {
           clearInterval(loadTimer);
-          var game = new main(0, 0, 14, 14, 100, 50);
+          var game = new main(0, 0, 16, 16, 100, 50);
           XML.loadXML('map-read.php');
           
           game.init({
@@ -84,7 +84,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 layout: XML.getContent('ground_map','row'),
                 graphics: groundImages.files,
                 graphicsDictionary: groundImages.dictionary,
-                shadowDistance: true,
+                shadowDistance: {
+                  color: '0, 0, 33',
+                  distance: 15,
+                  darkness: 0.7
+                },
                 shadow: {
                   offset: 20,
                   verticalColor: 'rgba(5, 5, 30, 0.4)',
@@ -114,10 +118,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 height: 100,
                 width: 50,
                 zeroIsBlank: true,
+                shadowDistance: true,
                 //alpha_mouse_behind: true,
                 //heightShadow: {
                 //  offset: 10
                 //},
+                shadowDistance: {
+                  color: '0, 0, 33',
+                  distance: 15,
+                  darkness: 0.7
+                },
                 heightMap: {
                   map: XML.getContent('ground_height','row'),
                   offset: 20,
@@ -128,7 +138,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 //  rangeMax: 11,
                 //  graphic: '7-normal.png'
                 //},
-                //applyIneractions: true
+                applyIneractions: true
               })
             ],
             gui: guiImages.files
@@ -153,6 +163,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
       var canvas = document.createElement('canvas');
       canvas.width = 920;
       canvas.height = 600;
+      canvas.style.background = "#000022"
       canvas.style.border = "#333 2px solid";
       var context = canvas.getContext('2d');
       document.body.appendChild(canvas);
