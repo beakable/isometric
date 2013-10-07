@@ -67,6 +67,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
       XML.loadXML('com/xml/XMLFiles.php?folder=img/gui/');
       var guiImages = imgLoader.loadImageArray('img/gui/', XML.getContent('files','file'));
+
+      XML.loadXML('com/xml/XMLFiles.php?folder=img/players/');
+      var playerImages = imgLoader.loadImageArray('img/players/', XML.getContent('files','file'));
       
       var loadTimer = setInterval(loadAll, 100);
 
@@ -86,15 +89,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 graphicsDictionary: groundImages.dictionary,
                 shadowDistance: {
                   color: '0, 0, 33',
-                  distance: 10,
-                  darkness: 0.9
+                  distance: 4,
+                  darkness: 1
                 },
                 shadow: {
                   offset: 20,
                   verticalColor: 'rgba(5, 5, 30, 0.4)',
                   horizontalColor: 'rgba(6, 5, 50, 0.5)'
                 },
-                lightMap: [[5, 5, 13, 0.7], [20, 20, 15, 0.7]],
+                lightMap: [[5, 5, 10, 1], [20, 20, 15, 1]],
                 heightMap: {
                   map: XML.getContent('ground_height','row'),
                   offset: 0,
@@ -126,10 +129,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 //},
                 shadowDistance: {
                   color: '0, 0, 33',
-                  distance: 12,
-                  darkness: 0.7
+                  distance: 4,
+                  darkness: 0.8
                 },
-                lightMap: [[5, 5, 13, 0.7], [20, 20, 15, 0.7]],
+                lightMap: [[5, 5, 13, 1], [20, 20, 15, 1]],
                 heightMap: {
                   map: XML.getContent('ground_height','row'),
                   offset: 20,
@@ -143,7 +146,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 applyIneractions: true
               })
             ],
-            gui: guiImages.files
+            gui: guiImages.files,
+            player: {
+              image: playerImages.files,
+              xPos: 10,
+              yPos: 10
+            }  
           });
         }
       }
@@ -161,6 +169,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
       var rangeX = xrange;
       var rangeY = yrange;
       var defaultRangeY = rangeY;
+
+      var player = [];
 
       var canvas = document.createElement('canvas');
       canvas.width = 920;
@@ -225,6 +235,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
               });
               startY --;
             }
+            if (Number(mapLayers[1].getTile([player.xPos - 1],[player.yPos])) === 0) {
+              player.xPos --;
+            }
           break;
           case 2:
             if (startX > 0) {
@@ -233,14 +246,20 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
               });
               startX --;
             }
+            if (Number(mapLayers[1].getTile([player.xPos],[player.yPos - 1])) === 0) {
+              player.yPos --;
+            }
           break;
           case 3:
-          if (startY + rangeY < mapLayers[0].getLayout().length) {
-            mapLayers.map(function(layer) {
-              layer.move("left");
-            });
-            startY ++;
-          }
+            if (startY + rangeY < mapLayers[0].getLayout().length) {
+              mapLayers.map(function(layer) {
+                layer.move("left");
+              });
+              startY ++;
+            }
+            if (Number(mapLayers[1].getTile([player.xPos + 1],[player.yPos])) === 0) {
+              player.xPos ++;
+            }
           break;
           case 4:
             if (startX + rangeX < mapLayers[0].getLayout().length ) {
@@ -248,6 +267,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 layer.move("right");
               });
               startX ++;
+            }
+            if (Number(mapLayers[1].getTile([player.xPos],[player.yPos + 1])) === 0) {
+              player.yPos ++;
             }
           break;
           case 5:
@@ -319,12 +341,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
       }
 
       this.draw = function() {
-       context.clearRect(0,0,canvas.width,canvas.height);
+       context.clearRect(0, 0, canvas.width, canvas.height);
         for(i = startY; i < startY + rangeY; i++) {
           for(j = startX; j < startX + rangeX; j++) {
-           mapLayers.map(function(layer) {
-             layer.draw(i,j);
-           });
+            mapLayers.map(function(layer) {
+              layer.setLight(player.xPos, player.yPos);
+              if(i === player.xPos  && j === player.yPos && layer.getTitle() === "Object Layer") {
+                layer.draw(i, j, player.image["main.png"]);
+              }
+              else {
+                layer.draw(i,j);
+              }
+            });
          }
        }
        context.fillStyle = "rgb(255,255,255)";
@@ -385,9 +413,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
       this.init = function(settings) {
-       mapLayers = settings.layers;
-       gui = settings.gui;
-       this.draw();
+        player = settings.player;
+        mapLayers = settings.layers;
+        gui = settings.gui;
+        this.draw();
       }
       
     }

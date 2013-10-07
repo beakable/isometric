@@ -24,6 +24,8 @@ function Isometric(ctx, tileWidth, tileHeight, mapLayout, tileImages, tileImages
 
   var heightMap = null;
   var lightMap = null;
+  var lightX = null;
+  var lightY = null;
 
   var heightOffset = 0;
   var heightShadows = null;
@@ -56,10 +58,9 @@ function Isometric(ctx, tileWidth, tileHeight, mapLayout, tileImages, tileImages
       //mouseBehindAlpha = settings.mouseBehindAlpha;
   }
 
-  function _draw(i, j) {
+  function _draw(i, j, tileImageOverwite) {
 
     var xpos, ypos;
-
     i = Math.floor(i);
     j = Math.floor(j);
     if (i > mapLayout.length - 1) {
@@ -78,11 +79,11 @@ function Isometric(ctx, tileWidth, tileHeight, mapLayout, tileImages, tileImages
       darkness: shadowDistance.darkness,
       color: shadowDistance.color
     }
-      distanceLighting = Math.sqrt((Math.floor(i - MouseTilePosX) * Math.floor(i - MouseTilePosX)) + (Math.floor(j - MouseTilePosY) * Math.floor(j - MouseTilePosY)));
+      distanceLighting = Math.sqrt((Math.floor(i - lightX) * Math.floor(i - lightX)) + (Math.floor(j - lightY) * Math.floor(j - lightY)));
       if (lightMap) {
         lightMap.map(function(light) {
           var lightDist = Math.sqrt((Math.floor(i - light[0]) * Math.floor(i - light[0])) + (Math.floor(j - light[1]) * Math.floor(j - light[1])));
-          if(lightDist < distanceLighting && light[2]) {
+          if(distanceLighting + distanceLightingSettings.distance  > lightDist) {
             distanceLighting = lightDist;
             distanceLightingSettings.distance = light[2];
             distanceLightingSettings.darkness = light[3];
@@ -94,7 +95,7 @@ function Isometric(ctx, tileWidth, tileHeight, mapLayout, tileImages, tileImages
       }
       distanceLighting = distanceLighting/(distanceLightingSettings.distance * distanceLightingSettings.darkness);
     }
-    if ((!zeroIsBlank) || (zeroIsBlank && image_num)) {
+    if ((!zeroIsBlank) || (zeroIsBlank && image_num) || tileImageOverwite) {
       if (zeroIsBlank) {
         image_num--;
       }
@@ -102,15 +103,25 @@ function Isometric(ctx, tileWidth, tileHeight, mapLayout, tileImages, tileImages
         stackGraphic = tileImages[hideSettings.planeGraphic];
         resized_height = tileImages[hideSettings.planeGraphic].height / (tileImages[hideSettings.planeGraphic].width / tileWidth);
       }
+      else if(tileImageOverwite) {
+        stackGraphic = tileImageOverwite;
+        resized_height = tileImageOverwite.height / (tileImageOverwite.width / tileWidth);
+      }
       else {
         stackGraphic = tileImages[tileImagesDictionary[image_num]];
         resized_height = tileImages[tileImagesDictionary[image_num]].height / (tileImages[tileImagesDictionary[image_num]].width / tileWidth);
       }
+      
       xpos = (i - j) * (tileHeight * curZoom) + drawX;
       ypos = (i + j) * (tileWidth / 4 * curZoom) + drawY;
       if (!stackTiles) {
         if (!distanceLightingSettings || ( distanceLightingSettings && distanceLighting < distanceLightingSettings.darkness)) {
-          ctx.drawImage(tileImages[tileImagesDictionary[image_num]], 0, 0, tileImages[tileImagesDictionary[image_num]].width, tileImages[tileImagesDictionary[image_num]].height, xpos, (ypos + ((tileHeight - resized_height) * curZoom)), (tileWidth * curZoom), (resized_height * curZoom));
+          if (tileImageOverwite) {
+            ctx.drawImage(tileImageOverwite, 0, 0, tileImages[tileImagesDictionary[image_num]].width, tileImages[tileImagesDictionary[image_num]].height, xpos, (ypos + ((tileHeight - resized_height) * curZoom)), (tileWidth * curZoom), (resized_height * curZoom));
+          }
+          else {
+            ctx.drawImage(tileImages[tileImagesDictionary[image_num]], 0, 0, tileImages[tileImagesDictionary[image_num]].width, tileImages[tileImagesDictionary[image_num]].height, xpos, (ypos + ((tileHeight - resized_height) * curZoom)), (tileWidth * curZoom), (resized_height * curZoom));
+          }
         }
       }
       else {
@@ -124,12 +135,22 @@ function Isometric(ctx, tileWidth, tileHeight, mapLayout, tileImages, tileImages
           }
           if (heightMapOnTop && k === stack){
             if (!distanceLightingSettings || ( distanceLightingSettings && distanceLighting < distanceLightingSettings.darkness)) {
-              ctx.drawImage(stackGraphic, 0, 0, stackGraphic.width, stackGraphic.height, xpos, ypos + (k *(tileHeight - heightOffset - tileHeight)) * curZoom - (resized_height  - tileHeight) * curZoom, (tileWidth * curZoom), (resized_height * curZoom));
+              if (tileImageOverwite) {
+                ctx.drawImage(tileImageOverwite, 0, 0, tileImageOverwite.width, tileImageOverwite.height, xpos, ypos + (k *(tileHeight - heightOffset - tileHeight)) * curZoom - (resized_height  - tileHeight) * curZoom, (tileWidth * curZoom), (resized_height * curZoom));
+              }
+              else {
+                ctx.drawImage(stackGraphic, 0, 0, stackGraphic.width, stackGraphic.height, xpos, ypos + (k *(tileHeight - heightOffset - tileHeight)) * curZoom - (resized_height  - tileHeight) * curZoom, (tileWidth * curZoom), (resized_height * curZoom)); 
+              }
             }
           }
           else if(!heightMapOnTop) {
             if (!distanceLightingSettings || ( distanceLightingSettings && distanceLighting < distanceLightingSettings.darkness)) {
-              ctx.drawImage(stackGraphic, 0, 0, stackGraphic.width, stackGraphic.height, xpos, ypos + (k * ((tileHeight - heightOffset - resized_height) * curZoom)), (tileWidth * curZoom), (resized_height * curZoom));
+              if (tileImageOverwite) {
+                ctx.drawImage(tileImageOverwite, 0, 0, tileImageOverwite.width, tileImageOverwite.height, xpos, ypos + (k * ((tileHeight - heightOffset - resized_height) * curZoom)), (tileWidth * curZoom), (resized_height * curZoom));
+              }
+              else{
+                ctx.drawImage(stackGraphic, 0, 0, stackGraphic.width, stackGraphic.height, xpos, ypos + (k * ((tileHeight - heightOffset - resized_height) * curZoom)), (tileWidth * curZoom), (resized_height * curZoom));
+              }
             }
           }
           ctx.restore();
@@ -217,6 +238,11 @@ function Isometric(ctx, tileWidth, tileHeight, mapLayout, tileImages, tileImages
     heightMapOnTop = settings.heightMapOnTop || false;
   }
 
+  function _setLight(posX, posY) {
+    lightX = posX;
+    lightY = posY;
+  }
+
   function _getLayout() {
     return mapLayout;
   }
@@ -259,7 +285,7 @@ function Isometric(ctx, tileWidth, tileHeight, mapLayout, tileImages, tileImages
   }
 
   function _applyMouseClick(x, y) {
-    // mapLayout[x][y] = Math.floor(Math.random()*6);
+    // mapLayout[x][y] = 10;
     heightMap[x][y] = Number(heightMap[x][y]) + 1;
   }
 
@@ -352,8 +378,8 @@ function Isometric(ctx, tileWidth, tileHeight, mapLayout, tileImages, tileImages
       return _setup(settings);
     },
 
-    draw: function(tileX, tileY) {
-      return _draw(tileX, tileY);
+    draw: function(tileX, tileY, tileImageOverwite) {
+      return _draw(tileX, tileY, tileImageOverwite);
     },
 
     stackTiles: function(settings) {
@@ -368,6 +394,10 @@ function Isometric(ctx, tileWidth, tileHeight, mapLayout, tileImages, tileImages
       return _getHeightLayout();
     },
 
+    getTitle: function() {
+      return title;
+    },
+
     getTile: function(tileX, tileY) {
       return _getTile(tileX, tileY);
     },
@@ -375,6 +405,10 @@ function Isometric(ctx, tileWidth, tileHeight, mapLayout, tileImages, tileImages
     setZoom: function(direction) {
       // in || out
       return _setZoom(direction);
+    },
+
+    setLight: function(tileX, tileY) {
+      return _setLight(tileX, tileY);
     },
 
     applyMouse: function(tileX, tileY) {
