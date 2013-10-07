@@ -10,6 +10,10 @@ http://www.cis.strath.ac.uk/cis/research/publications/papers/strath_cis_publicat
 
 The engine is currently in early stages however it's planned to be as feature rich as an earlier (and very messy sytnax wise) project, Glacial Flame: http://www.youtube.com/watch?v=Qlsipfu5Qq4.
 
+Fog of view and lighting toggled on (blue cuboid represents player)
+![lighting](https://f.cloud.github.com/assets/1159739/1278363/757498b4-2f0f-11e3-97af-5e5042679270.png)
+
+
 Basic dynamic lighting
 ![with-lighting](https://f.cloud.github.com/assets/1159739/1277738/28d797b8-2edd-11e3-95f8-4e6177eb81bd.png)
 
