@@ -124,9 +124,9 @@ function Isometric(ctx, tileWidth, tileHeight, mapLayout, tileImages, tileImages
             ctx.globalCompositeOperation = 'source-atop';
             ctx.fillStyle = 'rgba(' + shadowDistance.color + ',' + dist + ')';
             ctx.beginPath();
-            ctx.moveTo(xpos - 5, ypos + (k * ((tileHeight - resized_height) * curZoom)) + (tileHeight * curZoom) / 2);
-            ctx.lineTo(xpos - 5 + (tileHeight * curZoom), ypos + (k * ((tileHeight - resized_height) * curZoom)));
-            ctx.lineTo(xpos + 1 + (tileHeight * curZoom) * 2, ypos + (k * ((tileHeight - resized_height) * curZoom)) + (tileHeight * curZoom) / 2);
+            ctx.moveTo(xpos - 1, ypos - 1+ (k * ((tileHeight - resized_height) * curZoom)) + (tileHeight * curZoom) / 2);
+            ctx.lineTo(xpos - 1 + (tileHeight * curZoom), ypos - 1 + (k * ((tileHeight - resized_height) * curZoom)));
+            ctx.lineTo(xpos + 1 + (tileHeight * curZoom) * 2, ypos - 1 + (k * ((tileHeight - resized_height) * curZoom)) + (tileHeight * curZoom) / 2);
             ctx.lineTo(xpos + 1 + (tileHeight * curZoom), ypos + (k * ((tileHeight - resized_height) * curZoom)) + (tileHeight * curZoom));
             ctx.fill();
             ctx.restore();
