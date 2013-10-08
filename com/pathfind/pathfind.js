@@ -87,13 +87,11 @@ var pathfind = function (s, e, m) {
 		if (current.x == e.x && current.y == e.y) {
 
 			var path = [e]; // Create Path 
-
 			// Loop back through parents to complete the path
 			while (current.p !== -1) {
 				current = c[current.p];
 				path.unshift(current);
 			}
-
 			return path; // Return the path
 		}
 
@@ -102,13 +100,12 @@ var pathfind = function (s, e, m) {
 		mn[current.x + current.y * rows] = false; // Set bit to closed
 
 		c.push(current);
-
 		// Search new nodes in all directions
 		for (var x = Math.max(0, current.x-1), lenx = Math.min(cols, current.x+1); x <= lenx; x++) {
 			for (var y = Math.max(0, current.y-1), leny = Math.min(rows, current.y+1); y <= leny; y++) {
 
 				// Check if location square is open
-				if (m[x][y] === 0) {
+				if (Number(m[x][y]) === 0) {
 
 					// Check if square is in closed list
 					if (mn[x + y * rows] === false) {
@@ -118,7 +115,6 @@ var pathfind = function (s, e, m) {
 					// If square not in open list use it
 					if (mn[x + y * rows] !== true) {
 						var n = new node(x, y, c.length-1, -1, -1, -1); // Create new node
-
 						n.g = current.g + Math.floor(Math.sqrt(Math.pow(n.x - current.x, 2) + Math.pow(n.y-current.y, 2)));
 						n.h = heuristic(n, e);
 						n.f = n.g + n.h;

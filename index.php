@@ -39,6 +39,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     <script type="text/javascript" src="com/xml/XMLPopulate.js" ></script>
     <script type="text/javascript" src="com/img/ImageLoader.js"></script>
     <script tppe="text/javascript" src="com/iso/Isometric.js"></script>
+    <script tppe="text/javascript" src="com/pathfind/pathfind.js"></script>
     <script type="text/javascript">
 
     var globalTile = 1;
@@ -75,9 +76,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
       function loadAll() {
         if (imgLoader.loaded === imgLoader.to_load) {
-          clearInterval(loadTimer);
-          var game = new main(0, 0, 16, 16, 100, 50);
           XML.loadXML('map-read.php');
+
+          clearInterval(loadTimer);
+          var game = new main(0, 0, 14, 14, 100, 50);
           
           game.init({
             layers: [
@@ -97,7 +99,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                   verticalColor: 'rgba(5, 5, 30, 0.4)',
                   horizontalColor: 'rgba(6, 5, 50, 0.5)'
                 },
-                lightMap: [[5, 5, 10, 1], [20, 20, 15, 1]],
+                lightMap: [[5, 5, 13, 1], [20, 20, 4, 1]],
                 heightMap: {
                   map: XML.getContent('ground_height','row'),
                   offset: 0,
@@ -110,7 +112,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 },
                 height: 100,
                 width: 50,
-                applyIneractions: true
+                //applyIneractions: true
 
               }),
               game.createLayer({
@@ -122,17 +124,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 height: 100,
                 width: 50,
                 zeroIsBlank: true,
-                shadowDistance: true,
+                //shadowDistance: true,
                 //alpha_mouse_behind: true,
                 //heightShadow: {
                 //  offset: 10
                 //},
                 shadowDistance: {
-                  color: '0, 0, 33',
+                  color: false,
                   distance: 4,
-                  darkness: 0.8
+                  darkness: 1
                 },
-                lightMap: [[5, 5, 13, 1], [20, 20, 15, 1]],
+                lightMap: [[5, 5, 13, 1], [20, 20, 4, 1]],
                 heightMap: {
                   map: XML.getContent('ground_height','row'),
                   offset: 20,
@@ -143,15 +145,36 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 //  rangeMax: 11,
                 //  graphic: '7-normal.png'
                 //},
-                applyIneractions: true
+                //applyIneractions: true
               })
             ],
             gui: guiImages.files,
             player: {
-              image: playerImages.files,
+              image: playerImages.files["main.png"],
               xPos: 10,
               yPos: 10
-            }  
+            },
+            enemy:[{
+              image: playerImages.files["enemy1.png"],
+              xPos: 10,
+              yPos: 8
+            },
+            {
+              image: playerImages.files["enemy2.png"],
+              xPos: 20,
+              yPos: 30
+            },
+            {
+              image: playerImages.files["enemy3.png"],
+              xPos: 30,
+              yPos: 8
+            },
+            {
+              image: playerImages.files["enemy3.png"],
+              xPos: 2,
+              yPos: 30
+            }
+            ]
           });
         }
       }
@@ -169,8 +192,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
       var rangeX = xrange;
       var rangeY = yrange;
       var defaultRangeY = rangeY;
+      var calculatePaths = 0;
 
       var player = [];
+      var enemy = [];
 
       var canvas = document.createElement('canvas');
       canvas.width = 920;
@@ -337,21 +362,36 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             globalTile ++;
           break;
         }
-        requestAnimFrame(self.draw);
       }
 
       this.draw = function() {
-       context.clearRect(0, 0, canvas.width, canvas.height);
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        calculatePaths ++;
+       if(calculatePaths === 100) {
+          enemy.map(function(e) {
+            var moveTo = pathfind([e.xPos, e.yPos], [player.xPos, player.yPos], mapLayers[1].getLayout())[1];
+            if(moveTo) {
+              e.xPos = moveTo.x;
+              e.yPos = moveTo.y;
+            }
+          })
+          calculatePaths = 0;
+        }
         for(i = startY; i < startY + rangeY; i++) {
           for(j = startX; j < startX + rangeX; j++) {
             mapLayers.map(function(layer) {
               layer.setLight(player.xPos, player.yPos);
               if(i === player.xPos  && j === player.yPos && layer.getTitle() === "Object Layer") {
-                layer.draw(i, j, player.image["main.png"]);
+                layer.draw(i, j, player.image);
               }
               else {
                 layer.draw(i,j);
               }
+              enemy.map(function(e) {
+                if (i === e.xPos  && j === e.yPos  && layer.getTitle() === "Object Layer") {
+                  layer.draw(i, j, e.image);
+                }
+              });          
             });
          }
        }
@@ -367,7 +407,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             //}
          // }
          });
-       }
+        }
+        requestAnimFrame(self.draw);
+
       }
       
       this.createLayer = function(settings) {
@@ -392,17 +434,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
          input.mouse_move(function(coords) {
           tile_coordinates = layer.applyMouse(coords.x, coords.y);
           mouse_coordinates = coords;
-          requestAnimFrame(self.draw);
          });  
          input.mobile(function(coords) {
           tile_coordinates = layer.applyMouse(coords.x, coords.y);
           layer.applyMouseClick(tile_coordinates.x, tile_coordinates.y);
-          requestAnimFrame(self.draw);
          });
          input.mouse_action(function(coords) {
           tile_coordinates = layer.applyMouse(coords.x, coords.y);
           layer.applyMouseClick(tile_coordinates.x, tile_coordinates.y);
-          requestAnimFrame(self.draw);
          });
        }
 
@@ -414,6 +453,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
       this.init = function(settings) {
         player = settings.player;
+        enemy = settings.enemy;
         mapLayers = settings.layers;
         gui = settings.gui;
         this.draw();
