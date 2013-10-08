@@ -10,6 +10,10 @@ http://www.cis.strath.ac.uk/cis/research/publications/papers/strath_cis_publicat
 
 The engine is currently in early stages however it's planned to be as feature rich as an earlier (and very messy sytnax wise) project, Glacial Flame: http://www.youtube.com/watch?v=Qlsipfu5Qq4.
 
+Pathfinding (All cuboids apart from blue are AI)
+![ai](https://f.cloud.github.com/assets/1159739/1286661/31621fbc-2fdb-11e3-9e7a-39436670d4ba.png)
+
+
 Fog of view and lighting toggled on (blue cuboid represents player)
 ![lighting](https://f.cloud.github.com/assets/1159739/1278363/757498b4-2f0f-11e3-97af-5e5042679270.png)
 
