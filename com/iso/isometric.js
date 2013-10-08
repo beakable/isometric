@@ -84,7 +84,7 @@ function Isometric(ctx, tileWidth, tileHeight, mapLayout, tileImages, tileImages
       if (lightMap) {
         lightMap.map(function(light) {
           var lightDist = Math.sqrt((Math.floor(i - light[0]) * Math.floor(i - light[0])) + (Math.floor(j - light[1]) * Math.floor(j - light[1])));
-          if (distanceLighting + distanceLightingSettings.distance  > lightDist) {
+          if (distanceLighting + distanceLightingSettings.distance  > lightDist + light[2]) {
             distanceLighting = lightDist;
             distanceLightingSettings.distance = light[2];
             distanceLightingSettings.darkness = light[3];

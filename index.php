@@ -99,7 +99,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                   verticalColor: 'rgba(5, 5, 30, 0.4)',
                   horizontalColor: 'rgba(6, 5, 50, 0.5)'
                 },
-                lightMap: [[5, 5, 13, 1], [20, 20, 4, 1]],
+                lightMap: [[5, 5, 5, 1], [20, 20, 4, 1]],
                 heightMap: {
                   map: XML.getContent('ground_height','row'),
                   offset: 0,
@@ -134,7 +134,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                   distance: 4,
                   darkness: 1
                 },
-                lightMap: [[5, 5, 13, 1], [20, 20, 4, 1]],
+                lightMap: [[5, 5, 5, 1], [20, 20, 4, 1]],
                 heightMap: {
                   map: XML.getContent('ground_height','row'),
                   offset: 20,
@@ -151,8 +151,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             gui: guiImages.files,
             player: {
               image: playerImages.files["main.png"],
-              xPos: 10,
-              yPos: 10
+              xPos: 8,
+              yPos: 8
             },
             enemy:[{
               image: playerImages.files["enemy1.png"],
@@ -254,52 +254,52 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
       this.keyCommand = function(dir) {
         switch(dir) {
           case 1:
-            if (startY > 0) {
-              mapLayers.map(function(layer) {
-                layer.move("up");
-              });
-              startY --;
-            }
-            if (Number(mapLayers[1].getTile([player.xPos - 1],[player.yPos])) === 0) {
+            if (Number(mapLayers[1].getTile([player.xPos - 1], [player.yPos])) === 0) {
               player.xPos --;
+              if (startY > 0 && player.xPos <= mapLayers[0].getLayout().length - 1 - rangeX / 2) {
+                mapLayers.map(function(layer) {
+                  layer.move("up");
+                });
+                startY --;
+              }
             }
           break;
           case 2:
-            if (startX > 0) {
-              mapLayers.map(function(layer) {
-                layer.move("down");
-              });
-              startX --;
-            }
-            if (Number(mapLayers[1].getTile([player.xPos],[player.yPos - 1])) === 0) {
+            if (Number(mapLayers[1].getTile([player.xPos], [player.yPos - 1])) === 0) {
               player.yPos --;
+              if (startX > 0 && player.yPos <= mapLayers[0].getLayout().length - 1 - rangeY / 2) {
+                mapLayers.map(function(layer) {
+                  layer.move("down");
+                });
+                startX --;
+              }
             }
           break;
           case 3:
-            if (startY + rangeY < mapLayers[0].getLayout().length) {
-              mapLayers.map(function(layer) {
-                layer.move("left");
-              });
-              startY ++;
-            }
-            if (Number(mapLayers[1].getTile([player.xPos + 1],[player.yPos])) === 0) {
+            if (Number(mapLayers[1].getTile([player.xPos + 1], [player.yPos])) === 0) {
               player.xPos ++;
+              if (startY + rangeY < mapLayers[0].getLayout().length && player.xPos >= 0 + 1 + rangeX / 2) {
+                mapLayers.map(function(layer) {
+                  layer.move("left");
+                });
+                startY ++;
+              }
             }
           break;
           case 4:
-            if (startX + rangeX < mapLayers[0].getLayout().length ) {
-              mapLayers.map(function(layer) {
-                layer.move("right");
-              });
-              startX ++;
-            }
-            if (Number(mapLayers[1].getTile([player.xPos],[player.yPos + 1])) === 0) {
+            if (Number(mapLayers[1].getTile([player.xPos], [player.yPos + 1])) === 0) {
               player.yPos ++;
+              if (startX + rangeX < mapLayers[0].getLayout().length && player.yPos >= 0 + 1 + rangeY / 2 ) {
+                mapLayers.map(function(layer) {
+                  layer.move("right");
+                });
+                startX ++;
+              }
             }
           break;
           case 5:
             mapLayers.map(function(layer) {
-              if (startY + rangeY + 1 < mapLayers[0].getLayout().length - 1) {
+              if (startY + rangeY + 1 < mapLayers[0].getLayout().length) {
                 layer.setZoom("out");
 
                 //TODO: Make alignment offsets automatically generated
@@ -453,6 +453,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
       this.init = function(settings) {
         player = settings.player;
+        startY = player.xPos - rangeY / 2;
+        startX = player.xPos - rangeX / 2;
         enemy = settings.enemy;
         mapLayers = settings.layers;
         gui = settings.gui;
