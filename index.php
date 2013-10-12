@@ -97,13 +97,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 shadow: {
                   offset: 20,
                   verticalColor: 'rgba(5, 5, 30, 0.4)',
-                  horizontalColor: 'rgba(6, 5, 50, 0.5)'
+                 horizontalColor: 'rgba(6, 5, 50, 0.5)'
                 },
                 lightMap: [[5, 5, 5, 1], [20, 20, 4, 1]],
                 heightMap: {
                   map: XML.getContent('ground_height','row'),
                   offset: 0,
-                  //heightMapOnTop: true
+                  heightTile: groundImages.files["blank-block.png"]
                 },
                 hideGraphics: {
                   //rangeMin: 0,
@@ -303,8 +303,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 layer.setZoom("out");
 
                 //TODO: Make alignment offsets automatically generated
-                layer.align("h-center", canvas.width, xrange, -60);
-                layer.align("v-center", canvas.height,  yrange, 35);
+                layer.align("h-center", canvas.width, xrange + player.xPos, -60);
+                layer.align("v-center", canvas.height,  yrange + player.yPos, 35);
                 rangeX +=  1
                 rangeY +=  1
               }
