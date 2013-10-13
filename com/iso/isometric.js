@@ -14,7 +14,7 @@
     along with Iain Hamiltons Isometric HTML5 App.  If not, see <http://www.gnu.org/licenses/>. */
 
 function Isometric(ctx, tileWidth, tileHeight, mapLayout, tileImages, tileImagesDictionary) {
-  
+
   var title = "";
 
   var zeroIsBlank = false;
@@ -49,6 +49,10 @@ function Isometric(ctx, tileWidth, tileHeight, mapLayout, tileImages, tileImages
 
   var tilesHide = null;
   var hideSettings = null;
+
+  var particleTiles =null;
+  var particleMap = [];
+  var particleMapHolder = [];
 
 
   function _setup(settings) {
@@ -204,6 +208,22 @@ function Isometric(ctx, tileWidth, tileHeight, mapLayout, tileImages, tileImages
         }
       }
     }
+
+    if (particleTiles) {
+      if (Number(particleMap[i][j]) !== 0) {
+        if (!particleMapHolder[i]) {
+          particleMapHolder[i] = [];
+        }
+        if (!particleMapHolder[i][j]) {
+          console.log(particleMap[i][j]);
+          particleMapHolder[i][j] = new EffectLoader.Get(particleMap[i][j], ctx, new Range(0, 800), new Range(0, 600));
+        }
+        var partXpos = xpos;
+        var partYpos =  (ypos + ((tileHeight - resized_height) * curZoom));
+        particleMapHolder[i][j].Draw(partXpos, partYpos);
+      }
+    }
+
     if (heightShadows) {
       if (heightMap) {
         var nextStack = Math.round(Number(heightMap[i][j - 1]));
@@ -258,6 +278,11 @@ function Isometric(ctx, tileWidth, tileHeight, mapLayout, tileImages, tileImages
     heightMap = settings.map;
     heightOffset = settings.offset;
     heightMapOnTop = settings.heightMapOnTop || false;
+  }
+
+  function _particleTiles(map) {
+    particleTiles = true;
+    particleMap = map;
   }
 
   function _setLight(posX, posY) {
@@ -350,6 +375,8 @@ function Isometric(ctx, tileWidth, tileHeight, mapLayout, tileImages, tileImages
     var tempLine = [];
     var tempArrayTwo = [];
     var tempLineTwo = [];
+    var tempArrayThree =[];
+    var tempLineThree = [];
     var i,j ;
     if (setting == "left") {
       for (i = 0; i < mapLayout.length; i++) {
@@ -358,6 +385,9 @@ function Isometric(ctx, tileWidth, tileHeight, mapLayout, tileImages, tileImages
           if (stackTiles) {
             tempLineTwo.push(heightMap[j][i]);
           }
+          if (particleTiles) {
+            tempLineThree.push(particleMap[j][i]);
+          }
         }
         tempArray.push(tempLine);
         tempLine = [];
@@ -365,9 +395,16 @@ function Isometric(ctx, tileWidth, tileHeight, mapLayout, tileImages, tileImages
           tempArrayTwo.push(tempLineTwo);
           tempLineTwo = [];
         }
+        if (particleTiles) {
+          tempArrayThree.push(tempLineThree);
+          tempLineThree = [];
+        }
       }
       if (stackTiles) {
         heightMap = tempArrayTwo;
+      }
+      if (particleTiles) {
+        heightMap = tempArrayThree;
       }
       mapLayout = tempArray;
     }
@@ -378,6 +415,9 @@ function Isometric(ctx, tileWidth, tileHeight, mapLayout, tileImages, tileImages
           if (stackTiles) {
             tempLineTwo.push(heightMap[j][i]);
           }
+          if (particleTiles) {
+            tempLineThree.push(particleMap[j][i]);
+          }
         }
         tempArray.push(tempLine);
         tempLine = [];
@@ -385,9 +425,16 @@ function Isometric(ctx, tileWidth, tileHeight, mapLayout, tileImages, tileImages
           tempArrayTwo.push(tempLineTwo);
           tempLineTwo = [];
         }
+        if (particleTiles) {
+          tempArrayThree.push(tempLineThree);
+          tempLineThree = [];
+        }
       }
       if (stackTiles) {
         heightMap = tempArrayTwo;
+      }
+      if (particleTiles) {
+        heightMap = tempArrayThree;
       }
       mapLayout = tempArray;
     }
@@ -406,6 +453,10 @@ function Isometric(ctx, tileWidth, tileHeight, mapLayout, tileImages, tileImages
 
     stackTiles: function(settings) {
       return _stackTiles(settings);
+    },
+
+    particleTiles: function(map) {
+      return _particleTiles(map);
     },
 
     getLayout: function() {

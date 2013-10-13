@@ -35,6 +35,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
       padding: 0;
      }
     </style>
+
+    <script type="text/javascript" src="com/common.js"></script>
+    <script type="text/javascript" src="com/particles/Range.js"></script>
+    <script type="text/javascript" src="com/particles/Particle.js"></script>
+    <script type="text/javascript" src="com/particles/Emitter.js"></script>
+    <script type="text/javascript" src="com/particles/Effect.js"></script>
+    <script type="text/javascript" src="com/particles/EffectLoader.js"></script>
     <script type="text/javascript" src="com/CanvasInput/CanvasInput.js"></script> 
     <script type="text/javascript" src="com/xml/XMLPopulate.js" ></script>
     <script type="text/javascript" src="com/img/ImageLoader.js"></script>
@@ -134,6 +141,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                   distance: 4,
                   darkness: 1
                 },
+                particleMap: XML.getContent('particle_map','row'),
                 lightMap: [[5, 5, 5, 1], [20, 20, 4, 1]],
                 heightMap: {
                   map: XML.getContent('ground_height','row'),
@@ -363,7 +371,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
           break;
         }
       }
-
+      
       this.draw = function() {
         context.clearRect(0, 0, canvas.width, canvas.height);
         calculatePaths ++;
@@ -408,6 +416,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
          // }
          });
         }
+        context.save();
+        
+        context.restore();
         requestAnimFrame(self.draw);
 
       }
@@ -421,6 +432,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
        if (settings.heightMap) {
          layer.stackTiles(settings.heightMap);
        }
+       if(settings.particleMap) {
+        layer.particleTiles(settings.particleMap);
+       }
+
        if(settings.hideGraphics) {
          layer.hideGraphics(true, {
           rangeStart: settings.hideGraphics.rangeMin, 

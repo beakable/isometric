@@ -1,0 +1,157 @@
+﻿function Particle() {
+
+    var age = 0;
+
+
+
+    this.active = true; // draw or not
+
+    this.drawdelay = -1; // how old before the particle can start drawing
+
+    this.life = 1.0;    // particle lifespan
+
+    this.fade = 0.01;   // fade speed
+
+    this.r = 255;       // red intensity
+
+    this.g = 0;         // green intensity
+
+    this.b = 0;         // blue intensity
+
+    this.x = 0.0;       // x position
+
+    this.y = 0.0;       // y position
+
+    this.xi = 0.1;      // x axis speed
+
+    this.yi = 0.0;      // y axis speed
+
+    this.xg = 0.0;      // x gravity strength
+
+    this.yg = 0.0;      // y gravity strength
+
+    this.radius = 5.0;  // particle radius
+
+    this.slowdown = 2.0; // particle speed slowdown
+
+    this.minxb = -1;     // min x axis boundry
+
+    this.maxxb = 999999; // max x axis boundry
+
+    this.minyb = -1;     // min y axis boundry
+
+    this.maxyb = 999999; // max y axis boundry
+
+
+
+    this.Draw = function (context) {
+
+        if (this.active) {
+
+            if (this.drawdelay == -1 || age > this.drawdelay) {
+
+                // Determine alpha based on life
+
+                var alpha = this.life > 1.0 ? 1 : this.life < 0.0 ? 0 : this.life;
+
+
+
+                var rgbstr = "rgba(";
+
+                rgbstr += this.r;
+
+                rgbstr += ", ";
+
+                rgbstr += this.g;
+
+                rgbstr += ", ";
+
+                rgbstr += this.b;
+
+                rgbstr += ", ";
+
+                rgbstr += Math.roundTo(alpha, 1);
+
+                rgbstr += ")";
+
+
+
+                var rgbbgstr = "rgba(";
+
+                rgbbgstr += Math.floor(this.r / 3);
+
+                rgbbgstr += ", ";
+
+                rgbbgstr += Math.floor(this.g / 3);
+
+                rgbbgstr += ", ";
+
+                rgbbgstr += Math.floor(this.b / 3);
+
+                rgbbgstr += ", 0)";
+
+
+
+                // Draw the particle
+                //console.log(this.x, this.y, 0, this.x, this.y, this.radius);
+                if (Number(this.x) &&  Number(this.y)) {
+                    var p = context.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.radius);
+
+                    p.addColorStop(0, rgbstr);
+
+                    p.addColorStop(1, rgbbgstr);
+
+
+
+                    context.fillStyle = p;
+
+                    context.fillRect(this.x - this.radius, this.y - this.radius, this.radius * 2, this.radius * 2);
+
+
+
+                    // Update the position base on speed and direction
+
+                    this.x += this.xi / (this.slowdown * 100);
+
+                    this.y -= this.yi / (this.slowdown * 100); // canvas negative is up so flip the sign
+
+
+
+                    // Apply gravity to the speed and direction
+
+                    this.xi += this.xg;
+
+                    this.yi += this.yg;
+
+
+
+                    // Update the life based on fade
+
+                    this.life -= this.fade;
+
+                    this.radius -= (this.radius / 1) * this.fade;
+
+
+
+                    // Kill dead or out of bound particles
+
+                    if (this.life <= 0 || this.x < this.minxb || this.x > this.maxxb || this.y < this.minyb || this.y > this.maxyb) {
+
+                        this.active = false;
+
+                    }
+                }
+
+            }
+
+
+
+            // Increment the particle age
+
+            age++;
+
+        }
+
+    };
+
+}

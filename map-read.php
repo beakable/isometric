@@ -27,7 +27,11 @@ while ($get = mysql_fetch_array($getall)) {
 			$_xml .="</ground_height>";
 			$_xml .="<object_map>";
 					$_xml .= $get['object_map'];
-			$_xml .="</object_map>";			
+			$_xml .="</object_map>";
+			$_xml .="<particle_map>";
+					$_xml .= $get['particle_map'];
+			$_xml .="</particle_map>";
+
 	}
 		
 $_xml .= "</user_data>";
