@@ -8,7 +8,13 @@ An early and very basic was implementation used to develop:
 http://walking.beakable.com, used in the following paper:
 http://www.cis.strath.ac.uk/cis/research/publications/papers/strath_cis_publication_2595.pdf.
 
-The engine is currently in early stages however it's planned to be as feature rich as an earlier (and very messy sytnax wise) project, Glacial Flame: http://www.youtube.com/watch?v=Qlsipfu5Qq4.
+The engine is currently in early stages however it's planned to be as feature rich as an earlier project, Glacial Flame: http://www.youtube.com/watch?v=Qlsipfu5Qq4.
+
+Follow more about this project on my Twitter: https://twitter.com/Beakable
+
+Particles
+![particles](https://f.cloud.github.com/assets/1159739/1322878/ca65cd72-3453-11e3-97f6-c6b0243787b0.png)
+
 
 Pathfinding (All cuboids apart from blue are AI)
 ![ai](https://f.cloud.github.com/assets/1159739/1286661/31621fbc-2fdb-11e3-9e7a-39436670d4ba.png)
