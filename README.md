@@ -19,6 +19,7 @@ Particles
 
 
 Pathfinding (All cuboids apart from blue are AI)
+Pathfinding calculations are handled via webworkers.
 ![ai](https://f.cloud.github.com/assets/1159739/1286661/31621fbc-2fdb-11e3-9e7a-39436670d4ba.png)
 
 
