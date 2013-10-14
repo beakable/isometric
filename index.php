@@ -33,9 +33,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
      body{
       margin: 0;
       padding: 0;
+      background: #000022
      }
     </style>
-
+    <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
     <script type="text/javascript" src="com/common.js"></script>
     <script type="text/javascript" src="com/particles/Range.js"></script>
     <script type="text/javascript" src="com/particles/Particle.js"></script>
@@ -207,8 +208,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
       var canvas = document.createElement('canvas');
       canvas.width = 920;
       canvas.height = 600;
-      canvas.style.background = "#000022"
-      canvas.style.border = "#333 2px solid";
+      canvas.style.background = "#000022";
+      canvas.style.display = "block";
+      canvas.style.width = "920px";
+      canvas.style.height = "600px";
+      canvas.style.marginLeft = "auto";
+      canvas.style.marginRight = "auto";
       var context = canvas.getContext('2d');
       document.body.appendChild(canvas);
 
@@ -478,6 +483,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     }
     </script>
   </head>
-  <body onLoad="launch()">  
+  <body onLoad="launch()">
+    <a href="https://twitter.com/Beakable" class="twitter-follow-button" data-show-count="false">Follow @Beakable</a>
+    <div style="clear:both"></div>
   </body>
 </html>
