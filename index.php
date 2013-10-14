@@ -381,7 +381,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         calculatePaths ++;
        if(calculatePaths === 100) {
           enemy.map(function(e) {
-            new pathfind(e, [e.xPos, e.yPos], [player.xPos, player.yPos], mapLayers[1].getLayout(), function (data) {
+            pathfind(e, [e.xPos, e.yPos], [player.xPos, player.yPos], mapLayers[1].getLayout(), function (data) {
               if (data.length > 0 && data[1] !== undefined) {
                 e.xPos = data[1].x;
                 e.yPos = data[1].y;
