@@ -381,12 +381,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
         calculatePaths ++;
        if(calculatePaths === 100) {
           enemy.map(function(e) {
-            var moveTo = pathfind([e.xPos, e.yPos], [player.xPos, player.yPos], mapLayers[1].getLayout())[1];
-            if(moveTo) {
-              e.xPos = moveTo.x;
-              e.yPos = moveTo.y;
-            }
-          })
+            new pathfind(e, [e.xPos, e.yPos], [player.xPos, player.yPos], mapLayers[1].getLayout(), function (data) {
+              if (data.length > 0 && data[1] !== undefined) {
+                e.xPos = data[1].x;
+                e.yPos = data[1].y;
+              }
+            });
+          });
           calculatePaths = 0;
         }
         for(i = startY; i < startY + rangeY; i++) {
