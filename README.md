@@ -2,7 +2,9 @@ HTML5 Canvas Isometric Engine
 =========
 
 
-This repo contains a very basic Isometric HTML5 tile engine.
+This repo containsan Isometric HTML5 tile engine.
+
+A most current dev build can be viewed here: http://isometric.beakable.com/
 
 An early and very basic was implementation used to develop:
 http://walking.beakable.com, used in the following paper:
