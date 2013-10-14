@@ -49,7 +49,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     <script tppe="text/javascript" src="com/pathfind/pathfind.js"></script>
     <script type="text/javascript">
 
-    var globalTile = 1;
 
     window.requestAnimFrame = (function() {
       return window.requestAnimationFrame || 
