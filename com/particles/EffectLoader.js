@@ -16,7 +16,6 @@ EffectLoader.Get = function (name, ctx, xBoundRange, yBoundRange) {
         switch (String(name)) {
 
             case 'fire':
-                effect = new Effect()
                 var fire = new Emitter(ctx, 0, 0, 20, true, xBoundRange, yBoundRange);
 
                 fire.xRange = new Range(-22, 18);
@@ -46,6 +45,12 @@ EffectLoader.Get = function (name, ctx, xBoundRange, yBoundRange) {
                 fire.radiusRange = new Range(20, 30);
 
                 fire.composite = 'lighter';
+
+                fire.xOffset = 43;
+
+                fire.yOffset = 30;
+
+                effect = new Effect(fire);
 
                 break;
 
@@ -81,9 +86,9 @@ EffectLoader.Get = function (name, ctx, xBoundRange, yBoundRange) {
 
                 well.composite = 'lighter';
 				
-				well.xOffset = 11;
+				well.xOffset = 46;
 
-				well.yOffset = 30;
+				well.yOffset = 54;
 				
 				
 				var wellB = new Emitter(ctx, 0, 0, 20, true, xBoundRange, yBoundRange);
@@ -116,9 +121,9 @@ EffectLoader.Get = function (name, ctx, xBoundRange, yBoundRange) {
 
                 wellB.composite = 'lighter';
 				
-				wellB.xOffset = 11;
+				wellB.xOffset = 31;
 
-				wellB.yOffset = 70;
+				wellB.yOffset = 99;
 				
 
                 effect = new Effect(well);

@@ -175,7 +175,7 @@ function Isometric(ctx, tileWidth, tileHeight, mapLayout, tileImages, tileImages
               }
               else{
                 if (stackTileGraphic) {
-                  if(k !== stack) {
+                  if (k !== stack) {
                     ctx.drawImage(stackGraphic, 0, 0, stackGraphic.width, stackGraphic.height, xpos, ypos + (k * ((tileHeight - heightOffset - resizedTileHeight) * curZoom)), (tileWidth * curZoom), (resizedTileHeight * curZoom));
                   } 
                   else {
@@ -240,9 +240,7 @@ function Isometric(ctx, tileWidth, tileHeight, mapLayout, tileImages, tileImages
           if (!particleMapHolder[i][j]) {
             particleMapHolder[i][j] = new EffectLoader.Get(particleMap[i][j], ctx, new Range(0, 800), new Range(0, 600));
           }
-          var partXpos = xpos;
-          var partYpos = (ypos + ((tileHeight - resizedTileHeight) * curZoom));
-          particleMapHolder[i][j].Draw(partXpos, partYpos);
+          particleMapHolder[i][j].Draw(xpos, ypos + ((k - 1) *(tileHeight - heightOffset - tileHeight)) * curZoom - (resizedTileHeight  - tileHeight) * curZoom, (tileWidth * curZoom));
         }
       }
     }
@@ -369,7 +367,7 @@ function Isometric(ctx, tileWidth, tileHeight, mapLayout, tileImages, tileImages
   }
 
   function _applyMouseClick(x, y) {
-     mapLayout[x][y] = 17;
+     mapLayout[x][y] = 47;
     //heightMap[x][y] = Number(heightMap[x][y]) + 1;
   }
 
