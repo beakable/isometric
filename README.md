@@ -2,15 +2,12 @@ HTML5 Canvas Isometric Engine
 =========
 
 
-This repo containsan Isometric HTML5 tile engine.
+This repo contains an MIT Licensed Isometric HTML5 tile engine Copyright © 2013 of Iain Hamilton and Edward Smyth.
 
-A most current dev build can be viewed here: http://isometric.beakable.com/
-
-An early and very basic was implementation used to develop:
-http://walking.beakable.com, used in the following paper:
-http://www.cis.strath.ac.uk/cis/research/publications/papers/strath_cis_publication_2595.pdf.
+The most current running dev build can be viewed here: http://isometric.beakable.com/
 
 The engine is currently in early stages however it's planned to be as feature rich as an earlier project, Glacial Flame: http://www.youtube.com/watch?v=Qlsipfu5Qq4.
+
 
 Follow more about this project on my Twitter: https://twitter.com/Beakable
 
@@ -49,5 +46,7 @@ Early Screenshot 1
 
 Early Screenshot 2 
 ![screen2](https://f.cloud.github.com/assets/1159739/1267395/94e0ea16-2cb9-11e3-9726-86f312bca9f9.png)
+
+
 
 
