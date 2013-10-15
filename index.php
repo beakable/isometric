@@ -220,6 +220,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
       var input = new CanvasInput(document, canvas);
 
       input.keyboard(function(pressed) {
+          console.log(pressed)
         switch(pressed) {
           case 38:
             self.keyCommand(1);
@@ -254,6 +255,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
           case 75:
             self.keyCommand(11);
           break;
+          case 76:
+            self.keyCommand(14);
+          break;
           case 219:
             self.keyCommand(12);
           break;
@@ -264,6 +268,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
       });
 
       this.keyCommand = function(dir) {
+
         switch(dir) {
           case 1:
             if (Number(mapLayers[1].getTile([player.xPos - 1], [player.yPos])) === 0) {
@@ -362,8 +367,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
             });
           break;
           case 11:
-            var XML = new XMLPopulate();
-            XML.saveMap(43, mapLayers[0].getLayout(), mapLayers[0].getHeightLayout(), mapLayers[1].getLayout());
+            var lightTimer = setInterval(function (){
+              mapLayers.map(function(layer) {
+                if(layer.getLightness() < 4) {
+                  layer.adjustLightness(0.1, true);
+                }
+                else {
+                  clearInterval(lightTimer);
+                }
+              });
+            }, 100);
+            //var XML = new XMLPopulate();
+            //XML.saveMap(43, mapLayers[0].getLayout(), mapLayers[0].getHeightLayout(), mapLayers[1].getLayout());
           break;
           case 12:
           if(globalTile > 0) {
@@ -372,6 +387,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
           break;
           case 13:
             globalTile ++;
+          break;
+          case 14:
+            var lightTimer = setInterval(function (){
+              mapLayers.map(function(layer) {
+                if(layer.getLightness() > 1) {
+                  layer.adjustLightness(0.1, false);
+                }
+                else {
+                  clearInterval(lightTimer);
+                }
+              });
+            }, 100);
           break;
         }
       }

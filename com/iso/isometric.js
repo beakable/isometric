@@ -352,6 +352,21 @@ function Isometric(ctx, tileWidth, tileHeight, mapLayout, tileImages, tileImages
     }
   }
 
+  function _adjustLight(setting, increase) {
+    if (increase) {
+      shadowDistance.darkness += setting;
+      lightMap.map(function(light) {
+        light[3] += setting;
+      });
+    }
+    else {
+      shadowDistance.darkness -= setting;
+      lightMap.map(function(light) {
+        light[3] -= setting;
+      });
+    }
+  }
+
   function _applyMouse(x, y) {
     var coords = {};
     mouseUsed = true;
@@ -554,6 +569,14 @@ function Isometric(ctx, tileWidth, tileHeight, mapLayout, tileImages, tileImages
       if (heightShadows !== null) {
         _applyHeightShadow(toggle);
       }
+    },
+
+    adjustLightness: function(setting, increase) {
+      _adjustLight(setting, increase);
+    },
+
+    getLightness: function(){
+      return shadowDistance.darkness;
     },
 
     move: function(direction) {
