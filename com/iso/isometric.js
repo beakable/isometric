@@ -1,5 +1,4 @@
-/*  
-Copyright (c) 2013 Iain Hamilton & Edward Smyth
+/*  Copyright (c) 2013 Iain Hamilton & Edward Smyth
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -17,8 +16,7 @@ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE. 
-*/
+THE SOFTWARE. */
 
 function Isometric(ctx, tileWidth, tileHeight, mapLayout, tileImages, tileImagesDictionary) {
 
@@ -45,14 +43,12 @@ function Isometric(ctx, tileWidth, tileHeight, mapLayout, tileImages, tileImages
 
   var curZoom = 1;
   var mouseUsed = false;
-  var MouseTilePosX = 0;
-  var MouseTilePosY = 0;
-  var xMouse = 0;
-  var yMouse = 0;
+  var focusTilePosX = 0;
+  var focusTilePosY = 0;
 
   var applyIneractions = false;
 
-  var mouseBehindAlpha =  false;
+  var alphaWhenFocusBehind =  {}; // Used for applying alpha to objects infront of focus 
 
   var tilesHide = null;
   var hideSettings = null;
@@ -67,7 +63,7 @@ function Isometric(ctx, tileWidth, tileHeight, mapLayout, tileImages, tileImages
       shadowDistance = settings.shadowDistance;
       title = settings.title;
       zeroIsBlank = settings.zeroIsBlank;
-      //mouseBehindAlpha = settings.mouseBehindAlpha;
+      alphaWhenFocusBehind = settings.alphaWhenFocusBehind;
   }
 
   function _draw(i, j, tileImageOverwite) {
@@ -149,29 +145,43 @@ function Isometric(ctx, tileWidth, tileHeight, mapLayout, tileImages, tileImages
           else {
 
             // Draw the tile image
-
+            ctx.save();
+            if (alphaWhenFocusBehind.apply === true) {
+              if ((i === focusTilePosX + 1 && j === focusTilePosY + 1) || (i === focusTilePosX && j === focusTilePosY + 1) || (i === focusTilePosX + 1 && j === focusTilePosY)) {
+                    if (alphaWhenFocusBehind.objectApplied && ((alphaWhenFocusBehind.objectApplied === null || alphaWhenFocusBehind.objectApplied && (resizedTileHeight * curZoom) > alphaWhenFocusBehind.objectApplied.height * curZoom))) {
+                  ctx.globalAlpha = 0.6;
+                }
+              }
+            }
             ctx.drawImage(stackGraphic, 0, 0, stackGraphic.width, stackGraphic.height, xpos, (ypos + ((tileHeight - resizedTileHeight) * curZoom)), (tileWidth * curZoom), (resizedTileHeight * curZoom));
+            crx.restore();
           }
         }
       }
       else {
         var stack = Math.round(Number(heightMap[i][j]));
         for (var k = 0; k <= stack; k++) {
-          ctx.save();
-          if (mouseBehindAlpha) {
-            if (i == MouseTilePosX + 1 && j == MouseTilePosY + 1) {
-              ctx.globalAlpha = 0.3;
-            }
-          }
           if (heightMapOnTop && k === stack){
             if (!distanceLightingSettings || ( distanceLightingSettings && distanceLighting < distanceLightingSettings.darkness)) {
               if (tileImageOverwite) {
 
+                // Draw overwriting image on top of height map
 
                 ctx.drawImage(tileImageOverwite, 0, 0, tileImageOverwite.width, tileImageOverwite.height, xpos, ypos + ((k - 1) *(tileHeight - heightOffset - tileHeight)) * curZoom - (resizedTileHeight  - tileHeight) * curZoom, (tileWidth * curZoom), (resizedTileHeight * curZoom));
               }
               else {
+
+                // Draw the tile image on top of height map
+                ctx.save();
+                if (alphaWhenFocusBehind.apply === true) {
+                  if ((i === focusTilePosX + 1 && j === focusTilePosY + 1) || (i === focusTilePosX && j === focusTilePosY + 1) || (i === focusTilePosX + 1 && j === focusTilePosY)) {
+                    if (alphaWhenFocusBehind.objectApplied && (alphaWhenFocusBehind.objectApplied === null || (alphaWhenFocusBehind.objectApplied && (resizedTileHeight * curZoom) > alphaWhenFocusBehind.objectApplied.height * curZoom))) {
+                      ctx.globalAlpha = 0.6;
+                    }
+                  }
+                }
                 ctx.drawImage(stackGraphic, 0, 0, stackGraphic.width, stackGraphic.height, xpos, ypos + ((k - 1) *(tileHeight - heightOffset - tileHeight)) * curZoom - (resizedTileHeight  - tileHeight) * curZoom, (tileWidth * curZoom), (resizedTileHeight * curZoom));
+                ctx.restore();
               }
             }
           }
@@ -220,7 +230,7 @@ function Isometric(ctx, tileWidth, tileHeight, mapLayout, tileImages, tileImages
           }
         }
         if (mouseUsed) {
-          if (i == MouseTilePosX && j == MouseTilePosY) {
+          if (i == focusTilePosX && j == focusTilePosY) {
 
             // Apply mouse over tile coloring
 
@@ -374,23 +384,23 @@ function Isometric(ctx, tileWidth, tileHeight, mapLayout, tileImages, tileImages
     }
   }
 
-  function _applyMouse(x, y) {
-    var coords = {};
+  function _applyMouseFocus(x, y) {
     mouseUsed = true;
-    xMouse = x;
-    yMouse = y;
-    MouseTilePosY = (2 * (y - drawY) - x + drawX) / 2;
-    MouseTilePosX = x + MouseTilePosY - drawX - (tileHeight * curZoom);
-    MouseTilePosY = Math.round(MouseTilePosY / (tileHeight * curZoom));
-    MouseTilePosX = Math.round(MouseTilePosX / (tileHeight * curZoom));
-    coords.x = MouseTilePosX;
-    coords.y = MouseTilePosY;
-    return(coords);
+    focusTilePosY = (2 * (y - drawY) - x + drawX) / 2;
+    focusTilePosX = x + focusTilePosY - drawX - (tileHeight * curZoom);
+    focusTilePosY = Math.round(focusTilePosY / (tileHeight * curZoom));
+    focusTilePosX = Math.round(focusTilePosX / (tileHeight * curZoom));
+    return({x: focusTilePosX, y: focusTilePosY});
   }
 
-  function _applyMouseClick(x, y) {
+  function _applyFocusClick(x, y) {
      mapLayout[x][y] = 47;
     //heightMap[x][y] = Number(heightMap[x][y]) + 1;
+  }
+
+  function _applyFocus(xPos, yPos) {
+    focusTilePosX = xPos;
+    focusTilePosY = yPos;
   }
 
   function _align(position, screen_dimension, size, offset) {
@@ -541,12 +551,16 @@ function Isometric(ctx, tileWidth, tileHeight, mapLayout, tileImages, tileImages
       return _setLight(tileX, tileY);
     },
 
-    applyMouse: function(tileX, tileY) {
-      return _applyMouse(tileX, tileY);
+    applyMouseFocus: function(mouseXPosition, mouseYPosition) {
+      return _applyMouseFocus(mouseXPosition, mouseYPosition);
     },
 
-    applyMouseClick: function(tileX, tileY) {
-      return _applyMouseClick(tileX, tileY);
+    applyFocus: function(tileX, tileY) {
+      return _applyFocus(tileX, tileY);
+    },
+
+    applyFocusClick: function(tileX, tileY) {
+      return _applyFocusClick(tileX, tileY);
     },
 
     align: function(position, screen_dimension, size, offset) {

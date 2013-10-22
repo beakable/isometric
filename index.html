@@ -1,4 +1,4 @@
-<?php
+<!--
 /*  
 Copyright (c) 2013 Iain Hamilton & Edward Smyth
 
@@ -26,7 +26,7 @@ THE SOFTWARE.
   Twitter: @beakable
 
 */
-?>
+-->
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
@@ -122,7 +122,7 @@ THE SOFTWARE.
                 },
                 height: 100,
                 width: 50,
-                //applyIneractions: true
+                  //applyIneractions: true
 
               }),
               game.createLayer({
@@ -135,7 +135,10 @@ THE SOFTWARE.
                 width: 50,
                 zeroIsBlank: true,
                 //shadowDistance: true,
-                //alpha_mouse_behind: true,
+                alphaWhenFocusBehind: {
+                  objectApplied: playerImages.files["main.png"], // if set only applies when grapic is taller than this
+                  apply: true
+                },
                 //heightShadow: {
                 //  offset: 10
                 //},
@@ -223,7 +226,6 @@ THE SOFTWARE.
       var input = new CanvasInput(document, canvas);
 
       input.keyboard(function(pressed) {
-          console.log(pressed)
         switch(pressed) {
           case 38:
             self.keyCommand(1);
@@ -276,6 +278,7 @@ THE SOFTWARE.
           case 1:
             if (Number(mapLayers[1].getTile([player.xPos - 1], [player.yPos])) === 0) {
               player.xPos --;
+              mapLayers[1].applyFocus(player.xPos, player.yPos);
               if (startY > 0 && player.xPos <= mapLayers[0].getLayout().length - 1 - rangeX / 2) {
                 mapLayers.map(function(layer) {
                   layer.move("up");
@@ -287,6 +290,7 @@ THE SOFTWARE.
           case 2:
             if (Number(mapLayers[1].getTile([player.xPos], [player.yPos - 1])) === 0) {
               player.yPos --;
+              mapLayers[1].applyFocus(player.xPos, player.yPos);
               if (startX > 0 && player.yPos <= mapLayers[0].getLayout().length - 1 - rangeY / 2) {
                 mapLayers.map(function(layer) {
                   layer.move("down");
@@ -298,6 +302,7 @@ THE SOFTWARE.
           case 3:
             if (Number(mapLayers[1].getTile([player.xPos + 1], [player.yPos])) === 0) {
               player.xPos ++;
+              mapLayers[1].applyFocus(player.xPos, player.yPos);
               if (startY + rangeY < mapLayers[0].getLayout().length && player.xPos >= 0 + 1 + rangeX / 2) {
                 mapLayers.map(function(layer) {
                   layer.move("left");
@@ -309,6 +314,7 @@ THE SOFTWARE.
           case 4:
             if (Number(mapLayers[1].getTile([player.xPos], [player.yPos + 1])) === 0) {
               player.yPos ++;
+              mapLayers[1].applyFocus(player.xPos, player.yPos);
               if (startX + rangeX < mapLayers[0].getLayout().length && player.yPos >= 0 + 1 + rangeY / 2 ) {
                 mapLayers.map(function(layer) {
                   layer.move("right");
@@ -372,7 +378,7 @@ THE SOFTWARE.
           case 11:
             var lightTimer = setInterval(function (){
               mapLayers.map(function(layer) {
-                if(layer.getLightness() < 4) {
+                if(layer.getLightness() < 3) {
                   layer.adjustLightness(0.1, true);
                 }
                 else {
@@ -446,7 +452,7 @@ THE SOFTWARE.
             // context.drawImage(gui["popup-box.png"],mouse_coordinates.x,mouse_coordinates.y);
             // context.font = "8pt Arial";
             // context.fillText("Hover box",mouse_coordinates.x+14,mouse_coordinates.y+25);
-            // layer.applyMouseClick(tile_coordinates.x, tile_coordinates.y);
+            // layer.applyFocusClick(tile_coordinates.x, tile_coordinates.y);
             //}
          // }
          });
@@ -482,16 +488,16 @@ THE SOFTWARE.
        if(settings.applyIneractions) {
          layer.applyIneractions = settings.applyIneractions;
          input.mouse_move(function(coords) {
-          tile_coordinates = layer.applyMouse(coords.x, coords.y);
+          tile_coordinates = layer.applyMouseFocus(coords.x, coords.y);
           mouse_coordinates = coords;
          });  
          input.mobile(function(coords) {
-          tile_coordinates = layer.applyMouse(coords.x, coords.y);
-          layer.applyMouseClick(tile_coordinates.x, tile_coordinates.y);
+          tile_coordinates = layer.applyMouseFocus(coords.x, coords.y);
+          layer.applyFocusClick(tile_coordinates.x, tile_coordinates.y);
          });
          input.mouse_action(function(coords) {
-          tile_coordinates = layer.applyMouse(coords.x, coords.y);
-          layer.applyMouseClick(tile_coordinates.x, tile_coordinates.y);
+          tile_coordinates = layer.applyMouseFocus(coords.x, coords.y);
+          layer.applyFocusClick(tile_coordinates.x, tile_coordinates.y);
          });
        }
 
