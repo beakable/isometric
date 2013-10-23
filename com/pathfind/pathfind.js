@@ -36,23 +36,72 @@ THE SOFTWARE.
 */
 var pathfind = function (item, start, end, map, callback) {
 
-	// Ensure Web worker is supported
-	if (typeof Worker !== 'undefined') {
+	if (start[0] != end[0] || start[1] != end[1]) {
 
-		if (typeof item.pathfind !== 'object') {
-			item.pathfind = new Worker('com/pathfind/pathfind_worker.js');
+		// Ensure Web worker is supported
+		if (typeof Worker !== 'undefined') {
+
+			if (typeof item.pathfind !== 'object') {
+
+				item.pathfind = {
+					worker: new Worker('com/pathfind/pathfind_worker.js?123'),
+					end: end,
+					path: undefined,
+					active: false
+				};
+
+				// Event Listener
+				item.pathfind.worker.addEventListener('message', function(e) {
+
+					if (typeof e.data[0] !== 'function') {
+
+						item.pathfind.active = false;
+						item.pathfind.path = e.data;
+
+						callback(e.data); // Pass data to callback function
+					}
+				}, false);			
+			}
+
+			var pathfindWorker = function (p) {
+					if (!p.active) {
+						p.end = end;
+						p.active = true;
+						p.worker.postMessage({s: start, e: end, m: map}); // Initiate WebWorker	
+					}			
+				};
+
+			// Check if end location is same as previous loop
+			if (item.pathfind.end[0] == end[0] && item.pathfind.end[1] == end[1] && item.pathfind.path !== undefined) {
+
+				// Loop through current path
+				for (var i = 0, len = item.pathfind.path.length; i < len; i++) {
+					if (item.pathfind.path[i].x == start[0] && item.pathfind.path[i].y == start[1]) {
+						item.pathfind.path.splice(0, i);
+						callback(item.pathfind.path);
+						return true;
+					}
+				}
+
+				// If location not located
+				pathfindWorker(item.pathfind);
+
+			} else {
+
+				item.pathfind.end = end;
+				item.pathfind.path = undefined;
+
+				// Perform Search
+				pathfindWorker(item.pathfind);
+			}
+
+
+		} else {
+			callback([]); // Return blank array for non supported browsers
+			return true;
 		}
 
-		item.pathfind.addEventListener('message', function(e) {
-			callback(e.data); // Pass data to callback function
-		}, false);
-
-		item.pathfind.postMessage({s: start, e: end, m: map}); // Initiate WebWorker
-		return true;	
-
 	} else {
-		callback([]); // Return blank array for non supported browsers
-		return true;
+		return false; // No need for pathfind required
 	}
-
 }

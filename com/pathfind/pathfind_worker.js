@@ -111,6 +111,7 @@ self.addEventListener('message', function(evt) {
 				path.unshift({x: current.x, y: current.y});
 			}
 			self.postMessage(path); // Return the path
+			return true;
 		}
 
 		// Remove current node from open list
@@ -148,4 +149,5 @@ self.addEventListener('message', function(evt) {
 	}
 
 	self.postMessage([]); // No Path Found!
+	return true;
 }, false);
