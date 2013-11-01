@@ -31,6 +31,7 @@ THE SOFTWARE.
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
     <title></title>
     <style type="text/css">
      body{
@@ -46,7 +47,8 @@ THE SOFTWARE.
     <script type="text/javascript" src="com/particles/Emitter.js"></script>
     <script type="text/javascript" src="com/particles/Effect.js"></script>
     <script type="text/javascript" src="com/particles/EffectLoader.js"></script>
-    <script type="text/javascript" src="com/CanvasInput/CanvasInput.js"></script> 
+    <script type="text/javascript" src="com/Canvas/Input.js"></script>
+    <script type="text/javascript" src="com/Canvas/Control.js"></script> 
     <script type="text/javascript" src="com/xml/XMLPopulate.js" ></script>
     <script type="text/javascript" src="com/img/ImageLoader.js"></script>
     <script tppe="text/javascript" src="com/iso/Isometric.js"></script>
@@ -211,19 +213,21 @@ THE SOFTWARE.
       var player = [];
       var enemy = [];
 
-      var canvas = document.createElement('canvas');
-      canvas.width = 920;
-      canvas.height = 600;
-      canvas.style.background = "#000022";
-      canvas.style.display = "block";
-      canvas.style.width = "920px";
-      canvas.style.height = "600px";
-      canvas.style.marginLeft = "auto";
-      canvas.style.marginRight = "auto";
-      var context = canvas.getContext('2d');
-      document.body.appendChild(canvas);
 
-      var input = new CanvasInput(document, canvas);
+      var context = canvas.create("canavas", 920, 600, {
+        background: "#000022",
+        display: "block",
+        marginLeft: "auto",
+        marginRight: "auto"
+      });
+
+      canvas.fullScreen();
+
+      window.addEventListener("orientationchange", function() {
+        canvas.fullScreen();
+      }, false);
+
+      var input = new CanvasInput(document, canvas());
 
       input.keyboard(function(pressed) {
         switch(pressed) {
@@ -329,8 +333,8 @@ THE SOFTWARE.
                 layer.setZoom("out");
 
                 //TODO: Make alignment offsets automatically generated
-                layer.align("h-center", canvas.width, xrange + player.xPos, -60);
-                layer.align("v-center", canvas.height,  yrange + player.yPos, 35);
+                layer.align("h-center", canvas().width, xrange + player.xPos, -60);
+                layer.align("v-center", canvas().height,  yrange + player.yPos, 35);
                 rangeX +=  1
                 rangeY +=  1
               }
@@ -341,8 +345,8 @@ THE SOFTWARE.
               if (rangeY - 1 > defaultRangeY - 1) {
                 layer.setZoom("in");
                 //TODO: Make alignment offsets automatically generated
-                layer.align("h-center", canvas.width, xrange, -60);
-                layer.align("v-center", canvas.height,  yrange, 35);
+                layer.align("h-center", canvas().width, xrange, -60);
+                layer.align("v-center", canvas().height,  yrange, 35);
                 rangeX -=  1
                 rangeY -=  1
               }
@@ -413,7 +417,7 @@ THE SOFTWARE.
       }
       
       this.draw = function() {
-        context.clearRect(0, 0, canvas.width, canvas.height);
+        context.clearRect(0, 0, canvas().width, canvas().height);
         calculatePaths ++;
        if(calculatePaths === 100) {
           enemy.map(function(e) {
@@ -501,8 +505,8 @@ THE SOFTWARE.
          });
        }
 
-       layer.align("h-center", canvas.width, xrange, -60);
-       layer.align("v-center", canvas.height,  yrange, 35);
+       layer.align("h-center", canvas().width, xrange, -60);
+       layer.align("v-center", canvas().height,  yrange, 35);
        return layer;
       }
 
