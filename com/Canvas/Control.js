@@ -30,12 +30,12 @@ canvas = (function() {
   }
 
   function _create(name, w, h, style) {
-    if (_supported()){
+    if (_supported()) {
       canvasElement = document.createElement('canvas');
       canvasElement.id = name;
       canvasElement.width = w || window.innerWidth;
       canvasElement.height = h || window.innerHeight;
-      for (var s in style){
+      for (var s in style) {
         canvasElement.style[s] = style[s];
       }
       return document.body.appendChild(canvasElement).getContext('2d');
@@ -44,7 +44,7 @@ canvas = (function() {
       var noCanvas = document.createElement("div");
       noCanvas.style.color = "#FFF";
       noCanvas.style.textAlign = "center";
-      noCanvas.innerHTML = "Sorry, you need to use a more modern browser.";
+      noCanvas.innerHTML = "Sorry, you need to use a more modern browser. We like: <a href='https://www.google.com/intl/en/chrome/browser/'>Chrome</a> &amp; <a href='http://www.mozilla.org/en-US/firefox/new/'>Firefox</a>";
       return document.body.appendChild(noCanvas);
     }
   }
