@@ -232,6 +232,21 @@ THE SOFTWARE.
 
       var input = new CanvasInput(document, canvas());
 
+      input.mobile(function(coords) {
+        if (coords.x > canvas().width / 2) {
+          self.keyCommand(2);
+        }
+        if (coords.x < canvas().width / 2) {
+          self.keyCommand(1);
+        }
+        if (coords.y > canvas().height / 2) {
+          self.keyCommand(3);
+        }
+        if (coords.y < canvas().height / 2) {
+          self.keyCommand(4);
+        }
+       });
+
       input.keyboard(function(pressed) {
         switch(pressed) {
           case 38:
@@ -498,10 +513,7 @@ THE SOFTWARE.
           tile_coordinates = layer.applyMouseFocus(coords.x, coords.y);
           mouse_coordinates = coords;
          });  
-         input.mobile(function(coords) {
-          tile_coordinates = layer.applyMouseFocus(coords.x, coords.y);
-          layer.applyFocusClick(tile_coordinates.x, tile_coordinates.y);
-         });
+         
          input.mouse_action(function(coords) {
           tile_coordinates = layer.applyMouseFocus(coords.x, coords.y);
           layer.applyFocusClick(tile_coordinates.x, tile_coordinates.y);
