@@ -237,6 +237,8 @@ THE SOFTWARE.
       var player = [];
       var enemy = [];
 
+
+      // -- Game Clock - controls the in game light
       var gameClock = new Clock(document.getElementById("timer"));
       gameClock.set(86360);
       gameClock.run(function() {
@@ -252,7 +254,8 @@ THE SOFTWARE.
               layer.adjustLightness(gameClock.get()/86360, false);
             }
         });
-      }, 50, 3400);
+      }, 50, 300); // -- frequency to update and amount
+      // -------------------------------------------
 
       var context = canvas.create("canavas", 920, 600, {
         background: "#000022",
