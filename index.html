@@ -45,8 +45,20 @@ THE SOFTWARE.
       a, a:visited {
         color: #FFF;
       }
+      .gameInfo {
+        position: absolute;
+        right: 0px;
+        top: 0px;
+        width: 200px;
+        height: 24px;
+        background: #222244;
+        text-align: center;
+        color: #FFF;
+      }
     </style>
     <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+    
+    <!-- Engine Scripts -->
     <script type="text/javascript" src="com/common.js"></script>
     <script type="text/javascript" src="com/particles/Range.js"></script>
     <script type="text/javascript" src="com/particles/Particle.js"></script>
@@ -59,6 +71,12 @@ THE SOFTWARE.
     <script type="text/javascript" src="com/img/ImageLoader.js"></script>
     <script tppe="text/javascript" src="com/iso/Isometric.js"></script>
     <script tppe="text/javascript" src="com/pathfind/pathfind.js"></script>
+    <!--                -->
+    <!-- Game Scripts   -->
+    <script type="text/javascript" src="game/Clock.js"></script>
+    <!--                -->
+
+
     <script type="text/javascript">
 
 
@@ -117,7 +135,7 @@ THE SOFTWARE.
                   verticalColor: 'rgba(5, 5, 30, 0.4)',
                  horizontalColor: 'rgba(6, 5, 50, 0.5)'
                 },
-                lightMap: [[5, 5, 5, 1], [20, 20, 4, 1]],
+                lightMap: [[5, 5, 4, 1], [20, 20, 4, 1]],
                 heightMap: {
                   map: XML.getContent('ground_height','row'),
                   offset: 0,
@@ -156,7 +174,7 @@ THE SOFTWARE.
                   darkness: 1
                 },
                 particleMap: XML.getContent('particle_map','row'),
-                lightMap: [[5, 5, 5, 1], [20, 20, 4, 1]],
+                lightMap: [[5, 5, 4, 1], [20, 20, 4, 1]],
                 heightMap: {
                   map: XML.getContent('ground_height','row'),
                   offset: 20,
@@ -219,6 +237,22 @@ THE SOFTWARE.
       var player = [];
       var enemy = [];
 
+      var gameClock = new Clock(document.getElementById("timer"));
+      gameClock.set(86360);
+      gameClock.run(function() {
+         mapLayers.map(function(layer) {
+            var currentTime = gameClock.get();
+            if (currentTime > 19620 && currentTime < 66024){
+              layer.adjustLightness(gameClock.get()/86360, true);
+            }
+            else if (currentTime > 76824 && currentTime < 86400 || currentTime < 3602){
+              layer.setLightness(4);
+            }
+            else {
+              layer.adjustLightness(gameClock.get()/86360, false);
+            }
+        });
+      }, 50, 3400);
 
       var context = canvas.create("canavas", 920, 600, {
         background: "#000022",
@@ -229,9 +263,14 @@ THE SOFTWARE.
 
       canvas.fullScreen();
 
+
+
       window.addEventListener("orientationchange", function() {
         canvas.fullScreen();
       }, false);
+
+      
+      
 
       var input = new CanvasInput(document, canvas());
 
@@ -351,25 +390,25 @@ THE SOFTWARE.
           case 5:
             mapLayers.map(function(layer) {
               if (startY + rangeY + 1 < mapLayers[0].getLayout().length) {
-                layer.setZoom("out");
+                //layer.setZoom("out");
 
                 //TODO: Make alignment offsets automatically generated
-                layer.align("h-center", canvas().width, xrange + player.xPos, -60);
-                layer.align("v-center", canvas().height,  yrange + player.yPos, 35);
-                rangeX +=  1
-                rangeY +=  1
+                //layer.align("h-center", canvas().width, xrange + player.xPos, -60);
+                //layer.align("v-center", canvas().height,  yrange + player.yPos, 35);
+                //rangeX +=  1
+                //rangeY +=  1
               }
             });
           break;
           case 6:
             mapLayers.map(function(layer) {
               if (rangeY - 1 > defaultRangeY - 1) {
-                layer.setZoom("in");
+                //layer.setZoom("in");
                 //TODO: Make alignment offsets automatically generated
-                layer.align("h-center", canvas().width, xrange, -60);
-                layer.align("v-center", canvas().height,  yrange, 35);
-                rangeX -=  1
-                rangeY -=  1
+                //layer.align("h-center", canvas().width, xrange, -60);
+                //layer.align("v-center", canvas().height,  yrange, 35);
+                //rangeX -=  1
+                //rangeY -=  1
               }
             })
           break;
@@ -387,7 +426,7 @@ THE SOFTWARE.
           break;
           case 9:
             mapLayers.map(function(layer) {
-              layer.rotate("left");
+              //layer.rotate("left");
               //TODO: Work out the correct calculations for rotating and keeping current view when rotated using a minimized range.
               //startY = mapLayers[0].getLayout().length - startY - rangeX;
               //startX = startY;
@@ -395,13 +434,13 @@ THE SOFTWARE.
           break;
           case 10:
             mapLayers.map(function(layer) {
-              layer.rotate("right");
+              //layer.rotate("right");
               //TODO: Work out the correct calculations for rotating and keeping current view but rotated when using a minimized range.
               //startY = mapLayers[0].getLayout().length - startX - rangeX;
             });
           break;
           case 11:
-            var lightTimer = setInterval(function (){
+            /*var lightTimer = setInterval(function (){
               mapLayers.map(function(layer) {
                 if(layer.getLightness() < 3) {
                   layer.adjustLightness(0.1, true);
@@ -410,7 +449,7 @@ THE SOFTWARE.
                   clearInterval(lightTimer);
                 }
               });
-            }, 100);
+            }, 100);*/
             //var XML = new XMLPopulate();
             //XML.saveMap(43, mapLayers[0].getLayout(), mapLayers[0].getHeightLayout(), mapLayers[1].getLayout());
           break;
@@ -423,7 +462,7 @@ THE SOFTWARE.
             globalTile ++;
           break;
           case 14:
-            var lightTimer = setInterval(function (){
+            /*var lightTimer = setInterval(function (){
               mapLayers.map(function(layer) {
                 if(layer.getLightness() > 1) {
                   layer.adjustLightness(0.1, false);
@@ -432,7 +471,7 @@ THE SOFTWARE.
                   clearInterval(lightTimer);
                 }
               });
-            }, 100);
+            }, 100);*/
           break;
         }
       }
@@ -537,12 +576,14 @@ THE SOFTWARE.
         mapLayers = settings.layers;
         gui = settings.gui;
         this.draw();
+
       }
       
     }
     </script>
   </head>
   <body onLoad="launch()">
+    <div id="timer" class="gameInfo">Game Time</div>
     <a href="https://twitter.com/Beakable" class="twitter-follow-button" data-show-count="false">Follow @Beakable</a>
   </body>
 </html>

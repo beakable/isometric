@@ -95,17 +95,22 @@ function Isometric(ctx, tileWidth, tileHeight, mapLayout, tileImages, tileImages
 
         lightMap.map(function(light) {
           lightDist = Math.sqrt((Math.floor(i - light[0]) * Math.floor(i - light[0])) + (Math.floor(j - light[1]) * Math.floor(j - light[1])));
-          if (distanceLighting + distanceLightingSettings.distance  > lightDist + light[2]) {
-            distanceLighting = lightDist;
-            distanceLightingSettings.distance = light[2];
-            distanceLightingSettings.darkness = light[3];
+          if (lightDist > distanceLighting) {
+
+          }
+          else {
+            if(distanceLighting / (distanceLightingSettings.darkness * distanceLightingSettings.distance) > lightDist / (light[2] * light[3])) {
+              distanceLighting = lightDist;
+              distanceLightingSettings.distance = light[2];
+              distanceLightingSettings.darkness = light[3];
+            }
           }
         });
       }
       if(distanceLighting > distanceLightingSettings.distance){
         distanceLighting = distanceLightingSettings.distance;
       }
-      distanceLighting = distanceLighting/(distanceLightingSettings.distance * distanceLightingSettings.darkness);
+      distanceLighting =  distanceLighting / (distanceLightingSettings.darkness * distanceLightingSettings.distance);
     }
     if ((!zeroIsBlank) || (zeroIsBlank && image_num) || tileImageOverwite) {
       if (zeroIsBlank) {
@@ -371,16 +376,20 @@ function Isometric(ctx, tileWidth, tileHeight, mapLayout, tileImages, tileImages
 
   function _adjustLight(setting, increase) {
     if (increase) {
-      shadowDistance.darkness += setting;
-      lightMap.map(function(light) {
-        light[3] += setting;
-      });
+      shadowDistance.distance += setting;
+      if (lightMap) {
+        lightMap.map(function(light) {
+          //light[3] += setting;
+        });
+      }
     }
     else {
-      shadowDistance.darkness -= setting;
-      lightMap.map(function(light) {
-        light[3] -= setting;
-      });
+      shadowDistance.distance -= setting;
+      if (lightMap) {
+        lightMap.map(function(light) {
+         // light[3] -= setting;
+        });
+      }
     }
   }
 
@@ -592,12 +601,16 @@ function Isometric(ctx, tileWidth, tileHeight, mapLayout, tileImages, tileImages
       }
     },
 
+    setLightness: function(setting) {
+      shadowDistance.distance = setting;
+    },
+
     adjustLightness: function(setting, increase) {
       _adjustLight(setting, increase);
     },
 
     getLightness: function(){
-      return shadowDistance.darkness;
+      return shadowDistance.distance;
     },
 
     move: function(direction) {
