@@ -240,21 +240,28 @@ THE SOFTWARE.
 
       // -- Game Clock - controls the in game light
       var gameClock = new Clock(document.getElementById("timer"));
-      gameClock.set(86360);
+
+      var increaseSpeed = 328;
+
+      gameClock.set(21000);
       gameClock.run(function() {
          mapLayers.map(function(layer) {
             var currentTime = gameClock.get();
             if (currentTime > 19620 && currentTime < 66024){
-              layer.adjustLightness(gameClock.get()/86360, true);
+              if (layer.getLightness() < 8.6) {
+                layer.adjustLightness(gameClock.get()/(864*increaseSpeed), true);
+              }
             }
             else if (currentTime > 76824 && currentTime < 86400 || currentTime < 3602){
               layer.setLightness(4);
             }
             else {
-              layer.adjustLightness(gameClock.get()/86360, false);
+              if (layer.getLightness() > 4) {
+                layer.adjustLightness(gameClock.get()/(864*increaseSpeed), false);
+              }
             }
         });
-      }, 50, 300); // -- frequency to update and amount
+      }, 2500, increaseSpeed); // -- frequency to update and amount
       // -------------------------------------------
 
       var context = canvas.create("canavas", 920, 600, {
