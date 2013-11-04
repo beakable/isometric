@@ -1,0 +1,246 @@
+<!--
+/*  
+Copyright (c) 2013 Iain Hamilton & Edward Smyth
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE. 
+
+- Author : Iain M Hamilton - <iain@beakable.com> - http://www.beakable.com
+           Edward Smyth
+
+  Twitter: @beakable
+
+*/
+-->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title></title>
+    <style type="text/css">
+      body {
+        margin: 0;
+        padding: 0;
+        background: #000022
+      }
+       .twitter-follow-button {
+        position: absolute !important;
+      }
+      a, a:visited {
+        color: #FFF;
+      }
+      .gameInfo {
+        position: absolute;
+        right: 0px;
+        top: 0px;
+        width: 200px;
+        height: 24px;
+        background: #222244;
+        text-align: center;
+        color: #FFF;
+      }
+    </style>
+    <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+    
+    <!-- Engine Scripts -->
+    <script type="text/javascript" src="/com/common.js"></script>
+    <script type="text/javascript" src="/com/particles/Range.js"></script>
+    <script type="text/javascript" src="/com/particles/Particle.js"></script>
+    <script type="text/javascript" src="/com/particles/Emitter.js"></script>
+    <script type="text/javascript" src="/com/particles/Effect.js"></script>
+    <script type="text/javascript" src="/com/particles/EffectLoader.js"></script>
+    <script type="text/javascript" src="/com/Canvas/Input.js"></script>
+    <script type="text/javascript" src="/com/Canvas/Control.js"></script> 
+    <script type="text/javascript" src="/com/xml/XMLPopulate.js" ></script>
+    <script type="text/javascript" src="/com/img/ImageLoader.js"></script>
+    <script tppe="text/javascript" src="/com/iso/Isometric.js"></script>
+    <script tppe="text/javascript" src="/com/pathfind/pathfind.js"></script>
+    <!--                -->
+    <!-- Game Scripts   -->
+    <script type="text/javascript" src="/game/Clock.js"></script>
+    <!--                -->
+
+
+    <script type="text/javascript">
+
+    // -- FPS --------------------------------
+    window.requestAnimFrame = (function() {
+      return window.requestAnimationFrame || 
+      window.webkitRequestAnimationFrame  || 
+      window.mozRequestAnimationFrame     || 
+      window.oRequestAnimationFrame       ||  
+      window.msRequestAnimationFrame      || 
+      function(callback, element) {
+        window.setTimeout(callback, 1000 / 60);
+      };
+    })();
+    // ---------------------------------------
+
+
+    function launch() {
+
+      var XML = new XMLPopulate(); // Used for loading the XML maps TODO: Change maps to JSON rather than XML
+      var imgLoader = new ImageLoader(); // Used for loading all images used within game
+
+      XML.loadXML('/com/xml/XMLFiles.php?folder=img/ground/');
+      var groundImages = imgLoader.loadImageArray('/img/ground/', XML.getContent('files', 'file'));
+
+      var loadTimer = setInterval(loadAll, 100);
+
+      function loadAll() {
+        if (imgLoader.loaded === imgLoader.to_load) {
+          XML.loadXML('sample1.xml');
+
+          clearInterval(loadTimer);
+          var game = new main(0, 0, 14, 14, 100, 50); 
+          
+          game.init({
+            layers: [
+              game.createLayer({
+                zIndex: 0,
+                title: "Ground Layer",
+                layout: XML.getContent('ground_map','row'),
+                graphics: groundImages.files,
+                graphicsDictionary: groundImages.dictionary,
+                heightMap: {
+                  map: XML.getContent('ground_height','row'),
+                  offset: 0,
+                  heightTile: groundImages.files["blank-block.png"]
+                },
+                height: 100,
+                width: 50,
+              })
+            ]
+          });
+        }
+      }
+    }
+
+
+    function main(x, y, xrange, yrange) {
+      self = this;
+      var mapLayers = [];
+      var startY = y;
+      var startX = x;
+      var rangeX = xrange;
+      var rangeY = yrange;
+      var defaultRangeY = rangeY;
+
+      var context = canvas.create("canavas", 920, 600, {
+        background: "#000022",
+        display: "block",
+        marginLeft: "auto",
+        marginRight: "auto"
+      });
+      canvas.fullScreen();
+      
+      var input = new CanvasInput(document, canvas());
+
+      input.keyboard(function(pressed) {
+        switch(pressed) {
+          case 65:
+             mapLayers.map(function(layer) {
+              if (startY + rangeY + 1 < mapLayers[0].getLayout().length) {
+                layer.setZoom("out");
+                layer.align("h-center", canvas().width, xrange, -60);
+                layer.align("v-center", canvas().height,  yrange, 35);
+                rangeX +=  1
+                rangeY +=  1
+              }
+            });
+          break;
+          case 83:
+             mapLayers.map(function(layer) {
+              if (rangeY - 1 > defaultRangeY - 1) {
+                layer.setZoom("in");
+                layer.align("h-center", canvas().width, xrange, -60);
+                layer.align("v-center", canvas().height,  yrange, 35);
+                rangeX -=  1
+                rangeY -=  1
+              }
+            })
+          break;
+          case 49:
+            mapLayers.map(function(layer) {
+              layer.toggleGraphicsHide(true);
+              layer.toggleHeightShadow(true);
+            });
+          break;
+          case 50:
+            mapLayers.map(function(layer) {
+              layer.toggleGraphicsHide(false);
+              layer.toggleHeightShadow(false);
+            });
+          break;
+          case 81:
+            mapLayers.map(function(layer) {
+              layer.rotate("left");
+            });
+          break;
+          case 87:
+            mapLayers.map(function(layer) {
+              layer.rotate("right");
+            });
+          break;
+        }
+      });
+
+      
+      this.draw = function() {
+        context.clearRect(0, 0, canvas().width, canvas().height);
+        for(i = startY; i < startY + rangeY; i++) {
+          for(j = startX; j < startX + rangeX; j++) {
+            mapLayers.map(function(layer) {
+              layer.draw(i,j);
+            });
+          }
+        }
+        requestAnimFrame(self.draw);
+      }
+      
+      this.createLayer = function(settings) {
+       var layer = new Isometric(context, settings.height, settings.width, settings.layout, settings.graphics, settings.graphicsDictionary);
+       layer.setupProperties(settings);
+       
+       if (settings.heightMap) {
+         layer.stackTiles(settings.heightMap);
+       }
+      
+       layer.align("h-center", canvas().width, xrange, -60);
+       layer.align("v-center", canvas().height,  yrange, 35);
+       return layer;
+      }
+
+
+      this.init = function(settings) {
+        startY = 10 - rangeY / 2;
+        startX = 10 - rangeX / 2;
+        mapLayers = settings.layers;
+        this.draw();
+
+      }
+      
+    }
+    </script>
+  </head>
+  <body onLoad="launch()">
+    <div id="timer" class="gameInfo">[A]/[S] Zoom - [Q][W] Rotate</div>
+    <a href="https://twitter.com/Beakable" class="twitter-follow-button" data-show-count="false">Follow @Beakable</a>
+  </body>
+</html>
