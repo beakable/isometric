@@ -137,7 +137,7 @@ THE SOFTWARE.
                   verticalColor: 'rgba(5, 5, 30, 0.4)',
                  horizontalColor: 'rgba(6, 5, 50, 0.5)'
                 },
-                lightMap: [[5, 5, 4, 1], [20, 20, 4, 1]],
+                lightMap: [[5, 5, 4, 1], [20, 20, 4, 1]], // TODO: Make this work off a map too
                 heightMap: {
                   map: XML.getContent('ground_height','row'),
                   offset: 0,
@@ -268,7 +268,6 @@ THE SOFTWARE.
         marginLeft: "auto",
         marginRight: "auto"
       });
-
       canvas.fullScreen();
       
       var input = new CanvasInput(document, canvas());

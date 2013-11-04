@@ -49,7 +49,7 @@ function CanvasInput(doc, canvas) {
 
   function _orientationChange(callback) {
     window.addEventListener("orientationchange", function() {
-      callback();    
+      callback();
     }, false);    
   }
 
