@@ -79,7 +79,7 @@ THE SOFTWARE.
 
     <script type="text/javascript">
 
-
+    // -- FPS --------------------------------
     window.requestAnimFrame = (function() {
       return window.requestAnimationFrame || 
       window.webkitRequestAnimationFrame  || 
@@ -90,11 +90,13 @@ THE SOFTWARE.
         window.setTimeout(callback, 1000 / 60);
       };
     })();
+    // ---------------------------------------
+
 
     function launch() {
 
-      var XML = new XMLPopulate();
-      var imgLoader = new ImageLoader();
+      var XML = new XMLPopulate(); // Used for loading the XML maps TODO: Change maps to JSON rather than XML
+      var imgLoader = new ImageLoader(); // Used for loading all images used within game
 
       XML.loadXML('com/xml/XMLFiles.php?folder=img/ground/');
       var groundImages = imgLoader.loadImageArray('img/ground/', XML.getContent('files', 'file'));
@@ -160,14 +162,10 @@ THE SOFTWARE.
                 height: 100,
                 width: 50,
                 zeroIsBlank: true,
-                //shadowDistance: true,
                 alphaWhenFocusBehind: {
                   objectApplied: playerImages.files["main.png"], // if set only applies when grapic is taller than this
                   apply: true
                 },
-                //heightShadow: {
-                //  offset: 10
-                //},
                 shadowDistance: {
                   color: false,
                   distance: 4,
@@ -272,16 +270,7 @@ THE SOFTWARE.
       });
 
       canvas.fullScreen();
-
-
-
-      window.addEventListener("orientationchange", function() {
-        canvas.fullScreen();
-      }, false);
-
       
-      
-
       var input = new CanvasInput(document, canvas());
 
       input.mobile(function(coords) {
@@ -299,19 +288,23 @@ THE SOFTWARE.
         }
        });
 
+      input.orientationChange(function(){
+        canvas.fullScreen();
+      })
+
       input.keyboard(function(pressed) {
         switch(pressed) {
           case 38:
-            self.keyCommand(1);
-          break;
-          case 39:
             self.keyCommand(2);
           break;
-          case 40:
+          case 39:
             self.keyCommand(3);
           break;
-          case 37:
+          case 40:
             self.keyCommand(4);
+          break;
+          case 37:
+            self.keyCommand(1);
           break;
           case 65:
             self.keyCommand(5);

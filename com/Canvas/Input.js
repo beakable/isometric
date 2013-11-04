@@ -47,11 +47,21 @@ function CanvasInput(doc, canvas) {
     callback(coords);
   }
 
+  function _orientationChange(callback) {
+    window.addEventListener("orientationchange", function() {
+      callback();    
+    }, false);    
+  }
+
   return {
     keyboard: function(callback) {
       doc.onkeydown = function(event) {
         _keyboard_input(event, callback);
       };
+    },
+
+    orientationChange: function(callback) {
+      _orientationChange(callback);
     },
 
     mobile: function(callback) {
