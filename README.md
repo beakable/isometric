@@ -11,6 +11,10 @@ The engine is currently in early stages however it's planned to be as feature ri
 
 Follow more about this project on my Twitter: https://twitter.com/Beakable
 
+Other Samples:
+
+Zoom and rotate of a simple one layer map featuring a heightmap: http://isometric.beakable.com/Samples/sample1.html
+
 Particles
 ![particles](https://f.cloud.github.com/assets/1159739/1322878/ca65cd72-3453-11e3-97f6-c6b0243787b0.png)
 
