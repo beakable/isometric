@@ -98,26 +98,24 @@ THE SOFTWARE.
       var XML = new XMLPopulate(); // Used for loading the XML maps TODO: Change maps to JSON rather than XML
       var imgLoader = new ImageLoader(); // Used for loading all images used within game
 
-      XML.loadXML('/com/xml/XMLFiles.php?folder=img/ground/');
+      XML.loadXML('/com/xml/XMLFiles.php?folder=img/ground/'); // PHP is used to output a list of images within the directory for easier loading
       var groundImages = imgLoader.loadImageArray('/img/ground/', XML.getContent('files', 'file'));
 
       var loadTimer = setInterval(loadAll, 100);
 
       function loadAll() {
         if (imgLoader.loaded === imgLoader.to_load) {
-          XML.loadXML('sample1.xml');
+          XML.loadXML('sample1.xml'); // Load the map 
 
           clearInterval(loadTimer);
-          var game = new main(0, 0, 14, 14, 100, 50); 
+          var game = new main(0, 0, 14, 14);  // X & Y drawing position, and tile span to draw 
           
           game.init({
             layers: [
               game.createLayer({
-                zIndex: 0,
-                title: "Ground Layer",
                 layout: XML.getContent('ground_map','row'),
                 graphics: groundImages.files,
-                graphicsDictionary: groundImages.dictionary,
+                graphicsDictionary: groundImages.dictionary, 
                 heightMap: {
                   map: XML.getContent('ground_height','row'),
                   offset: 0,
@@ -215,16 +213,13 @@ THE SOFTWARE.
       }
       
       this.createLayer = function(settings) {
-       var layer = new Isometric(context, settings.height, settings.width, settings.layout, settings.graphics, settings.graphicsDictionary);
-       layer.setupProperties(settings);
-       
-       if (settings.heightMap) {
-         layer.stackTiles(settings.heightMap);
-       }
+        var layer = new Isometric(context, settings.height, settings.width, settings.layout, settings.graphics, settings.graphicsDictionary);
+        layer.setupProperties(settings);
+        layer.stackTiles(settings.heightMap);
       
-       layer.align("h-center", canvas().width, xrange, -60);
-       layer.align("v-center", canvas().height,  yrange, 35);
-       return layer;
+        layer.align("h-center", canvas().width, xrange, -60);
+        layer.align("v-center", canvas().height,  yrange, 35);
+        return layer;
       }
 
 
@@ -233,7 +228,6 @@ THE SOFTWARE.
         startX = 10 - rangeX / 2;
         mapLayers = settings.layers;
         this.draw();
-
       }
       
     }
