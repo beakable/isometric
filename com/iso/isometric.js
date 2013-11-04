@@ -178,7 +178,7 @@ function Isometric(ctx, tileWidth, tileHeight, mapLayout, tileImages, tileImages
 
                 // Draw the tile image on top of height map
                 ctx.save();
-                if (alphaWhenFocusBehind.apply === true) {
+                if (alphaWhenFocusBehind && alphaWhenFocusBehind.apply === true) {
                   if ((i === focusTilePosX + 1 && j === focusTilePosY + 1) || (i === focusTilePosX && j === focusTilePosY + 1) || (i === focusTilePosX + 1 && j === focusTilePosY)) {
                     if (alphaWhenFocusBehind.objectApplied && (alphaWhenFocusBehind.objectApplied === null || (alphaWhenFocusBehind.objectApplied && (resizedTileHeight * curZoom) > alphaWhenFocusBehind.objectApplied.height * curZoom))) {
                       ctx.globalAlpha = 0.6;
@@ -456,7 +456,7 @@ function Isometric(ctx, tileWidth, tileHeight, mapLayout, tileImages, tileImages
     var i,j ;
     if (setting == "left") {
       for (i = 0; i < mapLayout.length; i++) {
-        for (j = mapLayout[i].length - 1; j >= 0; j--) {
+        for (j = mapLayout.length - 1; j >= 0; j--) {
           tempLine.push(mapLayout[j][i]);
           if (stackTiles) {
             tempLineTwo.push(heightMap[j][i]);
@@ -609,7 +609,7 @@ function Isometric(ctx, tileWidth, tileHeight, mapLayout, tileImages, tileImages
       _adjustLight(setting, increase);
     },
 
-    getLightness: function(){
+    getLightness: function() {
       return shadowDistance.distance;
     },
 
