@@ -140,8 +140,8 @@ THE SOFTWARE.
 
       var enemy = [];
 
-      var enemyStart = [4, 0];
-      var enemyEnd = [4, 9];
+      var enemyStart = [4, 0]; // Starting location of AI
+      var enemyEnd = [4, 9]; // Ending location of AI
 
       var context = canvas.create("canavas", 920, 600, {
         background: "#FFF",
@@ -155,23 +155,23 @@ THE SOFTWARE.
 
       input.mouse_action(function(coords) {
         mapLayers.map(function(layer) {
-          tile_coordinates =  layer.applyMouseFocus(coords.x, coords.y);
-          layer.applyFocusClickHeightmap(tile_coordinates.x, tile_coordinates.y);
-          layer.applyFocusClick(tile_coordinates.x, tile_coordinates.y, 9);
+          tile_coordinates =  layer.applyMouseFocus(coords.x, coords.y); // Get the current mouse location from X & Y Coords
+          layer.applyFocusClickHeightmap(tile_coordinates.x, tile_coordinates.y); // Force the increasing of heightmap (TEMP)
+          layer.applyFocusClick(tile_coordinates.x, tile_coordinates.y, 9); // Force the chaning of tile graphic (TEMP)
         });
       });
 
       input.mouse_move(function(coords) {
         mapLayers.map(function(layer) {
-          tile_coordinates = layer.applyMouseFocus(coords.x, coords.y);
+          tile_coordinates = layer.applyMouseFocus(coords.x, coords.y); // Apply mouse rollover via mouse location X & Y
         });
       });  
       
       this.draw = function() {
         context.clearRect(0, 0, canvas().width, canvas().height);
-		    if(calculatePaths === 100) {
+		    if(calculatePaths === 100) { // Calculate AI paths every 100 ticks
           enemy.map(function(e) {
-            pathfind(e, [e.xPos, e.yPos], [enemyEnd[0], enemyEnd[1]], mapLayers[0].getHeightLayout(), function (data) {
+            pathfind(e, [e.xPos, e.yPos], [enemyEnd[0], enemyEnd[1]], mapLayers[0].getHeightLayout(), function (data) { 
               if (data.length > 0 && data[1] !== undefined) {
                 e.xPos = data[1].x;
                 e.yPos = data[1].y;
@@ -187,12 +187,12 @@ THE SOFTWARE.
           for (j = 0; j < 0 + rangeX; j++) {
             mapLayers.map(function(layer) {
               if (layer.getTitle() === "Graphics") {
-                layer.draw(i,j);
+                layer.draw(i,j); // Draw the graphics layer
               }
               else {
                 enemy.map(function(e) {
                   if (i === e.xPos  && j === e.yPos) {
-                    layer.draw(i, j, e.image);
+                    layer.draw(i, j, e.image); // Only draw the enemy over writes of the AI layer
                   }
                 });
               }
@@ -207,8 +207,8 @@ THE SOFTWARE.
         var layer = new Isometric(context, settings.height, settings.width, settings.layout, settings.graphics, settings.graphicsDictionary);
         layer.setupProperties(settings);
         layer.stackTiles(settings.heightMap);
-        layer.align("h-center", canvas().width, xrange, 0);
-        layer.align("v-center", canvas().height,  yrange, 0);
+        layer.align("h-center", canvas().width, xrange, 0); // Center canvas drawing X
+        layer.align("v-center", canvas().height,  yrange, 0); //Center canvas drawing Y
         return layer;
       }
 
@@ -222,7 +222,7 @@ THE SOFTWARE.
             xPos: enemyStart[0],
             yPos: enemyStart[1]
           });
-        }, 2500);
+        }, 2500); // Create new enemy AI every 2.5 seconds
       }
       
     }
