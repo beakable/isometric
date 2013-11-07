@@ -241,10 +241,10 @@ function Isometric(ctx, tileWidth, tileHeight, mapLayout, tileImages, tileImages
 
             ctx.fillStyle = 'rgba(255, 255, 120, 0.7)';
             ctx.beginPath();
-            ctx.moveTo(xpos, ypos + (k * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom) / 2);
-            ctx.lineTo(xpos + (tileHeight * curZoom), ypos + (k * ((tileHeight - resizedTileHeight) * curZoom)));
-            ctx.lineTo(xpos + (tileHeight * curZoom) * 2, ypos + (k * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom) / 2);
-            ctx.lineTo(xpos + (tileHeight * curZoom), ypos + (k * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom));
+            ctx.moveTo(xpos, ypos + ((k - 2) * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom) / 2);
+            ctx.lineTo(xpos + (tileHeight * curZoom), ypos + ((k - 2) * ((tileHeight - resizedTileHeight) * curZoom)));
+            ctx.lineTo(xpos + (tileHeight * curZoom) * 2, ypos + ((k - 2) * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom) / 2);
+            ctx.lineTo(xpos + (tileHeight * curZoom), ypos + ((k - 2) * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom));
             ctx.fill();
           }
         }
