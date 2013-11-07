@@ -65,21 +65,21 @@ function CanvasInput(doc, canvas) {
     },
 
     mobile: function(callback) {
-      doc.addEventListener('touchstart', function(event) {
+      canvas.addEventListener('touchstart', function(event) {
         event.preventDefault();
         _mobile_input(event, callback);
       }, false);
     },
 
     mouse_action: function(callback) {
-      doc.addEventListener('mousedown', function(event) {
+      canvas.addEventListener('mousedown', function(event) {
         event.preventDefault();
         _mouse_input(event, callback);
       }, false);
     },
 
     mouse_move: function(callback) {
-      doc.addEventListener('mousemove', function(event) {
+      canvas.addEventListener('mousemove', function(event) {
         event.preventDefault();
         _mouse_input(event, callback);
       }, false);
