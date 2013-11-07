@@ -44,7 +44,7 @@ var pathfind = function (item, start, end, map, callback) {
 			if (typeof item.pathfind !== 'object') {
 
 				item.pathfind = {
-					worker: new Worker('com/pathfind/pathfind_worker.js?123'),
+					worker: new Worker('/com/pathfind/pathfind_worker.js?123'),
 					end: end,
 					path: undefined,
 					active: false

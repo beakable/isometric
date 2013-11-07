@@ -402,9 +402,13 @@ function Isometric(ctx, tileWidth, tileHeight, mapLayout, tileImages, tileImages
     return({x: focusTilePosX, y: focusTilePosY});
   }
 
-  function _applyFocusClick(x, y) {
-     mapLayout[x][y] = 47;
+  function _applyFocusClick(x, y, val) {
+     mapLayout[x][y] = val;
     //heightMap[x][y] = Number(heightMap[x][y]) + 1;
+  }
+
+  function _applyFocusClickHeightmap(x, y) {
+    heightMap[x][y] = Number(heightMap[x][y]) + 1;
   }
 
   function _applyFocus(xPos, yPos) {
@@ -568,8 +572,12 @@ function Isometric(ctx, tileWidth, tileHeight, mapLayout, tileImages, tileImages
       return _applyFocus(tileX, tileY);
     },
 
-    applyFocusClick: function(tileX, tileY) {
-      return _applyFocusClick(tileX, tileY);
+    applyFocusClick: function(tileX, tileY, val) {
+      return _applyFocusClick(tileX, tileY, val);
+    },
+
+    applyFocusClickHeightmap: function(tileX, tileY) {
+      return _applyFocusClickHeightmap(tileX, tileY);
     },
 
     align: function(position, screen_dimension, size, offset) {
