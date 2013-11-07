@@ -15,6 +15,8 @@ Other Samples:
 
 Zoom and rotate of a simple one layer map featuring a heightmap: http://isometric.beakable.com/Samples/sample1.html
 
+The basics of a Tower Defence game using pathfinding: http://isometric.beakable.com/Samples/sample2.html (incomplete)
+
 Particles
 ![particles](https://f.cloud.github.com/assets/1159739/1322878/ca65cd72-3453-11e3-97f6-c6b0243787b0.png)
 
