@@ -34,26 +34,8 @@ THE SOFTWARE.
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
     <title></title>
     <style type="text/css">
-      body {
-        margin: 0;
-        padding: 0;
-        background: #000022
-      }
        .twitter-follow-button {
         position: absolute !important;
-      }
-      a, a:visited {
-        color: #FFF;
-      }
-      .gameInfo {
-        position: absolute;
-        right: 0px;
-        top: 0px;
-        width: 200px;
-        height: 24px;
-        background: #222244;
-        text-align: center;
-        color: #FFF;
       }
     </style>
     <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
@@ -116,13 +98,26 @@ THE SOFTWARE.
           game.init({
             layers: [
               game.createLayer({
+                title: "Graphics",
                 layout: XML.getContent('ground_map','row'),
                 graphics: groundImages.files,
                 graphicsDictionary: groundImages.dictionary, 
                 heightMap: {
                   map: XML.getContent('ground_height','row'),
                   offset: 0,
-                  heightTile: groundImages.files["blank-block.png"]
+                  heightTile: groundImages.files["blank-block.png"],
+                },
+                height: 100,
+                width: 50,
+                applyInteractions: true
+              }),
+              game.createLayer({
+                title: "AI",
+                layout: XML.getContent('object_map','row'),
+                heightMap: {
+                  map: XML.getContent('ground_height','row'),
+                  offset: 20,
+                  heightMapOnTop: true
                 },
                 height: 100,
                 width: 50,
@@ -138,8 +133,6 @@ THE SOFTWARE.
     function main(x, y, xrange, yrange, playerImages) {
       self = this;
       var mapLayers = [];
-      var startY = y;
-      var startX = x;
       var rangeX = xrange;
       var rangeY = yrange;
 
@@ -147,11 +140,11 @@ THE SOFTWARE.
 
       var enemy = [];
 
-      var enemyStart = [4,0];
+      var enemyStart = [4, 0];
       var enemyEnd = [4, 9];
 
       var context = canvas.create("canavas", 920, 600, {
-        background: "#000022",
+        background: "#FFF",
         display: "block",
         marginLeft: "auto",
         marginRight: "auto"
@@ -161,11 +154,18 @@ THE SOFTWARE.
       var input = new CanvasInput(document, canvas());
 
       input.mouse_action(function(coords) {
-        tile_coordinates =  mapLayers[0].applyMouseFocus(coords.x, coords.y);
-        mapLayers[0].applyFocusClickHeightmap(tile_coordinates.x, tile_coordinates.y);
-        mapLayers[0].applyFocusClick(tile_coordinates.x, tile_coordinates.y, 9);
-       });
+        mapLayers.map(function(layer) {
+          tile_coordinates =  layer.applyMouseFocus(coords.x, coords.y);
+          layer.applyFocusClickHeightmap(tile_coordinates.x, tile_coordinates.y);
+          layer.applyFocusClick(tile_coordinates.x, tile_coordinates.y, 9);
+        });
+      });
 
+      input.mouse_move(function(coords) {
+        mapLayers.map(function(layer) {
+          tile_coordinates = layer.applyMouseFocus(coords.x, coords.y);
+        });
+      });  
       
       this.draw = function() {
         context.clearRect(0, 0, canvas().width, canvas().height);
@@ -183,15 +183,19 @@ THE SOFTWARE.
           });
           calculatePaths = 0;
         }
-        for(i = startY; i < startY + rangeY; i++) {
-          for(j = startX; j < startX + rangeX; j++) {
+        for (i = 0; i < 0 + rangeY; i++) {
+          for (j = 0; j < 0 + rangeX; j++) {
             mapLayers.map(function(layer) {
-              layer.draw(i,j);
-              enemy.map(function(e) {
-                if (i === e.xPos  && j === e.yPos) {
-                  layer.draw(i, j, e.image);
-                }
-              });
+              if (layer.getTitle() === "Graphics") {
+                layer.draw(i,j);
+              }
+              else {
+                enemy.map(function(e) {
+                  if (i === e.xPos  && j === e.yPos) {
+                    layer.draw(i, j, e.image);
+                  }
+                });
+              }
             });
           }
         }
@@ -202,19 +206,14 @@ THE SOFTWARE.
       this.createLayer = function(settings) {
         var layer = new Isometric(context, settings.height, settings.width, settings.layout, settings.graphics, settings.graphicsDictionary);
         layer.setupProperties(settings);
-        if (settings.heightMap) {
-          layer.stackTiles(settings.heightMap);
-        }
-      
-        layer.align("h-center", canvas().width, xrange, -60);
+        layer.stackTiles(settings.heightMap);
+        layer.align("h-center", canvas().width, xrange, 0);
         layer.align("v-center", canvas().height,  yrange, 0);
         return layer;
       }
 
 
       this.init = function(settings) {
-        startY = 0;
-        startX = 0;
         mapLayers = settings.layers;
         this.draw();
         setInterval( function(){
@@ -230,7 +229,6 @@ THE SOFTWARE.
     </script>
   </head>
   <body onLoad="launch()">
-    <div id="timer" class="gameInfo">[Q][W] Rotate</div>
     <a href="https://twitter.com/Beakable" class="twitter-follow-button" data-show-count="false">Follow @Beakable</a>
   </body>
 </html>
