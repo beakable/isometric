@@ -29,7 +29,8 @@ self.addEventListener('message', function(evt) {
 	// Initial passed values
 	var s = evt.data.s,
 		e = evt.data.e,
-		m = evt.data.m;
+		m = evt.data.m,
+		d = (evt.data.d === false) ? false : true; // Allow Diagonal Movement
 
 	/*
 		Nodes -
@@ -47,7 +48,7 @@ self.addEventListener('message', function(evt) {
 		this.g = g;
 		this.h = h;
 		this.f = f;
-	}
+	};
 
 
 	/*
@@ -59,7 +60,15 @@ self.addEventListener('message', function(evt) {
 			y = current.y - end.y;
 
 		return Math.pow(x, 2) + Math.pow(y, 2);
-	}
+	};
+
+	/*
+		Difference
+	*/
+	var diff = function (a, b) {
+		return Math.abs((a > b)? a-b : b-a);
+	};
+
 
 	// Set-up Nodes
 	s = new node(s[0], s[1], -1, -1, -1, -1); // Start Node
@@ -123,26 +132,29 @@ self.addEventListener('message', function(evt) {
 		for (var x = Math.max(0, current.x-1), lenx = Math.min(cols, current.x+1); x <= lenx; x++) {
 			for (var y = Math.max(0, current.y-1), leny = Math.min(rows, current.y+1); y <= leny; y++) {
 
-				// Check if location square is open
-				if (Number(m[x][y]) === 0) {
+				if (d || (diff(current.x, x) + diff(current.y, y)) <= 1) {
 
-					// Check if square is in closed list
-					if (mn[x + y * rows] === false) {
-						continue;
+					// Check if location square is open
+					if (Number(m[x][y]) === 0) {
+
+						// Check if square is in closed list
+						if (mn[x + y * rows] === false) {
+							continue;
+						}
+
+						// If square not in open list use it
+						if (mn[x + y * rows] !== true) {
+							var n = new node(x, y, c.length-1, -1, -1, -1); // Create new node
+							n.g = current.g + Math.floor(Math.sqrt(Math.pow(n.x - current.x, 2) + Math.pow(n.y-current.y, 2)));
+							n.h = heuristic(n, e);
+							n.f = n.g + n.h;
+
+							o.push(n); // Push node onto open list
+
+							mn[x + y * rows] = true; // Set bit into open list
+						}
+
 					}
-
-					// If square not in open list use it
-					if (mn[x + y * rows] !== true) {
-						var n = new node(x, y, c.length-1, -1, -1, -1); // Create new node
-						n.g = current.g + Math.floor(Math.sqrt(Math.pow(n.x - current.x, 2) + Math.pow(n.y-current.y, 2)));
-						n.h = heuristic(n, e);
-						n.f = n.g + n.h;
-
-						o.push(n); // Push node onto open list
-
-						mn[x + y * rows] = true; // Set bit into open list
-					}
-
 				}
 			}
 		} 
