@@ -156,8 +156,8 @@ THE SOFTWARE.
       input.mouse_action(function(coords) {
         mapLayers.map(function(layer) {
           tile_coordinates =  layer.applyMouseFocus(coords.x, coords.y); // Get the current mouse location from X & Y Coords
-          layer.applyFocusClickHeightmap(tile_coordinates.x, tile_coordinates.y); // Force the increasing of heightmap (TEMP)
-          layer.applyFocusClick(tile_coordinates.x, tile_coordinates.y, 9); // Force the chaning of tile graphic (TEMP)
+          layer.setHeightmapTile(tile_coordinates.x, tile_coordinates.y, layer.getHeightmapTile(tile_coordinates.x, tile_coordinates.y) + 1); // Increase heightmap tile 
+          layer.setTile(tile_coordinates.x, tile_coordinates.y, 9); // Force the chaning of tile graphic
         });
       });
 

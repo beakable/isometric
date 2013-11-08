@@ -166,7 +166,10 @@ function Isometric(ctx, tileWidth, tileHeight, mapLayout, tileImages, tileImages
       else {
         var stack = Math.round(Number(heightMap[i][j]));
         for (var k = 0; k <= stack; k++) {
-          if (heightMapOnTop && k === stack){
+          if (heightMapOnTop && k === stack) { 
+
+            // If tile is to be placed on top of heightmap 
+
             if (!distanceLightingSettings || ( distanceLightingSettings && distanceLighting < distanceLightingSettings.darkness)) {
               if (tileImageOverwite) {
 
@@ -191,6 +194,9 @@ function Isometric(ctx, tileWidth, tileHeight, mapLayout, tileImages, tileImages
             }
           }
           else if(!heightMapOnTop) {
+
+            // If tile is to be repeated for heightmap
+
             if (!distanceLightingSettings || ( distanceLightingSettings && distanceLighting < distanceLightingSettings.darkness)) {
               if (tileImageOverwite) {
                 ctx.drawImage(tileImageOverwite, 0, 0, tileImageOverwite.width, tileImageOverwite.height, xpos, ypos + (k * ((tileHeight - heightOffset - resizedTileHeight) * curZoom)), (tileWidth * curZoom), (resizedTileHeight * curZoom));
@@ -359,6 +365,10 @@ function Isometric(ctx, tileWidth, tileHeight, mapLayout, tileImages, tileImages
     return mapLayout[posX][posY];
   }
 
+  function _getHeightmapTile(posX, posY) {
+    return heightMap[posX][posY];
+  }
+
   function _setZoom(dir) {
     if (Number(dir)) {
       curZoom = dir;
@@ -403,12 +413,15 @@ function Isometric(ctx, tileWidth, tileHeight, mapLayout, tileImages, tileImages
   }
 
   function _applyFocusClick(x, y, val) {
-     mapLayout[x][y] = val;
-    //heightMap[x][y] = Number(heightMap[x][y]) + 1;
+    // heightMap[x][y] = Number(heightMap[x][y]) + 1;
   }
 
-  function _applyFocusClickHeightmap(x, y) {
-    heightMap[x][y] = Number(heightMap[x][y]) + 1;
+  function _setTile(x, y, val) {
+    mapLayout[x][y] = val;
+  }
+
+  function _setHeightmapTile(x, y, val) {
+    heightMap[x][y] = val;
   }
 
   function _applyFocus(xPos, yPos) {
@@ -552,7 +565,19 @@ function Isometric(ctx, tileWidth, tileHeight, mapLayout, tileImages, tileImages
     },
 
     getTile: function(tileX, tileY) {
-      return _getTile(tileX, tileY);
+      return Number(_getTile(tileX, tileY));
+    },
+
+    getHeightmapTile: function(tileX, tileY) {
+      return Number(_getHeightmapTile(tileX, tileY));
+    },
+
+    setTile: function(tileX, tileY, val) {
+      _setTile(tileX, tileY, val);
+    },
+
+    setHeightmapTile: function(tileX, tileY, val) {
+      _setHeightmapTile(tileX, tileY, val);
     },
 
     setZoom: function(direction) {
@@ -573,11 +598,7 @@ function Isometric(ctx, tileWidth, tileHeight, mapLayout, tileImages, tileImages
     },
 
     applyFocusClick: function(tileX, tileY, val) {
-      return _applyFocusClick(tileX, tileY, val);
-    },
 
-    applyFocusClickHeightmap: function(tileX, tileY) {
-      return _applyFocusClickHeightmap(tileX, tileY);
     },
 
     align: function(position, screen_dimension, size, offset) {
