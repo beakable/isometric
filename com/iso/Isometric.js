@@ -365,7 +365,7 @@ function Isometric(ctx, tileWidth, tileHeight, mapLayout, tileImages, tileImages
     return mapLayout[posX][posY];
   }
 
-  function _getHeightmapTile(posX, posY) {
+  function _getHeightMapTile(posX, posY) {
     return heightMap[posX][posY];
   }
 
@@ -568,8 +568,8 @@ function Isometric(ctx, tileWidth, tileHeight, mapLayout, tileImages, tileImages
       return Number(_getTile(tileX, tileY));
     },
 
-    getHeightmapTile: function(tileX, tileY) {
-      return Number(_getHeightmapTile(tileX, tileY));
+    getHeightMapTile: function(tileX, tileY) {
+      return Number(_getHeightMapTile(tileX, tileY));
     },
 
     setTile: function(tileX, tileY, val) {
