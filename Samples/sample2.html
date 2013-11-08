@@ -177,11 +177,17 @@ THE SOFTWARE.
                 e.yPos = data[1].y;
               }
             });
-            if (e.xPos === enemyEnd[0] && e.yPos === enemyEnd[1]) {
-              e = null;
-            }
           });
           calculatePaths = 0;
+          enemy = enemy.filter(function(e) { 
+            if (e.xPos === Number(enemyEnd[0]) && e.yPos === Number(enemyEnd[1])) {
+              return false;
+              console.log("Remove");
+            }
+            else {
+              return true
+            } 
+          });        
         }
         for (i = 0; i < 0 + rangeY; i++) {
           for (j = 0; j < 0 + rangeX; j++) {
@@ -199,6 +205,7 @@ THE SOFTWARE.
             });
           }
         }
+        
         calculatePaths += 1;
         requestAnimFrame(self.draw);
       }
@@ -208,7 +215,7 @@ THE SOFTWARE.
         layer.setupProperties(settings);
         layer.stackTiles(settings.heightMap);
         layer.align("h-center", canvas().width, xrange, 0); // Center canvas drawing X
-        layer.align("v-center", canvas().height,  yrange, 0); //Center canvas drawing Y
+        layer.align("v-center", canvas().height, yrange, 0); // Center canvas drawing Y
         return layer;
       }
 
