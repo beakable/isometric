@@ -403,6 +403,14 @@ function Isometric(ctx, tileWidth, tileHeight, mapLayout, tileImages, tileImages
     }
   }
 
+  function _getXYCoords(x, y) {
+    var positionY = (2 * (y - drawY) - x + drawX) / 2;
+    var positionX = x + positionY - drawX - (tileHeight * curZoom);
+    positionY = Math.round(positionY / (tileHeight * curZoom));
+    positionX = Math.round(positionX / (tileHeight * curZoom));
+    return({x: positionX, y: positionY});
+  }
+
   function _applyMouseFocus(x, y) {
     mouseUsed = true;
     focusTilePosY = (2 * (y - drawY) - x + drawX) / 2;
@@ -587,6 +595,10 @@ function Isometric(ctx, tileWidth, tileHeight, mapLayout, tileImages, tileImages
 
     setLight: function(tileX, tileY) {
       return _setLight(tileX, tileY);
+    },
+
+    getXYCoords: function(XPosition, YPosition) {
+      return _getXYCoords(XPosition, YPosition);
     },
 
     applyMouseFocus: function(mouseXPosition, mouseYPosition) {
