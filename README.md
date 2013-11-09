@@ -13,8 +13,8 @@ Follow more about this project on my Twitter: https://twitter.com/Beakable
 
 Other Samples:
 
-Zoom and rotate of a simple one layer map featuring a heightmap: 
-http://isometric.beakable.com/Samples/sample1.html
+Zoom and rotate of a simple 900 tile one layer map featuring a heightmap: 
+http://isometric.beakable.com/Samples/sample1.html (Tiles Created by Indie Squid - http://indiesquid.com)
 
 The basics of a Tower Defence game using pathfinding: 
 http://isometric.beakable.com/Samples/sample2.html (incomplete)
