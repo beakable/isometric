@@ -32,7 +32,7 @@ THE SOFTWARE.
 		- 0 = Clear
 		- 1 or bigger = block
 */
-var pathfind = function (item, start, end, map, callback, force) {
+var pathfind = function (item, start, end, map, diagonal, callback, force) {
 
 	if (start[0] != end[0] || start[1] != end[1]) {
 
@@ -42,7 +42,7 @@ var pathfind = function (item, start, end, map, callback, force) {
 			if (typeof item.pathfind !== 'object') {
 
 				item.pathfind = {
-					worker: new Worker('com/pathfind/pathfind_worker.js?' + Math.random()),
+					worker: new Worker('/com/pathfind/pathfind_worker.js?' + Math.random()),
 					end: end,
 					path: undefined,
 					active: false
@@ -65,7 +65,7 @@ var pathfind = function (item, start, end, map, callback, force) {
 					if (!p.active) {
 						p.end = end;
 						p.active = true;
-						p.worker.postMessage({s: start, e: end, m: map, d:false}); // Initiate WebWorker	
+						p.worker.postMessage({s: start, e: end, m: map, d: diagonal}); // Initiate WebWorker	
 					}			
 				};
 

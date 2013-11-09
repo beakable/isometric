@@ -176,12 +176,12 @@ THE SOFTWARE.
         context.clearRect(0, 0, canvas().width, canvas().height);
 		    if(calculatePaths === 100) { // Calculate AI paths every 100 ticks
           enemy.map(function(e) {
-            pathfind(e, [e.xPos, e.yPos], [enemyEnd[0], enemyEnd[1]], mapLayers[0].getHeightLayout(), function (data) { 
+            pathfind(e, [e.xPos, e.yPos], [enemyEnd[0], enemyEnd[1]], mapLayers[0].getHeightLayout(), false, function (data) { 
               if (data.length > 0 && data[1] !== undefined) {
                 e.xPos = data[1].x;
                 e.yPos = data[1].y;
               }
-            });
+            }, true);
           });
           calculatePaths = 0;
           enemy = enemy.filter(function(e) { 
