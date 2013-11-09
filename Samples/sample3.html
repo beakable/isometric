@@ -129,13 +129,12 @@ THE SOFTWARE.
       var balls = [];
       var rangeX = xrange;
       var rangeY = yrange;
-      var context = canvas.create("canavas", 920, 600, {
+      var context = canvas.create("canavas", 1000, 600, {
         background: "#FFF",
         display: "block",
         marginLeft: "auto",
         marginRight: "auto"
       });
-      canvas.fullScreen();
       
 
     function ProjectileObject(x, y, tileHeight, tileWidth, img) {
@@ -156,26 +155,33 @@ THE SOFTWARE.
       },
 
       this.draw = function(context){
+          var pos = {};
+          var bounced = false; 
           context.save();
           var resizedTileHeight = img.height / (img.width / tileWidth);
           context.translate(this.x, this.y);
           context.drawImage(img, 0, 0, img.width, img.height, -tileWidth/2, -resizedTileHeight/2, (tileWidth), (resizedTileHeight));
-          var pos = mapLayers[0].getXYCoords(this.x + this.xD, this.y + this.yD);
+          
+          pos = mapLayers[0].getXYCoords(this.x, this.y + this.yD);
           this.tileX = pos.x;
           this.tileY = pos.y;
 
-          if (mapLayers[0].getHeightMapTile(pos.x, pos.y) === 0) {
-            this.x += this.xD;
-            this.y += this.yD;
+          if (mapLayers[0].getHeightMapTile(pos.x, pos.y) !== 0) {
+            this.yD *= -1
+            bounced = true;
           }
-          else {
-            if(Math.random()* 5 < 2.2) {
-              this.yD = -this.yD
-            }
-            else {
-              this.xD = -this.xD
-            }
+          
+          pos = mapLayers[0].getXYCoords(this.x + this.xD, this.y);
+          this.tileX = pos.x;
+          this.tileY = pos.y;
+
+          if (mapLayers[0].getHeightMapTile(pos.x, pos.y) !== 0) {
+            this.xD *= -1
           }
+
+          this.x += this.xD;
+          this.y += this.yD;
+          
           context.restore();
       };
     }
@@ -214,9 +220,9 @@ THE SOFTWARE.
       this.init = function(settings) {
         mapLayers = settings.layers;
         this.draw();
-        balls.push(new ProjectileObject(400, 280, 100, 50, objectImages.files["enemy2.png"]));
-        balls.push(new ProjectileObject(450, 210, 100, 50, objectImages.files["enemy1.png"]));
-        balls.push(new ProjectileObject(570, 210, 100, 50, objectImages.files["enemy3.png"]));
+        balls.push(new ProjectileObject(600, 380, 100, 50, objectImages.files["enemy2.png"]));
+        balls.push(new ProjectileObject(770, 280, 100, 50, objectImages.files["enemy1.png"]));
+        balls.push(new ProjectileObject(570, 180, 100, 50, objectImages.files["enemy3.png"]));
       }
       
     }
