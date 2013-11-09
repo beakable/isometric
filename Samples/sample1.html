@@ -98,14 +98,14 @@ THE SOFTWARE.
       var XML = new XMLPopulate(); // Used for loading the XML maps TODO: Change maps to JSON rather than XML
       var imgLoader = new ImageLoader(); // Used for loading all images used within game
 
-      XML.loadXML('/com/xml/XMLFiles.php?folder=img/ground/'); // PHP is used to output a list of images within the directory for easier loading
-      var groundImages = imgLoader.loadImageArray('/img/ground/', XML.getContent('files', 'file'));
+      XML.loadXML('/com/xml/XMLFiles.php?folder=Samples/sample1Img/'); // PHP is used to output a list of images within the directory for easier loading
+      var groundImages = imgLoader.loadImageArray('/Samples/sample1Img/', XML.getContent('files', 'file'));
 
       var loadTimer = setInterval(loadAll, 100);
 
       function loadAll() {
         if (imgLoader.loaded === imgLoader.to_load) {
-          XML.loadXML('sample1.xml'); // Load the map 
+         XML.loadXML('/Samples/sample1.xml');// Load the map 
 
           clearInterval(loadTimer);
           var game = new main(0, 0, 14, 14);  // X & Y drawing position, and tile span to draw 
@@ -113,23 +113,24 @@ THE SOFTWARE.
           game.init({
             layers: [
               game.createLayer({
+                Title: "Graphics",
                 layout: XML.getContent('ground_map','row'),
                 graphics: groundImages.files,
                 graphicsDictionary: groundImages.dictionary, 
                 heightMap: {
                   map: XML.getContent('ground_height','row'),
-                  offset: 0,
-                  heightTile: groundImages.files["blank-block.png"]
+                  offset: -80,
+                  heightTile: groundImages.files["ground.png"]
                 },
                 height: 100,
                 width: 50,
+                zeroIsBlank: true
               })
             ]
           });
         }
       }
     }
-
 
     function main(x, y, xrange, yrange) {
       self = this;
@@ -151,13 +152,14 @@ THE SOFTWARE.
       var input = new CanvasInput(document, canvas());
 
       input.keyboard(function(pressed) {
+        console.log(pressed);
         switch(pressed) {
           case 65:
              mapLayers.map(function(layer) {
               if (startY + rangeY + 1 < mapLayers[0].getLayout().length) {
                 layer.setZoom("out");
                 layer.align("h-center", canvas().width, xrange, -60);
-                layer.align("v-center", canvas().height,  yrange, 35);
+                layer.align("v-center", canvas().height,  yrange, 240);
                 rangeX +=  1
                 rangeY +=  1
               }
@@ -168,7 +170,7 @@ THE SOFTWARE.
               if (rangeY - 1 > defaultRangeY - 1) {
                 layer.setZoom("in");
                 layer.align("h-center", canvas().width, xrange, -60);
-                layer.align("v-center", canvas().height,  yrange, 35);
+                layer.align("v-center", canvas().height,  yrange, 240);
                 rangeX -=  1
                 rangeY -=  1
               }
@@ -196,6 +198,30 @@ THE SOFTWARE.
               layer.rotate("right");
             });
           break;
+          case 39:
+            mapLayers.map(function(layer) {
+              layer.move("left");
+            });
+            startY ++;
+          break;
+          case 38:
+            mapLayers.map(function(layer) {
+              layer.move("down");
+            });
+            startX --;
+          break;
+          case 40:
+            mapLayers.map(function(layer) {
+              layer.move("right");
+            });
+            startX ++;
+          break;
+          case 37:
+            mapLayers.map(function(layer) {
+              layer.move("up");
+            });
+            startY --;
+          break;
         }
       });
 
@@ -218,7 +244,7 @@ THE SOFTWARE.
         layer.stackTiles(settings.heightMap);
       
         layer.align("h-center", canvas().width, xrange, -60);
-        layer.align("v-center", canvas().height,  yrange, 35);
+        layer.align("v-center", canvas().height,  yrange, 240);
         return layer;
       }
 
@@ -234,7 +260,7 @@ THE SOFTWARE.
     </script>
   </head>
   <body onLoad="launch()">
-    <div id="timer" class="gameInfo">[A]/[S] Zoom - [Q][W] Rotate</div>
+    <div id="gameInfo" class="gameInfo">[A]/[S] Zoom - [Q][W] Rotate</div>
     <a href="https://twitter.com/Beakable" class="twitter-follow-button" data-show-count="false">Follow @Beakable</a>
   </body>
 </html>
