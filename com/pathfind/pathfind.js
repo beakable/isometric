@@ -31,10 +31,8 @@ THE SOFTWARE.
 	m: map array of map tiles
 		- 0 = Clear
 		- 1 or bigger = block
-
-	TODO: Bind worker to enemy object so the file isn't constantly loaded
 */
-var pathfind = function (item, start, end, map, callback) {
+var pathfind = function (item, start, end, map, callback, force) {
 
 	if (start[0] != end[0] || start[1] != end[1]) {
 
@@ -44,7 +42,7 @@ var pathfind = function (item, start, end, map, callback) {
 			if (typeof item.pathfind !== 'object') {
 
 				item.pathfind = {
-					worker: new Worker('/com/pathfind/pathfind_worker.js?123'),
+					worker: new Worker('com/pathfind/pathfind_worker.js?' + Math.random()),
 					end: end,
 					path: undefined,
 					active: false
@@ -67,12 +65,12 @@ var pathfind = function (item, start, end, map, callback) {
 					if (!p.active) {
 						p.end = end;
 						p.active = true;
-						p.worker.postMessage({s: start, e: end, m: map}); // Initiate WebWorker	
+						p.worker.postMessage({s: start, e: end, m: map, d:false}); // Initiate WebWorker	
 					}			
 				};
 
 			// Check if end location is same as previous loop
-			if (item.pathfind.end[0] == end[0] && item.pathfind.end[1] == end[1] && item.pathfind.path !== undefined) {
+			if ((force !== undefined && !force) && item.pathfind.end[0] == end[0] && item.pathfind.end[1] == end[1] && item.pathfind.path !== undefined) {
 
 				// Loop through current path
 				for (var i = 0, len = item.pathfind.path.length; i < len; i++) {
