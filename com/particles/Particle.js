@@ -78,39 +78,9 @@ function Particle() {
 
 
 
-                var rgbstr = "rgba(";
+                var rgbstr = "rgba(" + this.r + ", " + this.g + ", " + this.b + ", " + Math.roundTo(alpha, 1) + ")";
 
-                rgbstr += this.r;
-
-                rgbstr += ", ";
-
-                rgbstr += this.g;
-
-                rgbstr += ", ";
-
-                rgbstr += this.b;
-
-                rgbstr += ", ";
-
-                rgbstr += Math.roundTo(alpha, 1);
-
-                rgbstr += ")";
-
-
-
-                var rgbbgstr = "rgba(";
-
-                rgbbgstr += Math.floor(this.r / 3);
-
-                rgbbgstr += ", ";
-
-                rgbbgstr += Math.floor(this.g / 3);
-
-                rgbbgstr += ", ";
-
-                rgbbgstr += Math.floor(this.b / 3);
-
-                rgbbgstr += ", 0)";
+                var rgbbgstr = "rgba(" +  Math.floor(this.r / 3) +  ", " +  Math.floor(this.g / 3) +  ", " +  Math.floor(this.b / 3) +  ", 0)";
 
 
 
