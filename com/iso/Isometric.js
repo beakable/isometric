@@ -63,6 +63,7 @@ function Isometric(ctx, tileWidth, tileHeight, mapLayout, tileImages, tileImages
       shadowDistance = settings.shadowDistance;
       title = settings.title;
       zeroIsBlank = settings.zeroIsBlank;
+      mouseUsed = settings.mouseUsed || false;
       alphaWhenFocusBehind = settings.alphaWhenFocusBehind;
   }
 
@@ -71,6 +72,8 @@ function Isometric(ctx, tileWidth, tileHeight, mapLayout, tileImages, tileImages
     var xpos, ypos;
     i = Math.floor(i);
     j = Math.floor(j);
+    if (i < 0) { i = 0; }
+    if (j < 0) { j = 0; }
     if (i > mapLayout.length - 1) {
       i = mapLayout.length - 1;
     }
@@ -166,7 +169,7 @@ function Isometric(ctx, tileWidth, tileHeight, mapLayout, tileImages, tileImages
       else {
         var stack = Math.round(Number(heightMap[i][j]));
         for (var k = 0; k <= stack; k++) {
-          if (heightMapOnTop && k === stack) { 
+          if (heightMapOnTop && k === stack) {
 
             // If tile is to be placed on top of heightmap 
 
@@ -199,13 +202,20 @@ function Isometric(ctx, tileWidth, tileHeight, mapLayout, tileImages, tileImages
 
             if (!distanceLightingSettings || ( distanceLightingSettings && distanceLighting < distanceLightingSettings.darkness)) {
               if (tileImageOverwite) {
+
+                // If there is an overwrite image
+
                 ctx.drawImage(tileImageOverwite, 0, 0, tileImageOverwite.width, tileImageOverwite.height, xpos, ypos + (k * ((tileHeight - heightOffset - resizedTileHeight) * curZoom)), (tileWidth * curZoom), (resizedTileHeight * curZoom));
               }
               else{
                 if (stackTileGraphic) {
                   if (k !== stack) {
+
+                    // Repeat tile graphic till it's reach heightmap max
+
                     ctx.drawImage(stackGraphic, 0, 0, stackGraphic.width, stackGraphic.height, xpos, ypos + (k * ((tileHeight - heightOffset - resizedTileHeight) * curZoom)), (tileWidth * curZoom), (resizedTileHeight * curZoom));
-                  } 
+                  
+                  }
                   else {
                     stackGraphic = tileImages[tileImagesDictionary[image_num]];
                     //resizedTileHeight = stackGraphic.height / (stackGraphic.width / tileWidth);
@@ -242,9 +252,7 @@ function Isometric(ctx, tileWidth, tileHeight, mapLayout, tileImages, tileImages
         }
         if (mouseUsed) {
           if (i == focusTilePosX && j == focusTilePosY) {
-
             // Apply mouse over tile coloring
-
             ctx.fillStyle = 'rgba(255, 255, 120, 0.7)';
             ctx.beginPath();
             ctx.moveTo(xpos, ypos + ((k - 2) * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom) / 2);
@@ -374,12 +382,18 @@ function Isometric(ctx, tileWidth, tileHeight, mapLayout, tileImages, tileImages
       curZoom = dir;
     }
     else if (dir == "in") {
-      if (curZoom < 1) {
+      if (curZoom  + 0.1 < 1) {
         curZoom += 0.1;
       }
+      else {
+        curZoom = 1;
+      }
     }else if (dir == "out") {
-      if (curZoom > 0.2) {
+      if (curZoom - 0.1 > 0.2) {
         curZoom -= 0.1;
+      }
+      else {
+        curZoom = 0.2;
       }
     }
   }
@@ -421,7 +435,7 @@ function Isometric(ctx, tileWidth, tileHeight, mapLayout, tileImages, tileImages
   }
 
   function _applyFocusClick(x, y, val) {
-    // heightMap[x][y] = Number(heightMap[x][y]) + 1;
+     heightMap[x][y] = Number(heightMap[x][y]) + 1;
   }
 
   function _setTile(x, y, val) {
@@ -437,13 +451,13 @@ function Isometric(ctx, tileWidth, tileHeight, mapLayout, tileImages, tileImages
     focusTilePosY = yPos;
   }
 
-  function _align(position, screen_dimension, size, offset) {
+  function _align(position, screenDimension, size, offset) {
     switch(position) {
       case "h-center":
-        drawX = ((screen_dimension / 2) - (tileWidth * (size-1) )/(tileHeight/4)* curZoom) - offset;
+        drawX = (screenDimension / 2) - ((tileWidth/4  * size) * curZoom) / 2;
       break;
       case "v-center":
-        drawY = ((screen_dimension / 2) - (tileHeight * (size-1) * curZoom) / 2) - offset;
+        drawY = (screenDimension / 2) - ((tileHeight/2 * size) * curZoom);
       break;
     }
   }
@@ -613,8 +627,8 @@ function Isometric(ctx, tileWidth, tileHeight, mapLayout, tileImages, tileImages
 
     },
 
-    align: function(position, screen_dimension, size, offset) {
-      return _align(position, screen_dimension, size, offset);
+    align: function(position, screenDimension, size, offset) {
+      return _align(position, screenDimension, size, offset);
     },
 
     hideGraphics: function(toggle, settings) {

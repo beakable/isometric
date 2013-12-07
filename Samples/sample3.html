@@ -102,6 +102,7 @@ THE SOFTWARE.
                 layout: XML.getContent('ground_map','row'),
                 graphics: groundImages.files,
                 graphicsDictionary: groundImages.dictionary, 
+                mouseUsed: true,
                 heightMap: {
                   map: XML.getContent('ground_height','row'),
                   offset: 0,
@@ -140,8 +141,8 @@ THE SOFTWARE.
     function ProjectileObject(x, y, tileHeight, tileWidth, img) {
       this.x = x;
       this.y = y;
-      this.yD = 1;
-      this.xD = 1;
+      this.yD = 2;
+      this.xD = 2;
       this.tileX = null;
       this.tileY = null;
 
@@ -156,31 +157,40 @@ THE SOFTWARE.
 
       this.draw = function(context){
           var pos = {};
-          var bounced = false; 
-          context.save();
-          var resizedTileHeight = img.height / (img.width / tileWidth);
-          context.translate(this.x, this.y);
-          context.drawImage(img, 0, 0, img.width, img.height, -tileWidth/2, -resizedTileHeight/2, (tileWidth), (resizedTileHeight));
-          
-          pos = mapLayers[0].getXYCoords(this.x, this.y + this.yD);
-          this.tileX = pos.x;
-          this.tileY = pos.y;
+    
 
-          if (mapLayers[0].getHeightMapTile(pos.x, pos.y) !== 0) {
+          
+
+          pos = mapLayers[0].getXYCoords(this.x + tileWidth/2, this.y + this.yD + tileHeight/2);
+    
+          if (mapLayers[0].getHeightMapTile(pos.x, pos.y) !== 1) {
+            this.y += this.yD;
+          }
+          else {
+            this.y -= this.yD + 1;
             this.yD *= -1
-            bounced = true;
           }
-          
-          pos = mapLayers[0].getXYCoords(this.x + this.xD, this.y);
+
+          pos = mapLayers[0].getXYCoords(this.x + this.xD + tileWidth/2, this.y + tileHeight/2);
+
+          if (mapLayers[0].getHeightMapTile(pos.x, pos.y) !== 1) {
+            this.x += this.xD;
+          } 
+          else {
+            this.x -= this.xD + 1;
+            this.xD *= -1;
+          }
+
           this.tileX = pos.x;
           this.tileY = pos.y;
 
-          if (mapLayers[0].getHeightMapTile(pos.x, pos.y) !== 0) {
-            this.xD *= -1
-          }
+          
 
-          this.x += this.xD;
-          this.y += this.yD;
+          context.save();
+
+          context.translate(this.x, this.y);
+
+          context.drawImage(img, -(img.width/2 + tileWidth)/4, -(img.height/2) + (tileHeight/2) - 5, img.width, img.height);
           
           context.restore();
       };
@@ -191,25 +201,22 @@ THE SOFTWARE.
         context.clearRect(0, 0, canvas().width, canvas().height);
         for (i = 0; i < 0 + rangeY; i++) {
           for (j = 0; j < 0 + rangeX; j++) {
-            mapLayers.map(function(layer) {
-              layer.draw(i,j);
-              balls.map(function(ball) {
-                var pos = ball.getPos();
-                if (pos.x === i && pos.y ===j) {
-                  ball.draw(context);
-                }
-              })              
-            });
+            mapLayers[0].draw(i,j);
+            balls.map(function(ball) {
+              var pos = ball.getPos();
+              if (pos.x === i && pos.y ===j) {
+                ball.draw(context);
+              }
+            });     
           }
         }
-        
-        
         requestAnimFrame(self.draw);
       }
+
       
       this.createLayer = function(settings) {
         var layer = new Isometric(context, settings.height, settings.width, settings.layout, settings.graphics, settings.graphicsDictionary);
-          layer.applyHeightShadow(true, settings.shadow);
+        layer.applyHeightShadow(true, settings.shadow);
         layer.setupProperties(settings);
         layer.stackTiles(settings.heightMap);
         layer.align("h-center", canvas().width, xrange, 0); // Center canvas drawing X
@@ -219,10 +226,10 @@ THE SOFTWARE.
 
       this.init = function(settings) {
         mapLayers = settings.layers;
-        this.draw();
         balls.push(new ProjectileObject(600, 380, 100, 50, objectImages.files["enemy2.png"]));
         balls.push(new ProjectileObject(770, 280, 100, 50, objectImages.files["enemy1.png"]));
         balls.push(new ProjectileObject(570, 180, 100, 50, objectImages.files["enemy3.png"]));
+        this.draw();
       }
       
     }
