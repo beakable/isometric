@@ -454,7 +454,7 @@ function Isometric(ctx, tileWidth, tileHeight, mapLayout, tileImages, tileImages
   function _align(position, screenDimension, size, offset) {
     switch(position) {
       case "h-center":
-        drawX = (screenDimension / 2) - ((tileWidth/4  * size) * curZoom) / 2;
+        drawX = (screenDimension / 2) - ((tileWidth/4  * size) * curZoom) / (size/2);
       break;
       case "v-center":
         drawY = (screenDimension / 2) - ((tileHeight/2 * size) * curZoom);

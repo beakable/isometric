@@ -132,13 +132,11 @@ THE SOFTWARE.
       }
     }
 
-    function main(x, y, xrange, yrange) {
+    function main(x, y, rangeX, rangeY) {
       self = this;
       var mapLayers = [];
       var startY = y;
       var startX = x;
-      var rangeX = xrange;
-      var rangeY = yrange;
       var defaultRangeY = rangeY;
 
       var context = canvas.create("canavas", 920, 600, {
@@ -152,45 +150,39 @@ THE SOFTWARE.
       var input = new CanvasInput(document, canvas());
 
       input.keyboard(function(pressed) {
-        console.log(pressed);
         switch(pressed) {
           case 65:
              mapLayers.map(function(layer) {
-              if (startY + rangeY + 1 < mapLayers[0].getLayout().length) {
+              if (rangeY < layer.getLayout().length) {
+                rangeX +=  4
+                rangeY +=  4
+                startY -= 2
+                startX -= 2
+                layer.align("h-center", canvas().width, startX, -60);
+                layer.align("v-center", canvas().height, rangeY + startY, 240);
                 layer.setZoom("out");
-                layer.align("h-center", canvas().width, xrange, -60);
-                layer.align("v-center", canvas().height,  yrange, 240);
-                rangeX +=  1
-                rangeY +=  1
-              }
+
+             }
             });
           break;
           case 83:
              mapLayers.map(function(layer) {
-              if (rangeY - 1 > defaultRangeY - 1) {
+              if (rangeY > defaultRangeY) {
+                rangeX -=  4
+                rangeY -=  4
+                startY += 2
+                startX += 2
+                layer.align("h-center", canvas().width, startX, -60);
+                layer.align("v-center", canvas().height, rangeY + startY, 240);
                 layer.setZoom("in");
-                layer.align("h-center", canvas().width, xrange, -60);
-                layer.align("v-center", canvas().height,  yrange, 240);
-                rangeX -=  1
-                rangeY -=  1
+
               }
             })
-          break;
-          case 49:
-            mapLayers.map(function(layer) {
-              layer.toggleGraphicsHide(true);
-              layer.toggleHeightShadow(true);
-            });
-          break;
-          case 50:
-            mapLayers.map(function(layer) {
-              layer.toggleGraphicsHide(false);
-              layer.toggleHeightShadow(false);
-            });
           break;
           case 81:
             mapLayers.map(function(layer) {
               layer.rotate("left");
+
             });
           break;
           case 87:
@@ -242,9 +234,13 @@ THE SOFTWARE.
         var layer = new Isometric(context, settings.height, settings.width, settings.layout, settings.graphics, settings.graphicsDictionary);
         layer.setupProperties(settings);
         layer.stackTiles(settings.heightMap);
-      
-        layer.align("h-center", canvas().width, xrange, -60);
-        layer.align("v-center", canvas().height,  yrange, 240);
+                rangeX -=  4
+                rangeY -=  4
+                startY += 2
+                startX += 2
+        layer.align("h-center", canvas().width, startX, -60);
+        layer.align("v-center", canvas().height, rangeY + startY, 240);
+        layer.setZoom("out");
         return layer;
       }
 
