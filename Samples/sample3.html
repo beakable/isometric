@@ -157,14 +157,13 @@ THE SOFTWARE.
 
       this.draw = function(context){
           var pos = {};
-    
-
-          
 
           pos = mapLayers[0].getXYCoords(this.x + tileWidth/2, this.y + this.yD + tileHeight/2);
     
           if (mapLayers[0].getHeightMapTile(pos.x, pos.y) !== 1) {
             this.y += this.yD;
+            this.tileX = pos.x;
+            this.tileY = pos.y;
           }
           else {
             this.y -= this.yD + 1;
@@ -175,14 +174,13 @@ THE SOFTWARE.
 
           if (mapLayers[0].getHeightMapTile(pos.x, pos.y) !== 1) {
             this.x += this.xD;
+            this.tileX = pos.x;
+            this.tileY = pos.y;
           } 
           else {
             this.x -= this.xD + 1;
             this.xD *= -1;
           }
-
-          this.tileX = pos.x;
-          this.tileY = pos.y;
 
           
 
@@ -190,7 +188,7 @@ THE SOFTWARE.
 
           context.translate(this.x, this.y);
 
-          context.drawImage(img, -(img.width/2 + tileWidth)/4, -(img.height/2) + (tileHeight/2) - 5, img.width, img.height);
+          context.drawImage(img, -(img.width/2 + tileWidth)/4, -(img.height/2) + (tileHeight/2), img.width/1.15, img.height/1.15);
           
           context.restore();
       };
