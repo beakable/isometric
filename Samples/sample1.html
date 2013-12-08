@@ -154,27 +154,30 @@ THE SOFTWARE.
           case 65:
              mapLayers.map(function(layer) {
               if (rangeY < layer.getLayout().length) {
-                rangeX +=  4
-                rangeY +=  4
-                startY -= 2
-                startX -= 2
-                layer.align("h-center", canvas().width, startX, -60);
-                layer.align("v-center", canvas().height, rangeY + startY, 240);
+                rangeX +=  4;
+                rangeY +=  4;
+                startY -= 2;
+                startX -= 2;
+                if (startX < 0) { startX = 0; }
+                if (startY < 0) { startY = 0; }
                 layer.setZoom("out");
 
+                layer.align("h-center", canvas().width, rangeX + startX, 0);
+                layer.align("v-center", canvas().height, rangeY + startY, (rangeY + startY));
              }
             });
           break;
           case 83:
              mapLayers.map(function(layer) {
               if (rangeY > defaultRangeY) {
-                rangeX -=  4
-                rangeY -=  4
-                startY += 2
-                startX += 2
-                layer.align("h-center", canvas().width, startX, -60);
-                layer.align("v-center", canvas().height, rangeY + startY, 240);
+                rangeX -=  4;
+                rangeY -=  4;
+                startY += 2;
+                startX += 2;
                 layer.setZoom("in");
+
+                layer.align("h-center", canvas().width, rangeX + startX, 0);
+                layer.align("v-center", canvas().height, rangeY + startY, (rangeY + startY));
 
               }
             })
@@ -231,23 +234,21 @@ THE SOFTWARE.
       }
       
       this.createLayer = function(settings) {
+
         var layer = new Isometric(context, settings.height, settings.width, settings.layout, settings.graphics, settings.graphicsDictionary);
         layer.setupProperties(settings);
         layer.stackTiles(settings.heightMap);
-                rangeX -=  4
-                rangeY -=  4
-                startY += 2
-                startX += 2
-        layer.align("h-center", canvas().width, startX, -60);
-        layer.align("v-center", canvas().height, rangeY + startY, 240);
-        layer.setZoom("out");
+        
+        startY = 20 - rangeY / 2;
+        startX = 20 - rangeX / 2;
+        layer.setZoom("in");
+        layer.align("h-center", canvas().width, rangeX + startX,0);
+        layer.align("v-center", canvas().height, rangeY + startY, (rangeY + startY));
         return layer;
       }
 
 
       this.init = function(settings) {
-        startY = 10 - rangeY / 2;
-        startX = 10 - rangeX / 2;
         mapLayers = settings.layers;
         this.draw();
       }

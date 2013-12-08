@@ -214,7 +214,7 @@ function Isometric(ctx, tileWidth, tileHeight, mapLayout, tileImages, tileImages
                     // Repeat tile graphic till it's reach heightmap max
 
                     ctx.drawImage(stackGraphic, 0, 0, stackGraphic.width, stackGraphic.height, xpos, ypos + (k * ((tileHeight - heightOffset - resizedTileHeight) * curZoom)), (tileWidth * curZoom), (resizedTileHeight * curZoom));
-                  
+
                   }
                   else {
                     stackGraphic = tileImages[tileImagesDictionary[image_num]];
@@ -382,18 +382,18 @@ function Isometric(ctx, tileWidth, tileHeight, mapLayout, tileImages, tileImages
       curZoom = dir;
     }
     else if (dir == "in") {
-      if (curZoom  + 0.1 < 1) {
+      if (curZoom  + 0.1 <= 1) {
         curZoom += 0.1;
       }
       else {
         curZoom = 1;
       }
     }else if (dir == "out") {
-      if (curZoom - 0.1 > 0.2) {
+      if (curZoom - 0.1 >= 0) {
         curZoom -= 0.1;
       }
       else {
-        curZoom = 0.2;
+        curZoom = 0;
       }
     }
   }
@@ -457,7 +457,7 @@ function Isometric(ctx, tileWidth, tileHeight, mapLayout, tileImages, tileImages
         drawX = (screenDimension / 2) - ((tileWidth/4  * size) * curZoom) / (size/2);
       break;
       case "v-center":
-        drawY = (screenDimension / 2) - ((tileHeight/2 * size) * curZoom);
+        drawY = (screenDimension / 2) - ((tileHeight/2 * size) * curZoom) - ((offset * tileHeight) * curZoom) / 4;
       break;
     }
   }
