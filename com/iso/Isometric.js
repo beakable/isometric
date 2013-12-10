@@ -154,7 +154,7 @@ function Isometric(ctx, tileWidth, tileHeight, mapLayout, tileImages, tileImages
 
             // Draw the tile image
             ctx.save();
-            if (alphaWhenFocusBehind.apply === true) {
+            if (alphaWhenFocusBehind && alphaWhenFocusBehind.apply === true) {
               if ((i === focusTilePosX + 1 && j === focusTilePosY + 1) || (i === focusTilePosX && j === focusTilePosY + 1) || (i === focusTilePosX + 1 && j === focusTilePosY)) {
                     if (alphaWhenFocusBehind.objectApplied && ((alphaWhenFocusBehind.objectApplied === null || alphaWhenFocusBehind.objectApplied && (resizedTileHeight * curZoom) > alphaWhenFocusBehind.objectApplied.height * curZoom))) {
                   ctx.globalAlpha = 0.6;
@@ -162,7 +162,7 @@ function Isometric(ctx, tileWidth, tileHeight, mapLayout, tileImages, tileImages
               }
             }
             ctx.drawImage(stackGraphic, 0, 0, stackGraphic.width, stackGraphic.height, xpos, (ypos + ((tileHeight - resizedTileHeight) * curZoom)), (tileWidth * curZoom), (resizedTileHeight * curZoom));
-            crx.restore();
+            ctx.restore();
           }
         }
       }
@@ -389,11 +389,11 @@ function Isometric(ctx, tileWidth, tileHeight, mapLayout, tileImages, tileImages
         curZoom = 1;
       }
     }else if (dir == "out") {
-      if (curZoom - 0.1 >= 0) {
+      if (curZoom - 0.1 > 0.1) {
         curZoom -= 0.1;
       }
       else {
-        curZoom = 0;
+        curZoom = 0.1;
       }
     }
   }
