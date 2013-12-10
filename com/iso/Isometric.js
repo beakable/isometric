@@ -664,6 +664,11 @@ function Isometric(ctx, tileWidth, tileHeight, mapLayout, tileImages, tileImages
       _adjustLight(setting, increase);
     },
 
+    setOffset: function(x, y) {
+      drawX = x;
+      drawY = y;
+    },
+
     getLightness: function() {
       return shadowDistance.distance;
     },
