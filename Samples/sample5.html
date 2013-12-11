@@ -91,7 +91,7 @@ THE SOFTWARE.
           XML.loadXML('sample5.xml'); // Load the map 
 
           clearInterval(loadTimer);
-          var game = new main(0, 0, 18, 25);  // X & Y drawing position, and tile span to draw 
+          var game = new main(0, 0, 8, 8);  // X & Y drawing position, and tile span to draw 
           
           game.init({
             layers: [
@@ -100,17 +100,10 @@ THE SOFTWARE.
                 layout: XML.getContent('field_one','row'),
                 graphics: groundImages.files,
                 graphicsDictionary: groundImages.dictionary, 
-                height: 100,
-                width: 50
-              }),
-              game.createLayer({
-                title: "LayerTwo",
-                layout: XML.getContent('field_two','row'),
-                graphics: groundImages.files,
-                graphicsDictionary: groundImages.dictionary, 
-                height: 100,
-                width: 50,
-                zeroIsBlank: true
+                isometric: false, // Flag used to layout grid in non Isometric format
+                height: 80,
+                width: 80,
+                applyInteractions: true
               })
             ],
           });
@@ -119,66 +112,41 @@ THE SOFTWARE.
     }
 
     function main(x, y, xrange, yrange) {
-      self = this;
+      
+      var self = this;
       var mapLayers = [];
-      var rangeX = xrange;
-      var rangeY = yrange;
 
-      var startY = 0;
-      var startX = 0;
-
-      var offsetX = 290;
-      var offsetY = -180;
-
-      var offsetXTwo = 290;
-      var offsetYTwo = -180;
-
-      var tick = 0;
-
-      var context = canvas.create("canavas", 800, 600, {
-        background: "#000",
+      var context = canvas.create("canavas", 640, 640, {
         display: "block",
         marginLeft: "auto",
         marginRight: "auto"
       });
-      
+
+
+      var input = new CanvasInput(document, canvas());
+
+      input.mouse_action(function(coords) {
+        mapLayers.map(function(layer) {
+          tile_coordinates =  layer.applyMouseFocus(coords.x, coords.y); // Get the current mouse location from X & Y Coords
+          layer.setTile(tile_coordinates.x, tile_coordinates.y, 4); // Force the chaning of tile graphic
+        });
+      });
+
+      input.mouse_move(function(coords) {
+        mapLayers.map(function(layer) {
+          tile_coordinates = layer.applyMouseFocus(coords.x, coords.y); // Apply mouse rollover via mouse location X & Y
+        });
+      }); 
 
       this.draw = function() {
         context.clearRect(0, 0, canvas().width, canvas().height);
-        for (i = startY; i < 0 + rangeY; i++) {
-          for (j = startX; j < 0 + rangeX; j++) {
+        for (i = x; i < 0 + xrange; i++) {
+          for (j = y; j < 0 + yrange; j++) {
             mapLayers[0].draw(i,j);
-            mapLayers[1].draw(i,j);
           }
         }
         requestAnimFrame(self.draw);
-        tick ++;
-        offsetX -= 1;
-        offsetY -= 0.5;
-
-        offsetXTwo -= 1.1;
-        offsetYTwo -= 0.6;
-
-        mapLayers[0].setOffset(offsetX, offsetY);
-        mapLayers[1].setOffset(offsetXTwo, offsetYTwo);
-
-        if (tick === 50) {
-	        startY ++;
-	        rangeY ++;
-          tick = 0;
-        }
-        if(startY > 50) {
-          startY = 0
-          startX = 0;
-          rangeX = 18;
-          rangeY = 25;
-          offsetX = 290;
-          offsetY = -180;
-          offsetXTwo = 290;
-          offsetYTwo = -180;
-        }
       }
-
       
       this.createLayer = function(settings) {
         var layer = new Isometric(context, settings.height, settings.width, settings.layout, settings.graphics, settings.graphicsDictionary);
@@ -188,8 +156,6 @@ THE SOFTWARE.
 
       this.init = function(settings) {
         mapLayers = settings.layers;
-        mapLayers[0].setOffset(offsetX, offsetY);
-        mapLayers[1].setOffset(offsetX, offsetY);
         this.draw();
       }
       

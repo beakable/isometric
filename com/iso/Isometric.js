@@ -57,13 +57,17 @@ function Isometric(ctx, tileWidth, tileHeight, mapLayout, tileImages, tileImages
   var particleMap = [];
   var particleMapHolder = [];
 
+  var isometric = true;
+
 
   function _setup(settings) {
       lightMap = settings.lightMap;
       shadowDistance = settings.shadowDistance;
       title = settings.title;
       zeroIsBlank = settings.zeroIsBlank;
-      mouseUsed = settings.mouseUsed || false;
+      if (settings.isometric !== undefined) {
+        isometric = settings.isometric;
+      }
       alphaWhenFocusBehind = settings.alphaWhenFocusBehind;
   }
 
@@ -135,9 +139,14 @@ function Isometric(ctx, tileWidth, tileHeight, mapLayout, tileImages, tileImages
       }
 
       resizedTileHeight = stackGraphic.height / (stackGraphic.width / tileWidth);
-
-      xpos = (i - j) * (tileHeight * curZoom) + drawX;
-      ypos = (i + j) * (tileWidth / 4 * curZoom) + drawY;
+      if (!isometric) {
+        xpos = i * (tileHeight * curZoom) + drawX;
+        ypos = j * (tileWidth  * curZoom) + drawY;
+      }
+      else {
+        xpos = (i - j) * (tileHeight * curZoom) + drawX;
+        ypos = (i + j) * (tileWidth / 4 * curZoom) + drawY;
+      }
 
       if (!stackTiles) {
 
@@ -250,21 +259,32 @@ function Isometric(ctx, tileWidth, tileHeight, mapLayout, tileImages, tileImages
             }
           }
         }
-        if (mouseUsed) {
-          if (i == focusTilePosX && j == focusTilePosY) {
-            // Apply mouse over tile coloring
-            ctx.fillStyle = 'rgba(255, 255, 120, 0.7)';
-            ctx.beginPath();
-            ctx.moveTo(xpos, ypos + ((k - 2) * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom) / 2);
-            ctx.lineTo(xpos + (tileHeight * curZoom), ypos + ((k - 2) * ((tileHeight - resizedTileHeight) * curZoom)));
-            ctx.lineTo(xpos + (tileHeight * curZoom) * 2, ypos + ((k - 2) * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom) / 2);
-            ctx.lineTo(xpos + (tileHeight * curZoom), ypos + ((k - 2) * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom));
-            ctx.fill();
-          }
+
+      }
+    }
+    if (mouseUsed) {
+      if (i == focusTilePosX && j == focusTilePosY) {
+        // Apply mouse over tile coloring
+        if (!isometric) {
+          ctx.fillStyle = 'rgba(255, 255, 120, 0.7)';
+          ctx.beginPath();
+          ctx.moveTo(xpos * curZoom, ypos * curZoom);
+          ctx.lineTo(xpos + tileHeight * curZoom, ypos * curZoom);
+          ctx.lineTo(xpos + tileHeight * curZoom, ypos + tileHeight * curZoom);
+          ctx.lineTo(xpos * curZoom, ypos + tileHeight * curZoom);
+          ctx.fill();
+        }
+        else {
+          ctx.fillStyle = 'rgba(255, 255, 120, 0.7)';
+          ctx.beginPath();
+          ctx.moveTo(xpos, ypos + ((k - 2) * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom) / 2);
+          ctx.lineTo(xpos + (tileHeight * curZoom), ypos + ((k - 2) * ((tileHeight - resizedTileHeight) * curZoom)));
+          ctx.lineTo(xpos + (tileHeight * curZoom) * 2, ypos + ((k - 2) * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom) / 2);
+          ctx.lineTo(xpos + (tileHeight * curZoom), ypos + ((k - 2) * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom));
+          ctx.fill();
         }
       }
     }
-
     if (particleTiles) {
 
       // Draw Particles
@@ -427,10 +447,16 @@ function Isometric(ctx, tileWidth, tileHeight, mapLayout, tileImages, tileImages
 
   function _applyMouseFocus(x, y) {
     mouseUsed = true;
-    focusTilePosY = (2 * (y - drawY) - x + drawX) / 2;
-    focusTilePosX = x + focusTilePosY - drawX - (tileHeight * curZoom);
-    focusTilePosY = Math.round(focusTilePosY / (tileHeight * curZoom));
-    focusTilePosX = Math.round(focusTilePosX / (tileHeight * curZoom));
+    if (!isometric) {
+      focusTilePosY = Math.round((y - tileWidth/2)/tileWidth);
+      focusTilePosX = Math.round((x - tileHeight/2)/tileHeight);
+    }
+    else {
+      focusTilePosY = (2 * (y - drawY) - x + drawX) / 2;
+      focusTilePosX = x + focusTilePosY - drawX - (tileHeight * curZoom);
+      focusTilePosY = Math.round(focusTilePosY / (tileHeight * curZoom));
+      focusTilePosX = Math.round(focusTilePosX / (tileHeight * curZoom));
+    }
     return({x: focusTilePosX, y: focusTilePosY});
   }
 
