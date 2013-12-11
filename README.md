@@ -1,26 +1,30 @@
 HTML5 Canvas Isometric Engine
 =========
 
+![JSiso](http://jsiso.com/jsiso.png)
+
 
 This repo contains an MIT Licensed Isometric HTML5 tile engine Copyright © 2013 of Iain Hamilton and Edward Smyth.
 
 The most current running dev build can be viewed here: http://isometric.beakable.com/
 
-The engine is currently in early stages however it's planned to be as feature rich as an earlier project, Glacial Flame: http://www.youtube.com/watch?v=Qlsipfu5Qq4.
+For a list of examples and further details checkout: http://jsiso.com
 
+Currently contained features are:
 
-Follow more about this project on my Twitter: https://twitter.com/Beakable
-
-Other Samples:
-
-Zoom and rotate of a simple 900 tile one layer map featuring a heightmap: 
-http://isometric.beakable.com/Samples/sample1.html (Tiles Created by Indie Squid - http://indiesquid.com)
-
-The basics of a Tower Defence game using pathfinding: 
-http://isometric.beakable.com/Samples/sample2.html (incomplete)
-
-Rough copy of smooth random moving objects
-http://isometric.beakable.com/Samples/sample3.html (incomplete)
+  - Unlimited layer stacking
+  - Heightmaps
+  - Auto scaling of image dimensions
+  - Zooming (not 100% perfect yet)
+  - Rotating (not 100% perfect yet - Rotates whole map but doesn't readjust view)
+  - Simple Collision
+  - AI Pathfinding using Web Workers
+  - Custom built Particle Engine
+  - Easy fake lighting
+  - Player vision limiting
+  - Simple player device interaction
+  - Easy Node Multiplayer Integration
+  - Basic support for Standard non Isometric tiles
 
 Particles
 ![particles](https://f.cloud.github.com/assets/1159739/1322878/ca65cd72-3453-11e3-97f6-c6b0243787b0.png)
