@@ -18,10 +18,9 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE. */
 
-function Isometric(ctx, tileWidth, tileHeight, mapLayout, tileImages, tileImagesDictionary) {
+function Isometric(ctx, tileWidth, tileHeight, mapWidth, mapHeight, mapLayout, tileImages, tileImagesDictionary) {
 
   var title = "";
-
   var zeroIsBlank = false;
   var stackTiles = false;
   var stackTileGraphic = null;
@@ -294,7 +293,7 @@ function Isometric(ctx, tileWidth, tileHeight, mapLayout, tileImages, tileImages
             particleMapHolder[i] = [];
           }
           if (!particleMapHolder[i][j]) {
-            particleMapHolder[i][j] = new EffectLoader.Get(particleMap[i][j], ctx, new Range(0, 800), new Range(0, 600));
+            particleMapHolder[i][j] = new EffectLoader.Get(particleMap[i][j], ctx, new Range(0, mapHeight), new Range(0, mapWidth));
           }
           particleMapHolder[i][j].Draw(xpos, ypos + ((k - 1) *(tileHeight - heightOffset - tileHeight)) * curZoom - (resizedTileHeight  - tileHeight) * curZoom, (tileWidth * curZoom));
         }

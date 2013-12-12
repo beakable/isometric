@@ -20,12 +20,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE. 
 */
 
-function EffectLoader(name) {
-
-    
-
-};
-
+function EffectLoader(name) {}
 
 
 EffectLoader.Get = function (name, ctx, xBoundRange, yBoundRange) {
@@ -255,41 +250,41 @@ EffectLoader.Get = function (name, ctx, xBoundRange, yBoundRange) {
 
 
 
-            case 'water':
+            case 'rain':
 
-                var water = new Emitter(ctx, 0, 0, 5, true, xBoundRange, yBoundRange);
+                var rain = new Emitter(ctx, 0, 0, 100, true, xBoundRange, yBoundRange);
 
-                water.boundryMode = 'isometric'; // limit water to a single iso tile
+                rain.xRange = new Range(0, 420);
 
-                water.xRange = new Range(-10, 10);
+                rain.yRange = new Range(-100, 10);
 
-                water.yRange = new Range(-10, 10);
+                rain.lifeRange = new Range(0.8, 1.4);
 
-                water.lifeRange = new Range(1, 1);
+                rain.fadeRange = new Range(0.01, 0.08);
 
-                water.fadeRange = new Range(0.02, 0.1);
+                rain.redRange = new Range(0, 150);
 
-                water.redRange = new Range(10, 10);
+                rain.greenRange = new Range(0, 150);
 
-                water.greenRange = new Range(10, 10);
+                rain.blueRange = new Range(175, 200);
 
-                water.blueRange = new Range(50, 50);
+                rain.xiRange = new Range(0, 420);
 
-                water.xiRange = new Range(0, 0);
+                rain.yiRange = new Range(-10, -10);
 
-                water.yiRange = new Range(0, 0);
+                rain.xgRange = new Range(0, 50);
 
-                water.xgRange = new Range(5, 5);
+                rain.ygRange = new Range(-40, -50);
 
-                water.ygRange = new Range(5, 5);
 
-                water.slowdownRange = new Range(0.5, 0.2);
+                rain.slowdownRange = new Range(0.5, 1);
 
-                water.radiusRange = new Range(20, 20);
+                rain.radiusRange = new Range(7, 10);
 
-                water.composite = 'lighter';
+                rain.composite = 'lighter';
 
-                effect = new Effect(water);
+
+                effect = new Effect(rain);
 
                 break;
 

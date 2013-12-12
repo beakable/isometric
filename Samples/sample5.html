@@ -41,22 +41,12 @@ THE SOFTWARE.
     <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
     
     <!-- Engine Scripts -->
-    <script type="text/javascript" src="/com/common.js"></script>
-    <script type="text/javascript" src="/com/particles/Range.js"></script>
-    <script type="text/javascript" src="/com/particles/Particle.js"></script>
-    <script type="text/javascript" src="/com/particles/Emitter.js"></script>
-    <script type="text/javascript" src="/com/particles/Effect.js"></script>
-    <script type="text/javascript" src="/com/particles/EffectLoader.js"></script>
     <script type="text/javascript" src="/com/Canvas/Input.js"></script>
     <script type="text/javascript" src="/com/Canvas/Control.js"></script> 
     <script type="text/javascript" src="/com/xml/XMLPopulate.js" ></script>
     <script type="text/javascript" src="/com/img/ImageLoader.js"></script>
     <script tppe="text/javascript" src="/com/iso/Isometric.js"></script>
-    <script tppe="text/javascript" src="/com/pathfind/pathfind.js"></script>
-    <!--                -->
-    <!-- Game Scripts   -->
-    <script type="text/javascript" src="/game/Clock.js"></script>
-    <!--                -->
+ 
 
 
     <script type="text/javascript">
@@ -149,7 +139,7 @@ THE SOFTWARE.
       }
       
       this.createLayer = function(settings) {
-        var layer = new Isometric(context, settings.height, settings.width, settings.layout, settings.graphics, settings.graphicsDictionary);
+        var layer = new Isometric(context, settings.height, settings.width, canvas().height, canvas().width, settings.layout, settings.graphics, settings.graphicsDictionary);
         layer.setupProperties(settings);
         return layer;
       }

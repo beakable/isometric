@@ -1,0 +1,515 @@
+<!--
+/*  
+Copyright (c) 2013 Iain Hamilton & Edward Smyth
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE. 
+
+- Author : Iain M Hamilton - <iain@beakable.com> - http://www.beakable.com
+           Edward Smyth
+
+  Twitter: @beakable
+
+*/
+-->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title></title>
+    <style type="text/css">
+      body {
+        margin: 0;
+        padding: 0;
+        background: #000022
+      }
+       .twitter-follow-button {
+        position: absolute !important;
+      }
+      a, a:visited {
+        color: #FFF;
+      }
+      .gameInfo {
+        position: absolute;
+        right: 0px;
+        top: 0px;
+        width: 200px;
+        height: 1300px;
+        background: #222244;
+        text-align: center;
+        overflow: scroll;;
+        color: #FFF;
+        font-family: 'Keania One', cursive;
+      }
+    </style>
+    <link href='http://fonts.googleapis.com/css?family=Keania+One' rel='stylesheet' type='text/css'>
+    <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+    
+    <!-- Engine Scripts -->
+    <script type="text/javascript" src="com/common.js"></script>
+    <script type="text/javascript" src="com/particles/Range.js"></script>
+    <script type="text/javascript" src="com/particles/Particle.js"></script>
+    <script type="text/javascript" src="com/particles/Emitter.js"></script>
+    <script type="text/javascript" src="com/particles/Effect.js"></script>
+    <script type="text/javascript" src="com/particles/EffectLoader.js"></script>
+    <script type="text/javascript" src="com/Canvas/Input.js"></script>
+    <script type="text/javascript" src="com/Canvas/Control.js"></script> 
+    <script type="text/javascript" src="com/xml/XMLPopulate.js" ></script>
+    <script type="text/javascript" src="com/img/ImageLoader.js"></script>
+    <script tppe="text/javascript" src="com/iso/Isometric.js"></script>
+    <script tppe="text/javascript" src="com/pathfind/pathfind.js"></script>
+    <!--                -->
+    <!-- Game Scripts   -->
+    <script type="text/javascript" src="game/Clock.js"></script>
+    <!--                -->
+
+
+    <script type="text/javascript">
+
+    // -- FPS --------------------------------
+    window.requestAnimFrame = (function() {
+      return window.requestAnimationFrame || 
+      window.webkitRequestAnimationFrame  || 
+      window.mozRequestAnimationFrame     || 
+      window.oRequestAnimationFrame       ||  
+      window.msRequestAnimationFrame      || 
+      function(callback, element) {
+        window.setTimeout(callback, 1000 / 60);
+      };
+    })();
+    // ---------------------------------------
+
+
+    // Editor Globals ------------------------
+
+    var tileSelection = {};
+
+    // ---------------------------------------
+
+    function launch() {
+
+      var XML = new XMLPopulate(); // Used for loading the XML maps TODO: Change maps to JSON rather than XML
+      var imgLoader = new ImageLoader(); // Used for loading all images used within game
+
+      XML.loadXML('com/xml/XMLFiles.php?folder=img/ground/');
+      var groundImages = imgLoader.loadImageArray('img/ground/', XML.getContent('files', 'file'));
+
+      XML.loadXML('com/xml/XMLFiles.php?folder=img/objects/');
+      var objectImages = imgLoader.loadImageArray('img/objects/', XML.getContent('files','file'));
+
+      XML.loadXML('com/xml/XMLFiles.php?folder=img/gui/');
+      var guiImages = imgLoader.loadImageArray('img/gui/', XML.getContent('files','file'));
+
+      XML.loadXML('com/xml/XMLFiles.php?folder=img/players/');
+      var playerImages = imgLoader.loadImageArray('img/players/', XML.getContent('files','file'));
+      
+      var loadTimer = setInterval(loadAll, 100);
+
+      function loadAll() {
+        if (imgLoader.loaded === imgLoader.to_load) {
+          XML.loadXML('map-read.php?id=43');
+
+          clearInterval(loadTimer);
+          var game = new main(0, 0, 14, 14, 100, 50);
+          
+          game.init({
+            layers: [
+              game.createLayer({
+                zIndex: 0,
+                title: "Ground Layer",
+                layout: XML.getContent('ground_map','row'),
+                graphics: groundImages.files,
+                graphicsDictionary: groundImages.dictionary,
+                shadowDistance: {
+                  color: '0, 0, 33',
+                  distance: 14,
+                  darkness: 1
+                },
+                shadow: {
+                  offset: 20,
+                  verticalColor: 'rgba(5, 5, 30, 0.4)',
+                 horizontalColor: 'rgba(6, 5, 50, 0.5)'
+                },
+                lightMap: [[5, 5, 4, 1], [20, 20, 4, 1]], // TODO: Make this work off a map too
+                heightMap: {
+                  map: XML.getContent('ground_height','row'),
+                  offset: 0,
+                  heightTile: groundImages.files["blank-block.png"]
+                },
+                hideGraphics: {
+                  //rangeMin: 0,
+                  //rangeMax: 6,
+                  //graphic: '5-concrete.png'
+                },
+                height: 100,
+                width: 50,
+                applyIneractions: true
+
+              }),
+              game.createLayer({
+                zIndex: 1,
+                title: "Object Layer",
+                layout: XML.getContent('object_map','row'),
+                graphics: objectImages.files,
+                graphicsDictionary: objectImages.dictionary,
+                height: 100,
+                width: 50,
+                zeroIsBlank: true,
+                alphaWhenFocusBehind: {
+                  objectApplied: playerImages.files["main.png"], // if set only applies when grapic is taller than this
+                  apply: true
+                },
+                shadowDistance: {
+                  color: false,
+                  distance: 14,
+                  darkness: 1
+                },
+                particleMap: XML.getContent('particle_map','row'),
+                lightMap: [[5, 5, 4, 1], [20, 20, 4, 1]],
+                heightMap: {
+                  map: XML.getContent('ground_height','row'),
+                  offset: 20,
+                  heightMapOnTop: true
+                },
+                //hideGraphics: {
+                //  rangeMin: 0,
+                //  rangeMax: 11,
+                //  graphic: '7-normal.png'
+                //},
+                applyIneractions: true
+              })
+            ],
+            gui: guiImages.files,
+            player: {
+              image: playerImages.files["main.png"],
+              xPos: 8,
+              yPos: 8
+            }
+          });
+        }
+      }
+      addTilesToHUD("Object Layer", "img/objects/", objectImages.dictionary, 1);
+      addTilesToHUD("Ground Layer", "img/ground/", groundImages.dictionary, 0);
+    }
+
+    function tileChoice(layer, tile) {
+      tileSelection.title = layer;
+      tileSelection.value = tile;
+    }
+
+    function addTilesToHUD(layer, path, dictionary, offset){
+      for(var i =0;i<dictionary.length;i++){
+          document.getElementById("gameInfo").innerHTML += ("<a href='javascript:tileChoice(\"" + layer + "\"," + (i + offset) + ")' ><img  height='50' width='50' src='" + path + dictionary[i] +"' /></a>");
+      }
+    }
+
+
+    function main(x, y, xrange, yrange) {
+      self = this;
+      var mapLayers = [];
+      var gui = [];
+      var tile_coordinates = {};
+      var mouse_coordinates = {};
+      var startY = y;
+      var startX = x;
+      var rangeX = xrange;
+      var rangeY = yrange;
+      var defaultRangeY = rangeY;
+      var calculatePaths = 0;
+
+      var player = [];
+      var enemy = [];
+
+
+      // -- Game Clock - controls the in game light
+
+      var context = canvas.create("canavas", 920, 600, {
+        background: "#000022",
+        display: "block",
+        marginLeft: "auto",
+        marginRight: "auto"
+      });
+      canvas.fullScreen();
+      
+      var input = new CanvasInput(document, canvas());
+
+      input.mobile(function(coords) {
+        if (coords.x > canvas().width / 2) {
+          self.keyCommand(2);
+        }
+        if (coords.x < canvas().width / 2) {
+          self.keyCommand(1);
+        }
+        if (coords.y > canvas().height / 2) {
+          self.keyCommand(3);
+        }
+        if (coords.y < canvas().height / 2) {
+          self.keyCommand(4);
+        }
+       });
+
+      input.orientationChange(function(){
+        canvas.fullScreen();
+      })
+
+      input.keyboard(function(pressed) {
+        switch(pressed) {
+          case 38:
+            self.keyCommand(2);
+          break;
+          case 39:
+            self.keyCommand(3);
+          break;
+          case 40:
+            self.keyCommand(4);
+          break;
+          case 37:
+            self.keyCommand(1);
+          break;
+          case 65:
+            self.keyCommand(5);
+          break;
+          case 83:
+            self.keyCommand(6);
+          break;
+          case 49:
+            self.keyCommand(7);
+          break;
+          case 50:
+            self.keyCommand(8);
+          break;
+          case 81:
+            self.keyCommand(9);
+          break;
+          case 87:
+            self.keyCommand(10);
+          break;
+          case 75:
+            self.keyCommand(11);
+          break;
+          case 76:
+            self.keyCommand(14);
+          break;
+          case 219:
+            self.keyCommand(12);
+          break;
+          case 221:
+            self.keyCommand(13);
+          break;
+        }
+      });
+
+      this.keyCommand = function(dir) {
+
+        switch(dir) {
+          case 1:
+            if (Number(mapLayers[1].getTile([player.xPos - 1], [player.yPos])) === 0) {
+              player.xPos --;
+              mapLayers[1].applyFocus(player.xPos, player.yPos);
+              if (startY > 0 && player.xPos <= mapLayers[0].getLayout().length - 1 - rangeX / 2) {
+                mapLayers.map(function(layer) {
+                  layer.move("up");
+                });
+                startY --;
+              }
+            }
+          break;
+          case 2:
+            if (Number(mapLayers[1].getTile([player.xPos], [player.yPos - 1])) === 0) {
+              player.yPos --;
+              mapLayers[1].applyFocus(player.xPos, player.yPos);
+              if (startX > 0 && player.yPos <= mapLayers[0].getLayout().length - 1 - rangeY / 2) {
+                mapLayers.map(function(layer) {
+                  layer.move("down");
+                });
+                startX --;
+              }
+            }
+          break;
+          case 3:
+            if (Number(mapLayers[1].getTile([player.xPos + 1], [player.yPos])) === 0) {
+              player.xPos ++;
+              mapLayers[1].applyFocus(player.xPos, player.yPos);
+              if (startY + rangeY < mapLayers[0].getLayout().length && player.xPos >= 0 + 1 + rangeX / 2) {
+                mapLayers.map(function(layer) {
+                  layer.move("left");
+                });
+                startY ++;
+              }
+            }
+          break;
+          case 4:
+            if (Number(mapLayers[1].getTile([player.xPos], [player.yPos + 1])) === 0) {
+              player.yPos ++;
+              mapLayers[1].applyFocus(player.xPos, player.yPos);
+              if (startX + rangeX < mapLayers[0].getLayout().length && player.yPos >= 0 + 1 + rangeY / 2 ) {
+                mapLayers.map(function(layer) {
+                  layer.move("right");
+                });
+                startX ++;
+              }
+            }
+          break;
+          case 5:
+            mapLayers.map(function(layer) {
+              if (startY + rangeY + 1 < mapLayers[0].getLayout().length) {
+                //layer.setZoom("out");
+
+                //TODO: Make alignment offsets automatically generated
+                //layer.align("h-center", canvas().width, xrange + player.xPos, -60);
+                //layer.align("v-center", canvas().height,  yrange + player.yPos, 35);
+                //rangeX +=  1
+                //rangeY +=  1
+              }
+            });
+          break;
+          case 6:
+            var XML = new XMLPopulate();
+            XML.saveMap(43, mapLayers[0].getLayout(), mapLayers[0].getHeightLayout(), mapLayers[1].getLayout());
+          break;
+          case 7:
+            mapLayers.map(function(layer) {
+              layer.toggleGraphicsHide(true);
+              layer.toggleHeightShadow(true);
+            });
+          break;
+          case 8:
+            mapLayers.map(function(layer) {
+              layer.toggleGraphicsHide(false);
+              layer.toggleHeightShadow(false);
+            });
+          break;
+         
+        }
+      }
+      
+      this.draw = function() {
+        context.clearRect(0, 0, canvas().width, canvas().height);
+        calculatePaths ++;
+       if(calculatePaths === 100) {
+          enemy.map(function(e) {
+            pathfind(e, [e.xPos, e.yPos], [player.xPos, player.yPos], mapLayers[1].getLayout(), function (data) {
+              if (data.length > 0 && data[1] !== undefined) {
+                e.xPos = data[1].x;
+                e.yPos = data[1].y;
+              }
+            });
+          });
+          calculatePaths = 0;
+        }
+        for(i = startY; i < startY + rangeY; i++) {
+          for(j = startX; j < startX + rangeX; j++) {
+            mapLayers.map(function(layer) {
+              layer.setLight(player.xPos, player.yPos);
+              if(i === player.xPos  && j === player.yPos && layer.getTitle() === "Object Layer") {
+                layer.draw(i, j, player.image);
+              }
+              else {
+                layer.draw(i,j);
+              }
+              enemy.map(function(e) {
+                if (i === e.xPos  && j === e.yPos  && layer.getTitle() === "Object Layer") {
+                  layer.draw(i, j, e.image);
+                }
+              });          
+            });
+         }
+       }
+       context.fillStyle = "rgb(255,255,255)";
+       if (tile_coordinates.x < mapLayers[0].getLayout().length && tile_coordinates.x >= 0 && tile_coordinates.y < mapLayers[0].getLayout().length && tile_coordinates.y >= 0) {
+         mapLayers.map( function(layer) {
+          //if (layer.applyIneractions) {
+            //if (layer.getTile([tile_coordinates.x],[tile_coordinates.y]) > 0) {
+            // context.drawImage(gui["popup-box.png"],mouse_coordinates.x,mouse_coordinates.y);
+            // context.font = "8pt Arial";
+            // context.fillText("Hover box",mouse_coordinates.x+14,mouse_coordinates.y+25);
+            //}
+         // }
+         });
+        }
+        context.save();
+        
+        context.restore();
+        requestAnimFrame(self.draw);
+
+      }
+      
+      this.createLayer = function(settings) {
+       var layer = new Isometric(context, settings.height, settings.width, settings.layout, settings.graphics, settings.graphicsDictionary);
+       layer.setupProperties(settings);
+       if(settings.shadow) {
+         layer.applyHeightShadow(true, settings.shadow);
+       }
+       if (settings.heightMap) {
+         layer.stackTiles(settings.heightMap);
+       }
+       if(settings.particleMap) {
+        layer.particleTiles(settings.particleMap);
+       }
+
+       if(settings.hideGraphics) {
+         layer.hideGraphics(true, {
+          rangeStart: settings.hideGraphics.rangeMin, 
+          rangeEnd: settings.hideGraphics.rangeMax, 
+          graphic: settings.hideGraphics.graphic
+         });
+       }
+
+       if(settings.applyIneractions) {
+         layer.applyIneractions = settings.applyIneractions;
+         input.mouse_move(function(coords) {
+          tile_coordinates = layer.applyMouseFocus(coords.x, coords.y);
+          mouse_coordinates = coords;
+         });  
+         
+         input.mouse_action(function(coords) {
+          tile_coordinates = layer.applyMouseFocus(coords.x, coords.y);
+          if (tileSelection.title === layer.getTitle()) {
+            if (tileSelection.title === "Ground Layer") {
+              layer.applyFocusClick(tile_coordinates.x, tile_coordinates.y, tileSelection.value);
+            }
+            else {
+              layer.applyFocusClick(tile_coordinates.x, tile_coordinates.y, tileSelection.value);
+            }
+          }
+         });
+       }
+
+       layer.align("h-center", canvas().width, xrange, -60);
+       layer.align("v-center", canvas().height,  yrange, 35);
+       return layer;
+      }
+
+
+      this.init = function(settings) {
+        player = settings.player;
+        startY = player.xPos - rangeY / 2;
+        startX = player.xPos - rangeX / 2;
+        mapLayers = settings.layers;
+        this.draw();
+
+      }
+      
+    }
+    </script>
+  </head>
+  <body onLoad="launch()">
+  <div id="gameInfo" class="gameInfo"></div>
+  </body>
+</html>

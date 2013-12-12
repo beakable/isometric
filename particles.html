@@ -1,0 +1,525 @@
+﻿<html>
+<head>
+    <title>Canvas Particle Demo 5</title>
+    <style type="text/css">
+        body
+        {
+            background-color:#fff;
+            color:#000;
+            text-align: center;
+            font-family: Verdana;
+        }
+        
+        h2
+        {
+            font-size:10px;
+            font-weight:normal;
+        }
+        
+        #main
+        {
+            width:900; 
+            text-align:center;
+            margin:0 auto;
+        }       
+        
+        .options
+        {
+            width:600px;
+            font-size:8pt;
+        }
+        
+        .options input
+        {
+            width:40px;
+        }
+    </style>
+    <script src="com/common.js" type="text/javascript"></script>
+    <script src="com/particles/Range.js" type="text/javascript"></script>
+    <script src="com/particles/Particle.js" type="text/javascript"></script>
+
+    <script src="com/particles/Emitter.js" type="text/javascript"></script>
+    <script src="com/particles/Effect.js" type="text/javascript"></script>
+    <script src="com/particles/EffectLoader.js" type="text/javascript"></script>
+</head>
+<body onload="init()">
+    <div id="main">
+        <h1>Particle Demo</h1>    
+        <table>
+
+            <tr>
+                <td>
+                    <form id="frm" name="frm" action="" method="post">
+                        <table class="options" cellpadding="2" cellspacing="2">
+                            <tr>
+                                <th>origin x</th>
+                                <td>
+                                    <input id="originx" type="text" value="150" onchange="ResetEmitters()" />
+
+                                </td>
+                                <th>origin y</th>
+                                <td>
+                                    <input id="originy" type="text" value="374" onchange="ResetEmitters()" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>particles</th>
+
+                                <td>
+                                    <input id="pcount" type="text" value="60" onchange="ResetEmitters()" />
+                                </td>
+                                <th>loop</th>
+                                <td>
+                                    <select id="loop" onchange="ResetEmitters()">
+                                        <option value="true" selected="true">true</option>
+                                        <option value="false">false</option>
+
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>x min boundry</th>
+                                <td>
+                                    <input id="xminboundry" type="text" value="0" onchange="ResetEmitters()" />
+                                </td>
+
+                                <th>x max boundry</th>
+                                <td>
+                                    <input id="xmaxboundry" type="text" value="300" onchange="ResetEmitters()" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>y min boundry</th>
+                                <td>
+
+                                    <input id="yminboundry" type="text" value="0" onchange="ResetEmitters()" />
+                                </td>
+                                <th>y max boundry</th>
+                                <td>
+                                    <input id="ymaxboundry" type="text" value="450" onchange="ResetEmitters()" />
+                                </td>
+                            </tr>
+                            <tr>
+
+                                <th>boundry mode</th>
+                                <td>
+                                    <select id="boundrymode" onchange="ResetEmitters()">
+                                        <option value="normal" selected="true">normal</option>
+                                        <option value="isometric">isometric</option>
+                                    </select>
+                                </td>
+
+                                <th></th>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <th>x range min</th>
+                                <td>
+                                    <input id="xrangemin" type="text" value="-22" onchange="ResetEmitters()" />
+                                </td>
+
+                                <th>x range max</th>
+                                <td>
+                                    <input id="xrangemax" type="text" value="18" onchange="ResetEmitters()" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>y range min</th>
+                                <td>
+
+                                    <input id="yrangemin" type="text" value="-2" onchange="ResetEmitters()" />
+                                </td>
+                                <th>y range max</th>
+                                <td>
+                                    <input id="yrangemax" type="text" value="2" onchange="ResetEmitters()" />
+                                </td>
+                            </tr>
+                            <tr>
+
+                                <th>draw delay min (-1 instant)</th>
+                                <td>
+                                    <input id="drawdelaymin" type="text" value="-1" onchange="ResetEmitters()" />
+                                </td>
+                                <th>draw delay max</th>
+                                <td>
+                                    <input id="drawdelaymax" type="text" value="20" onchange="ResetEmitters()" />
+                                </td>
+
+                            </tr>
+                            <tr>
+                                <th>life range min</th>
+                                <td>
+                                    <input id="liferangemin" type="text" value="0.8" onchange="ResetEmitters()" />
+                                </td>
+                                <th>life range min</th>
+                                <td>
+
+                                    <input id="liferangemax" type="text" value="1" onchange="ResetEmitters()" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>fade range min</th>
+                                <td>
+                                    <input id="faderangemin" type="text" value="0.02" onchange="ResetEmitters()" />
+                                </td>
+
+                                <th>fade range max</th>
+                                <td>
+                                    <input id="faderangemax" type="text" value="0.08" onchange="ResetEmitters()" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>red intensity range min</th>
+                                <td>
+
+                                    <input id="redmin" type="text" value="175" onchange="ResetEmitters()" />
+                                </td>
+                                <th>red intensity range max</th>
+                                <td>
+                                    <input id="redmax" type="text" value="255" onchange="ResetEmitters()" />
+                                </td>
+                            </tr>
+                            <tr>
+
+                                <th>green intensity range min</th>
+                                <td>
+                                    <input id="greenmin" type="text" value="0" onchange="ResetEmitters()" />
+                                </td>
+                                <th>green intensity range max</th>
+                                <td>
+                                    <input id="greenmax" type="text" value="150" onchange="ResetEmitters()" />
+                                </td>
+
+                            </tr>
+                            <tr>
+                                <th>blue intensity range min</th>
+                                <td>
+                                    <input id="bluemin" type="text" value="0" onchange="ResetEmitters()" />
+                                </td>
+                                <th>blue intensity range max</th>
+                                <td>
+
+                                    <input id="bluemax" type="text" value="0" onchange="ResetEmitters()" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>x speed min (- left + right)</th>
+                                <td>
+                                    <input id="ximin" type="text" value="-10" onchange="ResetEmitters()" />
+                                </td>
+
+                                <th>x speed range max</th>
+                                <td>
+                                    <input id="ximax" type="text" value="10" onchange="ResetEmitters()" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>y speed min (- down + up)</th>
+                                <td>
+
+                                    <input id="yimin" type="text" value="0" onchange="ResetEmitters()" />
+                                </td>
+                                <th>y speed range max</th>
+                                <td>
+                                    <input id="yimax" type="text" value="0" onchange="ResetEmitters()" />
+                                </td>
+                            </tr>
+                            <tr>
+
+                                <th>x gravity min (- left + right)</th>
+                                <td>
+                                    <input id="xgmin" type="text" value="-10" onchange="ResetEmitters()" />
+                                </td>
+                                <th>x gravity range max</th>
+                                <td>
+                                    <input id="xgmax" type="text" value="10" onchange="ResetEmitters()" />
+                                </td>
+
+                            </tr>
+                            <tr>
+                                <th>x gravity life min (+/-)</th>
+                                <td>
+                                    <input id="xglifemin" type="text" value="0" onchange="ResetEmitters()" />
+                                </td>
+                                <th>x gravity life max</th>
+                                <td>
+
+                                    <input id="xglifemax" type="text" value="0" onchange="ResetEmitters()" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>y gravity min (- down + up)</th>
+                                <td>
+                                    <input id="ygmin" type="text" value="50" onchange="ResetEmitters()" />
+                                </td>
+
+                                <th>y gravity range max</th>
+                                <td>
+                                    <input id="ygmax" type="text" value="50" onchange="ResetEmitters()" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>y gravity life min (+/-)</th>
+                                <td>
+
+                                    <input id="yglifemin" type="text" value="0" onchange="ResetEmitters()" />
+                                </td>
+                                <th>y gravity life max</th>
+                                <td>
+                                    <input id="yglifemax" type="text" value="0" onchange="ResetEmitters()" />
+                                </td>
+                            </tr>
+                            <tr>
+
+                                <th>slowdown range min</th>
+                                <td>
+                                    <input id="slowdownmin" type="text" value="0.5" onchange="ResetEmitters()" />
+                                </td>
+                                <th>slowdown range max</th>
+                                <td>
+                                    <input id="slowdownmax" type="text" value="1" onchange="ResetEmitters()" />
+                                </td>
+
+                            </tr>
+                            <tr>
+                                <th>radius range min</th>
+                                <td>
+                                    <input id="radiusmin" type="text" value="5" onchange="ResetEmitters()" />
+                                </td>
+                                <th>radius range max</th>
+                                <td>
+
+                                    <input id="radiusmax" type="text" value="20" onchange="ResetEmitters()" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>
+                                    particle composite
+                                </th>
+                                <td>
+                                    <select id="composite" onchange="ResetEmitters()">
+
+                                        <option value="source-over">source over</option>
+                                        <option value="source-in">source in</option>
+                                        <option value="source-out">source out</option>
+                                        <option value="source-atop">source atop</option>
+                                        <option value="destination-over">destination over</option>
+                                        <option value="destination-in">destination in</option>
+
+                                        <option value="destination-out">destination out</option>
+                                        <option value="destination-atop">destination atop</option>
+                                        <option value="lighter" selected="selected">lighter</option>
+                                        <option value="darker">darker</option>
+                                        <option value="copy">copy</option>
+                                        <option value="xor">xor</option>
+
+                                    </select>
+                                </td>
+                                <th>tile</th>
+                                <td>
+                                    <select id="tile" onchange="ResetTile()">
+                                        <option value="">None</option>
+                                        <option value="arch1.png">Arch 1</option>
+
+                                        <option value="/img/objects/coalFire.png" selected="selected">Coal Fire</option>
+                                        <option value="/img/objects/emptyFire.png">Empty Fire</option>
+                                        <option value="/img/objects/floor1.png">Floor 1</option>
+                                        <option value="/img/objects/floor2.png">Floor 2</option>
+                                        <option value="/img/objects/floor3.png">Floor 3</option>
+                                        <option value="/img/objects/floor4.png">Floor 4</option>
+
+                                        <option value="/img/objects/grass.png">Grass</option>
+                                        <option value="/img/objects/grass2.png">Grass 2</option>
+                                        <option value="/img/objects/hole.png">Hole</option>
+                                        <option value="/img/objects/land.png">Land</option>
+                                        <option value="/img/objects/lava.png">Lava</option>
+                                        <option value="/img/objects/magic.png">Magic</option>
+
+                                        <option value="/img/objects/marsh.png">Marsh</option>
+                                        <option value="/img/objects/mud.png">Mud</option>
+                                        <option value="/img/objects/ocean.png">Ocean</option>
+                                        <option value="/img/objects/pond.png">Pond</option>
+                                        <option value="/img/objects/rock.png">Rock</option>
+                                        <option value="/img/objects/sand.png">Sand</option>
+
+                                        <option value="/img/objects/swamp.png">Swamp</option>
+                                        <option value="/img/objects/tree.png">Tree</option>
+                                        <option value="/img/objects/tree2.png">Tree 2</option>
+                                        <option value="/img/objects/wall1.png">Wall 1</option>
+                                        <option value="/img/objects/wall2.png">Wall 2</option>
+                                        <option value="/img/objects/wall3.png">Wall 3</option>
+
+                                        <option value="/img/objects/water.png">Water</option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>
+                                    <input style="width:100px" type="submit" value="Restart" onclick="ResetEmitters(); return false;" />
+                                </th>
+
+                                <td></td>
+                                <th></th>
+                                <td></td>
+                            </tr>
+                        </table>
+                    </form>
+                </td>
+                <td>
+                    <canvas id="canvas" width="300" height="450" style="border: 1px solid black; background-color: #fff;">
+
+                        Your browser does not support this content.
+                    </canvas>   
+                    <h2>300 x 450</h2>
+                </td>
+            </tr>             
+        </table>   
+        <h2>JsIso.com - Iain Hamilton</h2>
+    </div>
+
+    <script type="text/javascript">
+
+
+        // -- FPS --------------------------------
+        window.requestAnimFrame = (function() {
+          return window.requestAnimationFrame || 
+          window.webkitRequestAnimationFrame  || 
+          window.mozRequestAnimationFrame     || 
+          window.oRequestAnimationFrame       ||  
+          window.msRequestAnimationFrame      || 
+          function(callback, element) {
+            window.setTimeout(callback, 1000 / 60);
+          };
+        })();
+        // ---------------------------------------
+
+
+        var ctx = null;
+        var width = 0, height = 0;
+        var emitters = [];
+        var tile = null, imgloaded = false;
+        var drawInterval = 50;
+        var frameCount = 0;
+        var fps = 0;
+        var maxfps = 60;
+        var drawing = false;
+        var lastTime = new Date();
+
+        function init() {
+            if (Setup('2d')) {
+                Draw();
+            }
+        }
+
+        function Setup(method) {
+            var canvas = $('canvas');
+
+            if (canvas && canvas.getContext) {
+                width = canvas.width;
+                height = canvas.height;
+
+                ctx = canvas.getContext(method);
+
+                ResetEmitters();
+
+                return true;
+            }
+
+            return false;
+        }
+
+        function ResetEmitters() {
+            emitters = [];
+
+            var emitter = new Emitter(
+                ctx,
+                parseInt($('originx').value),
+                parseInt($('originy').value),
+                parseInt($('pcount').value),
+                $('loop').value === 'true',
+                new Range(parseInt($('xminboundry').value), parseInt($('xmaxboundry').value)),
+                new Range(parseInt($('yminboundry').value), parseInt($('ymaxboundry').value)));
+
+            emitter.composite = $('composite').value;
+            emitter.boundryMode = $('boundrymode').value;
+            emitter.xRange = new Range(parseInt($('xrangemin').value), parseInt($('xrangemax').value));
+            emitter.yRange = new Range(parseInt($('yrangemin').value), parseInt($('yrangemax').value));
+            emitter.drawdelayRange = new Range(parseInt($('drawdelaymin').value), parseInt($('drawdelaymax').value));
+            emitter.lifeRange = new Range(parseFloat($('liferangemin').value), parseFloat($('liferangemax').value));
+            emitter.fadeRange = new Range(parseFloat($('faderangemin').value), parseFloat($('faderangemax').value));
+            emitter.redRange = new Range(parseInt($('redmin').value), parseInt($('redmax').value));
+            emitter.greenRange = new Range(parseInt($('greenmin').value), parseInt($('greenmax').value));
+            emitter.blueRange = new Range(parseInt($('bluemin').value), parseInt($('bluemax').value));
+            emitter.xiRange = new Range(parseInt($('ximin').value), parseInt($('ximax').value));
+            emitter.yiRange = new Range(parseInt($('yimin').value), parseInt($('yimax').value));
+            emitter.xgRange = new Range(parseFloat($('xgmin').value), parseFloat($('xgmax').value));
+            emitter.xglifeRange = new Range(parseFloat($('xglifemin').value), parseFloat($('xglifemax').value));
+            emitter.ygRange = new Range(parseFloat($('ygmin').value), parseFloat($('ygmax').value));
+            emitter.yglifeRange = new Range(parseFloat($('yglifemin').value), parseFloat($('yglifemax').value));
+            emitter.slowdownRange = new Range(parseFloat($('slowdownmin').value), parseFloat($('slowdownmax').value));
+            emitter.radiusRange = new Range(parseInt($('radiusmin').value), parseInt($('radiusmax').value));
+
+            emitter.Load();
+            emitters.push(emitter);
+        }
+
+        function ResetTile() {
+            tile = null;
+        }
+
+        function DrawTile() {
+            if (tile == null) {
+                imgloaded = false;
+                tile = new Image();
+                tile.onload = function () { imgloaded = true; };
+                tile.src = $('tile').value;
+            }
+
+            if (tile != null && imgloaded)
+                ctx.drawImage(tile, width / 2 - tile.width / 2, height - tile.height - 20, tile.width, tile.height);
+        }
+
+        function Draw() {
+            if (!drawing) {
+                drawing = true;
+
+                var nowTime = new Date();
+                var diffTime = Math.ceil((nowTime.getTime() - lastTime.getTime()));                
+                
+                if (ctx != null) {
+                    if (diffTime >= 1000) {
+                        fps = frameCount;
+                        frameCount = 0.0;
+                        lastTime = nowTime;
+                    }
+
+                    ctx.clearRect(0, 0, width, height);
+
+                    ctx.save();
+                    ctx.fillStyle = '#000000';
+                    ctx.fillRect(0, height - 15, width, 15);
+                    ctx.fillStyle = '#FFF';
+                    ctx.font = 'bold 10px sans-serif';
+                    ctx.fillText('FPS: ' + fps + '/' + maxfps, 4, height - 4);
+                    ctx.restore();
+
+                    ctx.save();
+                    DrawTile();
+                    ctx.restore();
+
+                    for (var n = 0; n < emitters.length; n++) {
+                        emitters[n].Draw();
+                    }
+
+                    frameCount++;
+                    
+
+                }
+                requestAnimFrame(Draw);
+            }
+            drawing = false;
+        }
+
+    </script>
+</body>
+</html>

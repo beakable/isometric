@@ -215,7 +215,7 @@ THE SOFTWARE.
       }
       
       this.createLayer = function(settings) {
-        var layer = new Isometric(context, settings.height, settings.width, settings.layout, settings.graphics, settings.graphicsDictionary);
+        var layer = new Isometric(context, settings.height, settings.width, canvas().height, canvas().width, settings.layout, settings.graphics, settings.graphicsDictionary);
           layer.applyHeightShadow(true, settings.shadow);
         layer.setupProperties(settings);
         layer.stackTiles(settings.heightMap);

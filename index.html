@@ -235,6 +235,8 @@ THE SOFTWARE.
       var player = [];
       var enemy = [];
 
+      var rain = null;
+
 
       // -- Game Clock - controls the in game light
       var gameClock = new Clock(document.getElementById("timer"));
@@ -510,59 +512,44 @@ THE SOFTWARE.
             });
          }
        }
-       context.fillStyle = "rgb(255,255,255)";
-       if (tile_coordinates.x < mapLayers[0].getLayout().length && tile_coordinates.x >= 0 && tile_coordinates.y < mapLayers[0].getLayout().length && tile_coordinates.y >= 0) {
-         mapLayers.map( function(layer) {
-          //if (layer.applyIneractions) {
-            //if (layer.getTile([tile_coordinates.x],[tile_coordinates.y]) > 0) {
-            // context.drawImage(gui["popup-box.png"],mouse_coordinates.x,mouse_coordinates.y);
-            // context.font = "8pt Arial";
-            // context.fillText("Hover box",mouse_coordinates.x+14,mouse_coordinates.y+25);
-            // layer.applyFocusClick(tile_coordinates.x, tile_coordinates.y);
-            //}
-         // }
-         });
-        }
-        context.save();
-        
-        context.restore();
-        requestAnimFrame(self.draw);
+      rain.Draw(canvas().width / 4, 0);
+      requestAnimFrame(self.draw);
 
       }
       
       this.createLayer = function(settings) {
-       var layer = new Isometric(context, settings.height, settings.width, settings.layout, settings.graphics, settings.graphicsDictionary);
-       layer.setupProperties(settings);
-       if(settings.shadow) {
-         layer.applyHeightShadow(true, settings.shadow);
-       }
-       if (settings.heightMap) {
-         layer.stackTiles(settings.heightMap);
-       }
-       if(settings.particleMap) {
+        var layer = new Isometric(context, settings.height, settings.width, canvas().height, canvas().width, settings.layout, settings.graphics, settings.graphicsDictionary);
+        layer.setupProperties(settings);
+        if(settings.shadow) {
+          layer.applyHeightShadow(true, settings.shadow);
+        }
+        if (settings.heightMap) {
+          layer.stackTiles(settings.heightMap);
+        }
+        if(settings.particleMap) {
         layer.particleTiles(settings.particleMap);
-       }
+        }
 
-       if(settings.hideGraphics) {
-         layer.hideGraphics(true, {
-          rangeStart: settings.hideGraphics.rangeMin, 
-          rangeEnd: settings.hideGraphics.rangeMax, 
-          graphic: settings.hideGraphics.graphic
+        if(settings.hideGraphics) {
+          layer.hideGraphics(true, {
+            rangeStart: settings.hideGraphics.rangeMin, 
+            rangeEnd: settings.hideGraphics.rangeMax, 
+            graphic: settings.hideGraphics.graphic
          });
-       }
+        }
 
-       if(settings.applyIneractions) {
-         layer.applyIneractions = settings.applyIneractions;
-         input.mouse_move(function(coords) {
-          tile_coordinates = layer.applyMouseFocus(coords.x, coords.y);
-          mouse_coordinates = coords;
-         });  
-         
-         input.mouse_action(function(coords) {
-          tile_coordinates = layer.applyMouseFocus(coords.x, coords.y);
-          layer.applyFocusClick(tile_coordinates.x, tile_coordinates.y);
-         });
-       }
+        if(settings.applyIneractions) {
+          layer.applyIneractions = settings.applyIneractions;
+          input.mouse_move(function(coords) {
+            tile_coordinates = layer.applyMouseFocus(coords.x, coords.y);
+            mouse_coordinates = coords;
+          });  
+           
+          input.mouse_action(function(coords) {
+            tile_coordinates = layer.applyMouseFocus(coords.x, coords.y);
+            layer.applyFocusClick(tile_coordinates.x, tile_coordinates.y);
+          });
+        }
 
        layer.align("h-center", canvas().width, xrange, 0);
        layer.align("v-center", canvas().height, yrange, 0);
@@ -574,6 +561,7 @@ THE SOFTWARE.
         player = settings.player;
         startY = player.xPos - rangeY / 2;
         startX = player.xPos - rangeX / 2;
+        rain = new EffectLoader.Get("rain", context, new Range(-100, canvas().height), new Range(-100, canvas().width));
         enemy = settings.enemy;
         mapLayers = settings.layers;
         gui = settings.gui;
