@@ -62,7 +62,7 @@ canvas = (function() {
 
   function _update(w, h) {
     canvasElement.width = w || window.innerWidth;
-    canvasElement.height = h || window.innerWidth;
+    canvasElement.height = h || window.innerHeight;
   }
 
   function canvas() {
