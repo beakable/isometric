@@ -204,6 +204,25 @@ THE SOFTWARE.
         }
       });
 
+      input.mobile(function(coords, status) {
+        if (status) {
+          if (coords.x < 300 / 2) {
+            keyInput[37] = true; // Represent left key press
+          }
+          if (coords.x > 300 / 2) {
+            keyInput[39] = true; // Represent right key press
+          }
+          if (coords.y < 300 / 2) {
+            keyInput[38] = true; // Represent right key press
+          }
+        }
+        else {
+          keyInput[37] = false;
+          keyInput[39] = false;
+          keyInput[38] = false;
+        }
+      });
+
       this.draw = function() {
         context.clearRect(0, 0, canvas().width, canvas().height);
         var pos = player.getPos();

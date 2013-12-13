@@ -33,11 +33,13 @@ function CanvasInput(doc, canvas) {
     callback(keyCode, pressed);
   }
 
-  function _mobileInput(e, callback) {
+  function _mobileInput(e, callback, pressed) {
     var coords = {};
-    coords.x = e.touches[0].pageX - canvas.offsetLeft;
-    coords.y = e.touches[0].pageY - canvas.offsetTop;
-    callback(coords);
+    if (pressed) {
+      coords.x = e.touches[0].pageX - canvas.offsetLeft;
+      coords.y = e.touches[0].pageY - canvas.offsetTop;
+    }
+    callback(coords, pressed);
   }
 
   function _mouseInput(e, callback) {
@@ -70,7 +72,11 @@ function CanvasInput(doc, canvas) {
     mobile: function(callback) {
       canvas.addEventListener('touchstart', function(event) {
         event.preventDefault();
-        _mobileInput(event, callback);
+        _mobileInput(event, callback, true);
+      }, false);
+      canvas.addEventListener('touchend', function(event) {
+        event.preventDefault();
+        _mobileInput(event, callback, false);
       }, false);
     },
 
