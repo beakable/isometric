@@ -178,18 +178,21 @@ THE SOFTWARE.
             }
             else {
               this.jumped = 0;
+              this.y = (tileCoords.y) * tileHeight - this.size - (this.mass * 5);
             }
           }
         }
       }
 
-      
+
 
       var context = canvas.create("canvas", 750, 740, {
         display: "block",
         marginLeft: "auto",
         marginRight: "auto"
       });
+      canvas.fullScreen();
+
 
       var input = new CanvasInput(document, canvas());
       input.keyboard(function(pressed, status) {
