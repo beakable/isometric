@@ -22,7 +22,7 @@ THE SOFTWARE.
 
 function CanvasInput(doc, canvas) {
 
-  function _keyboard_input(e, callback) {
+  function _keyboardInput(e, callback, pressed) {
     var keyCode;
     if(e === null) {
       keyCode = window.e.keyCode;
@@ -30,17 +30,17 @@ function CanvasInput(doc, canvas) {
     else {
       keyCode = e.keyCode;
     }
-    callback(keyCode);
+    callback(keyCode, pressed);
   }
 
-  function _mobile_input(e, callback) {
+  function _mobileInput(e, callback) {
     var coords = {};
     coords.x = e.touches[0].pageX - canvas.offsetLeft;
     coords.y = e.touches[0].pageY - canvas.offsetTop;
     callback(coords);
   }
 
-  function _mouse_input(e, callback) {
+  function _mouseInput(e, callback) {
     var coords = {};
     coords.x = e.pageX - canvas.offsetLeft;
     coords.y = e.pageY - canvas.offsetTop;
@@ -50,13 +50,16 @@ function CanvasInput(doc, canvas) {
   function _orientationChange(callback) {
     window.addEventListener("orientationchange", function() {
       callback();
-    }, false);    
+    }, false);
   }
 
   return {
     keyboard: function(callback) {
       doc.onkeydown = function(event) {
-        _keyboard_input(event, callback);
+        _keyboardInput(event, callback, true);
+      };
+      doc.onkeyup = function(event) {
+        _keyboardInput(event, callback, false);
       };
     },
 
@@ -67,21 +70,21 @@ function CanvasInput(doc, canvas) {
     mobile: function(callback) {
       canvas.addEventListener('touchstart', function(event) {
         event.preventDefault();
-        _mobile_input(event, callback);
+        _mobileInput(event, callback);
       }, false);
     },
 
     mouse_action: function(callback) {
       canvas.addEventListener('mousedown', function(event) {
         event.preventDefault();
-        _mouse_input(event, callback);
+        _mouseInput(event, callback);
       }, false);
     },
 
     mouse_move: function(callback) {
       canvas.addEventListener('mousemove', function(event) {
         event.preventDefault();
-        _mouse_input(event, callback);
+        _mouseInput(event, callback);
       }, false);
     }
   };
