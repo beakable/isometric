@@ -389,7 +389,10 @@ function Isometric(ctx, tileWidth, tileHeight, mapWidth, mapHeight, mapLayout, t
   }
 
   function _getTile(posX, posY) {
-    return mapLayout[posX][posY];
+    if (mapLayout[posX] && mapLayout[posX][posY]) {
+      return mapLayout[posX][posY];
+    }
+    return null;
   }
 
   function _getHeightMapTile(posX, posY) {
@@ -437,10 +440,17 @@ function Isometric(ctx, tileWidth, tileHeight, mapWidth, mapHeight, mapLayout, t
   }
 
   function _getXYCoords(x, y) {
-    var positionY = (2 * (y - drawY) - x + drawX) / 2;
-    var positionX = x + positionY - drawX - (tileHeight * curZoom);
-    positionY = Math.round(positionY / (tileHeight * curZoom));
-    positionX = Math.round(positionX / (tileHeight * curZoom));
+    var positionY, positionX;
+    if (!isometric) {
+      positionY = Math.round((y - tileWidth / 2) / tileWidth);
+      positionX = Math.round((x - tileHeight / 2) / tileHeight);
+    }
+    else {
+      positionY = (2 * (y - drawY) - x + drawX) / 2;
+      positionX = x + positionY - drawX - (tileHeight * curZoom);
+      positionY = Math.round(positionY / (tileHeight * curZoom));
+      positionX = Math.round(positionX / (tileHeight * curZoom));
+    }
     return({x: positionX, y: positionY});
   }
 
