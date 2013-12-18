@@ -34,8 +34,13 @@ THE SOFTWARE.
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
     <title></title>
     <style type="text/css">
-       .twitter-follow-button {
+      .twitter-follow-button {
         position: absolute !important;
+      }
+
+      body{
+        padding: 0;
+        margin: 0;
       }
     </style>
     <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
@@ -104,15 +109,17 @@ THE SOFTWARE.
     function main(x, y, xrange, yrange) {
       
       var self = this;
-      var mapLayers = [];
-      var graphics = null;
-      var playerSnake = [];
-      var positionTimer = null;
-      var snakeDirection = "right";
+      var mapLayers = []; // An Array of created layers
+      var graphics = null; // The loaded graphics
+      var playerSnake = []; // The snake body
+      var positionTimer = null; // Timer for moving the snake
+      var snakeDirection = "right"; // Stores current direction to move the snake
+      var snakeMoved = false; // Prevents multiple direction change until the snake has moved
+      var soundPew = new Audio("/pew.wav"); // A Pew Pew sound for point collection
       var point = {
         x: 12,
         y: 12
-      }
+      } // Defaut point position
 
       var context = canvas.create("canavas", 500, 450, {
         display: "block",
@@ -120,28 +127,30 @@ THE SOFTWARE.
         marginRight: "auto"
       });
 
-
       var input = new CanvasInput(document, canvas());
-
       input.keyboard(function(pressed, status) {
         if (status) {
           if (pressed === 37) {
-            if (snakeDirection !== "right") {
+            if (snakeDirection !== "right" && snakeMoved) {
+              snakeMoved = false;
               snakeDirection = "left";
             }
           }
           if (pressed === 39) {
-            if (snakeDirection !== "left") {
+            if (snakeDirection !== "left" && snakeMoved) {
+              snakeMoved = false;
               snakeDirection = "right";
             }
           }
           if (pressed === 38) {
-            if (snakeDirection !== "down") {
+            if (snakeDirection !== "down" && snakeMoved) {
+              snakeMoved = false;
               snakeDirection = "up";
             }
           }
           if (pressed === 40) {
-            if (snakeDirection !== "up") {
+            if (snakeDirection !== "up" && snakeMoved) {
+              snakeMoved = false;
               snakeDirection = "down";
             }
           }
@@ -181,9 +190,10 @@ THE SOFTWARE.
         if (point.x === playerSnake[playerSnake.length - 1].x && point.y === playerSnake[playerSnake.length - 1].y) {
           playerSnake.push({x: point.x, y: point.y});
           point.x = Math.floor(Math.random() * 18) + 1;
-          point.y = Math.floor(Math.random() * 17) + 1;
-          console.log(point);
+          point.y = Math.floor(Math.random() * 16) + 1;
+          soundPew.play();
         }
+        snakeMoved = true;
       }
 
       this.draw = function() {
@@ -194,14 +204,14 @@ THE SOFTWARE.
             drawOverwrite = false;
             playerSnake.map(function(piece){
               if (piece.x === i && piece.y === j) {
-                 mapLayers[0].draw(i, j, graphics["1-blank.jpg"]);
+                 mapLayers[0].draw(i, j, graphics["1-blank.jpg"]); // If tile location is equal to a snake body piece send an overwrite image
                  drawOverwrite = true;
               }
-              if (point.x === i && point.y === j) {
-                mapLayers[0].draw(i, j, graphics["2-point.png"]);
-                drawOverwrite = true;
-              }
             });
+            if (point.x === i && point.y === j) {
+              mapLayers[0].draw(i, j, graphics["2-point.png"]); // If tile location is equal to the point location send overwrite image
+              drawOverwrite = true;
+            }
             if (!drawOverwrite) {
               mapLayers[0].draw(i, j);
             }
@@ -220,14 +230,14 @@ THE SOFTWARE.
 
       this.init = function(settings) {
         mapLayers = settings.layers;
-        playerSnake.push({x: 4, y: 8});
+        playerSnake.push({x: 4, y: 8}); // Create Initial Snake Shape
         playerSnake.push({x: 5, y: 8});
         playerSnake.push({x: 6, y: 8});
         playerSnake.push({x: 7, y: 8});
         playerSnake.push({x: 8, y: 8});
         playerSnake.push({x: 9, y: 8});
         this.draw();
-        positionTimer = setInterval(function() { self.updateSnakePositions(); }, 250);
+        positionTimer = setInterval(function() { self.updateSnakePositions(); }, 250); // Set Snake to move every 250ms
       }
       
     }
