@@ -116,6 +116,7 @@ THE SOFTWARE.
       var snakeDirection = "right"; // Stores current direction to move the snake
       var snakeMoved = false; // Prevents multiple direction change until the snake has moved
       var soundPew = new Audio("/pew.wav"); // A Pew Pew sound for point collection
+      var score = 0; // Player Score
       var point = {
         x: 12,
         y: 12
@@ -178,16 +179,20 @@ THE SOFTWARE.
           playerSnake[playerSnake.length - 1].y += 1;
         }
         if (mapLayers[0].getTile(playerSnake[playerSnake.length - 1].x, playerSnake[playerSnake.length - 1].y) === 1){
+          // End Game
           clearInterval(positionTimer);
         }
         playerSnake.map(function(piece, i) {
           if (i !== playerSnake.length - 1) {
             if (piece.x === playerSnake[playerSnake.length - 1].x && piece.y === playerSnake[playerSnake.length - 1].y) {
+              // End Game
               clearInterval(positionTimer);
             }
           }
         });
         if (point.x === playerSnake[playerSnake.length - 1].x && point.y === playerSnake[playerSnake.length - 1].y) {
+          // Update score and  reposition point
+          score ++;
           playerSnake.push({x: point.x, y: point.y});
           point.x = Math.floor(Math.random() * 18) + 1;
           point.y = Math.floor(Math.random() * 16) + 1;
@@ -217,6 +222,8 @@ THE SOFTWARE.
             }
           }
         }
+        context.font="22px Georgia";
+        context.fillText(score, 27, 44);
         context.drawImage(graphics["4-screen-cover.png"], 0, 0);
         requestAnimFrame(self.draw);
       }
