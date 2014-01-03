@@ -22,8 +22,8 @@ function returnimages($dirname) {
     $pattern = "(\.jpg$)|(\.png$)|(\.jpeg$)|(\.gif$)";
       foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator(realpath("../../" . $dirname))) as $filepath) {
         if (eregi($pattern, $filepath)) {
-          $file =  explode("/", $filepath);
-          array_push($files, "<file>" . $file[count($file)-1] . "</file>");
+          $file =  basename($filepath);
+          array_push($files, "<file>" . $file . "</file>");
       }
     }
     natsort($files);
