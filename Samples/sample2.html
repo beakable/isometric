@@ -40,207 +40,205 @@ THE SOFTWARE.
     </style>
     <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
     
-    <!-- Engine Scripts -->
-    <script type="text/javascript" src="/com/common.js"></script>
-    <script type="text/javascript" src="/com/particles/Range.js"></script>
-    <script type="text/javascript" src="/com/particles/Particle.js"></script>
-    <script type="text/javascript" src="/com/particles/Emitter.js"></script>
-    <script type="text/javascript" src="/com/particles/Effect.js"></script>
-    <script type="text/javascript" src="/com/particles/EffectLoader.js"></script>
-    <script type="text/javascript" src="/com/Canvas/Input.js"></script>
-    <script type="text/javascript" src="/com/Canvas/Control.js"></script> 
-    <script type="text/javascript" src="/com/xml/XMLPopulate.js" ></script>
-    <script type="text/javascript" src="/com/img/ImageLoader.js"></script>
-    <script tppe="text/javascript" src="/com/iso/Isometric.js"></script>
-    <script tppe="text/javascript" src="/com/pathfind/pathfind.js"></script>
-    <!--                -->
-    <!-- Game Scripts   -->
-    <script type="text/javascript" src="/game/Clock.js"></script>
-    <!--                -->
-
+    <script data-main="../js/jsiso.js" src="../js/require.js"></script>
 
     <script type="text/javascript">
 
-    // -- FPS --------------------------------
-    window.requestAnimFrame = (function() {
-      return window.requestAnimationFrame || 
-      window.webkitRequestAnimationFrame  || 
-      window.mozRequestAnimationFrame     || 
-      window.oRequestAnimationFrame       ||  
-      window.msRequestAnimationFrame      || 
-      function(callback, element) {
-        window.setTimeout(callback, 1000 / 60);
-      };
-    })();
-    // ---------------------------------------
+    require([
+      'jsiso/canvas/Control',
+      'jsiso/canvas/Input',
+      'jsiso/img/ImageLoader',
+      'jsiso/xml/XMLPopulate',
+      'jsiso/iso/Isometric',
+      'jsiso/pathfind/pathfind',
+      'domReady!'
+    ],
+    function(CanvasControl, CanvasInput, ImageLoader, XMLPopulate, Isometric, pathfind) {
+
+      // -- FPS --------------------------------
+      window.requestAnimFrame = (function() {
+        return window.requestAnimationFrame || 
+        window.webkitRequestAnimationFrame  || 
+        window.mozRequestAnimationFrame     || 
+        window.oRequestAnimationFrame       ||  
+        window.msRequestAnimationFrame      || 
+        function(callback, element) {
+          window.setTimeout(callback, 1000 / 60);
+        };
+      })();
+      // ---------------------------------------
 
 
-    function launch() {
+      function launch() {
 
-      var XML = new XMLPopulate(); // Used for loading the XML maps TODO: Change maps to JSON rather than XML
-      var imgLoader = new ImageLoader(); // Used for loading all images used within game
+        var XML = new XMLPopulate(); // Used for loading the XML maps TODO: Change maps to JSON rather than XML
+        var imgLoader = new ImageLoader(); // Used for loading all images used within game
 
-      XML.loadXML('/com/xml/XMLFiles.php?folder=img/ground/'); // PHP is used to output a list of images within the directory for easier loading
-      var groundImages = imgLoader.loadImageArray('/img/ground/', XML.getContent('files', 'file'));
+        XML.loadXML('../XMLFiles.php?folder=/ground/'); // PHP is used to output a list of images within the directory for easier loading
+        var groundImages = imgLoader.loadImageArray(XML.getContent('files', 'file'), true);
 
-      XML.loadXML('/com/xml/XMLFiles.php?folder=img/players/');
-      var playerImages = imgLoader.loadImageArray('/img/players/', XML.getContent('files','file'));
+        XML.loadXML('../XMLFiles.php?folder=/players/');
+        var playerImages = imgLoader.loadImageArray(XML.getContent('files','file'), true);
 
-      var loadTimer = setInterval(loadAll, 100);
+        var loadTimer = setInterval(loadAll, 100);
 
-      function loadAll() {
-        if (imgLoader.loaded === imgLoader.to_load) {
-          XML.loadXML('sample2.xml'); // Load the map 
+        function loadAll() {
+          if (imgLoader.loaded === imgLoader.to_load) {
+            XML.loadXML('sample2.xml'); // Load the map 
 
-          clearInterval(loadTimer);
-          var game = new main(0, 0, 10, 10, playerImages);  // X & Y drawing position, and tile span to draw 
-          
-          game.init({
-            layers: [
-              game.createLayer({
-                title: "Graphics",
-                layout: XML.getContent('ground_map','row'),
-                graphics: groundImages.files,
-                graphicsDictionary: groundImages.dictionary, 
-                heightMap: {
-                  map: XML.getContent('ground_height','row'),
-                  offset: 0,
-                  heightTile: groundImages.files["blank-block.png"],
-                },
-                height: 100,
-                width: 50,
-                applyInteractions: true,
-                shadow: {
-                  offset: 20, // Offset is the same height as the stack tile
-                  verticalColor: 'rgba(5, 5, 30, 0.4)',
-                  horizontalColor: 'rgba(6, 5, 50, 0.5)'
-                }
-              }),
-              game.createLayer({
-                title: "AI",
-                layout: XML.getContent('object_map','row'),
-                heightMap: {
-                  map: XML.getContent('ground_height','row'),
-                  offset: 20, // Offset is the same height as the  graphics stack tile
-                  heightMapOnTop: true
-                },
-                height: 100,
-                width: 50,
-                applyInteractions: true
-              })
-            ],
-          });
-        }
-      }
-    }
-
-
-    function main(x, y, xrange, yrange, playerImages) {
-      self = this;
-      var mapLayers = [];
-      var rangeX = xrange;
-      var rangeY = yrange;
-
-      var calculatePaths = 0;
-
-      var enemy = [];
-
-      var enemyStart = [4, 0]; // Starting location of AI
-      var enemyEnd = [4, 9]; // Ending location of AI
-
-      var context = canvas.create("canavas", 920, 600, {
-        background: "#FFF",
-        display: "block",
-        marginLeft: "auto",
-        marginRight: "auto"
-      });
-      canvas.fullScreen();
-      
-      var input = new CanvasInput(document, canvas());
-
-      input.mouse_action(function(coords) {
-        mapLayers.map(function(layer) {
-          tile_coordinates =  layer.applyMouseFocus(coords.x, coords.y); // Get the current mouse location from X & Y Coords
-          layer.setHeightmapTile(tile_coordinates.x, tile_coordinates.y, layer.getHeightMapTile(tile_coordinates.x, tile_coordinates.y) + 1); // Increase heightmap tile 
-          layer.setTile(tile_coordinates.x, tile_coordinates.y, 9); // Force the chaning of tile graphic
-        });
-      });
-
-      input.mouse_move(function(coords) {
-        mapLayers.map(function(layer) {
-          tile_coordinates = layer.applyMouseFocus(coords.x, coords.y); // Apply mouse rollover via mouse location X & Y
-        });
-      });  
-      
-      this.draw = function() {
-        context.clearRect(0, 0, canvas().width, canvas().height);
-		    if(calculatePaths === 100) { // Calculate AI paths every 100 ticks
-          enemy.map(function(e) {
-            pathfind(e, [e.xPos, e.yPos], [enemyEnd[0], enemyEnd[1]], mapLayers[0].getHeightLayout(), false, function (data) { 
-              if (data.length > 0 && data[1] !== undefined) {
-                e.xPos = data[1].x;
-                e.yPos = data[1].y;
-              }
-            }, true);
-          });
-          calculatePaths = 0;
-          enemy = enemy.filter(function(e) { 
-            if (e.xPos === Number(enemyEnd[0]) && e.yPos === Number(enemyEnd[1])) {
-              return false;
-            }
-            else {
-              return true
-            } 
-          });        
-        }
-        for (i = 0; i < 0 + rangeY; i++) {
-          for (j = 0; j < 0 + rangeX; j++) {
-            mapLayers.map(function(layer) {
-              if (layer.getTitle() === "Graphics") {
-                layer.draw(i,j); // Draw the graphics layer
-              }
-              else {
-                enemy.map(function(e) {
-                  if (i === e.xPos  && j === e.yPos) {
-                    layer.draw(i, j, e.image); // Only draw the enemy over writes of the AI layer
+            clearInterval(loadTimer);
+            var game = new main(0, 0, 10, 10, playerImages);  // X & Y drawing position, and tile span to draw 
+            
+            game.init({
+              layers: [
+                game.createLayer({
+                  title: "Graphics",
+                  layout: XML.getContent('ground_map','row'),
+                  graphics: groundImages.files,
+                  graphicsDictionary: groundImages.dictionary, 
+                  heightMap: {
+                    map: XML.getContent('ground_height','row'),
+                    offset: 0,
+                    heightTile: groundImages.files["blank-block.png"],
+                  },
+                  height: 100,
+                  width: 50,
+                  applyInteractions: true,
+                  shadow: {
+                    offset: 20, // Offset is the same height as the stack tile
+                    verticalColor: 'rgba(5, 5, 30, 0.4)',
+                    horizontalColor: 'rgba(6, 5, 50, 0.5)'
                   }
-                });
-              }
+                }),
+                game.createLayer({
+                  title: "AI",
+                  layout: XML.getContent('object_map','row'),
+                  heightMap: {
+                    map: XML.getContent('ground_height','row'),
+                    offset: 20, // Offset is the same height as the  graphics stack tile
+                    heightMapOnTop: true
+                  },
+                  height: 100,
+                  width: 50,
+                  applyInteractions: true
+                })
+              ],
             });
           }
         }
+      }
+
+
+      function main(x, y, xrange, yrange, playerImages) {
+        self = this;
+        var mapLayers = [];
+        var rangeX = xrange;
+        var rangeY = yrange;
+
+        var calculatePaths = 0;
+
+        var enemy = [];
+
+        var enemyStart = [4, 0]; // Starting location of AI
+        var enemyEnd = [4, 9]; // Ending location of AI
+
+        var context = CanvasControl.create("canavas", 920, 600, {
+          background: "#FFF",
+          display: "block",
+          marginLeft: "auto",
+          marginRight: "auto"
+        });
+        CanvasControl.fullScreen();
         
-        calculatePaths += 1;
-        requestAnimFrame(self.draw);
-      }
-      
-      this.createLayer = function(settings) {
-        var layer = new Isometric(context, settings.height, settings.width, canvas().height, canvas().width, settings.layout, settings.graphics, settings.graphicsDictionary);
-          layer.applyHeightShadow(true, settings.shadow);
-        layer.setupProperties(settings);
-        layer.stackTiles(settings.heightMap);
-        layer.align("h-center", canvas().width, xrange, 0); // Center canvas drawing X
-        layer.align("v-center", canvas().height, yrange, 0); // Center canvas drawing Y
-        return layer;
-      }
+        var input = new CanvasInput(document, CanvasControl());
 
-
-      this.init = function(settings) {
-        mapLayers = settings.layers;
-        this.draw();
-        setInterval( function(){
-          enemy.push({
-            image: playerImages.files["enemy3.png"],
-            xPos: enemyStart[0],
-            yPos: enemyStart[1]
+        input.mouse_action(function(coords) {
+          mapLayers.map(function(layer) {
+            tile_coordinates =  layer.applyMouseFocus(coords.x, coords.y); // Get the current mouse location from X & Y Coords
+            layer.setHeightmapTile(tile_coordinates.x, tile_coordinates.y, layer.getHeightMapTile(tile_coordinates.x, tile_coordinates.y) + 1); // Increase heightmap tile 
+            layer.setTile(tile_coordinates.x, tile_coordinates.y, 9); // Force the chaning of tile graphic
           });
-        }, 2500); // Create new enemy AI every 2.5 seconds
+        });
+
+        input.mouse_move(function(coords) {
+          mapLayers.map(function(layer) {
+            tile_coordinates = layer.applyMouseFocus(coords.x, coords.y); // Apply mouse rollover via mouse location X & Y
+          });
+        });  
+        
+        this.draw = function() {
+          context.clearRect(0, 0, CanvasControl().width, CanvasControl().height);
+  		    if(calculatePaths === 100) { // Calculate AI paths every 100 ticks
+            enemy.map(function(e) {
+              pathfind(e, [e.xPos, e.yPos], [enemyEnd[0], enemyEnd[1]], mapLayers[0].getHeightLayout(), false, function (data) { 
+                if (data.length > 0 && data[1] !== undefined) {
+                  e.xPos = data[1].x;
+                  e.yPos = data[1].y;
+                }
+              }, true);
+            });
+            calculatePaths = 0;
+            enemy = enemy.filter(function(e) { 
+              if (e.xPos === Number(enemyEnd[0]) && e.yPos === Number(enemyEnd[1])) {
+                return false;
+              }
+              else {
+                return true
+              } 
+            });        
+          }
+          for (i = 0; i < 0 + rangeY; i++) {
+            for (j = 0; j < 0 + rangeX; j++) {
+              mapLayers.map(function(layer) {
+                if (layer.getTitle() === "Graphics") {
+                  layer.draw(i,j); // Draw the graphics layer
+                }
+                else {
+                  enemy.map(function(e) {
+                    if (i === e.xPos  && j === e.yPos) {
+                      layer.draw(i, j, e.image); // Only draw the enemy over writes of the AI layer
+                    }
+                  });
+                }
+              });
+            }
+          }
+          
+          calculatePaths += 1;
+          requestAnimFrame(self.draw);
+        }
+        
+        this.createLayer = function(settings) {
+          var layer = new Isometric(context, settings.height, settings.width, CanvasControl().height, CanvasControl().width, settings.layout, settings.graphics, settings.graphicsDictionary);
+            layer.applyHeightShadow(true, settings.shadow);
+          layer.setupProperties(settings);
+          layer.stackTiles(settings.heightMap);
+          layer.align("h-center", CanvasControl().width, xrange, 0); // Center canvas drawing X
+          layer.align("v-center", CanvasControl().height, yrange, 0); // Center canvas drawing Y
+          return layer;
+        }
+
+
+        this.init = function(settings) {
+          mapLayers = settings.layers;
+          this.draw();
+          setInterval( function(){
+            enemy.push({
+              image: playerImages.files["enemy3.png"],
+              xPos: enemyStart[0],
+              yPos: enemyStart[1]
+            });
+          }, 2500); // Create new enemy AI every 2.5 seconds
+        }
+        
       }
-      
-    }
+
+      launch();
+
+    });
     </script>
   </head>
-  <body onLoad="launch()">
+  <body>
     <a href="https://twitter.com/Beakable" class="twitter-follow-button" data-show-count="false">Follow @Beakable</a>
   </body>
 </html>

@@ -39,120 +39,125 @@ THE SOFTWARE.
       }
     </style>
     <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
-    
-    <!-- Engine Scripts -->
-    <script type="text/javascript" src="/com/Canvas/Input.js"></script>
-    <script type="text/javascript" src="/com/Canvas/Control.js"></script> 
-    <script type="text/javascript" src="/com/xml/XMLPopulate.js" ></script>
-    <script type="text/javascript" src="/com/img/ImageLoader.js"></script>
-    <script tppe="text/javascript" src="/com/iso/Isometric.js"></script>
- 
 
+    <script data-main="../js/jsiso.js" src="../js/require.js"></script>
 
     <script type="text/javascript">
 
-    // -- FPS --------------------------------
-    window.requestAnimFrame = (function() {
-      return window.requestAnimationFrame || 
-      window.webkitRequestAnimationFrame  || 
-      window.mozRequestAnimationFrame     || 
-      window.oRequestAnimationFrame       ||  
-      window.msRequestAnimationFrame      || 
-      function(callback, element) {
-        window.setTimeout(callback, 1000 / 60);
-      };
-    })();
-    // ---------------------------------------
+    require([
+      'jsiso/canvas/Control',
+      'jsiso/canvas/Input',
+      'jsiso/img/ImageLoader',
+      'jsiso/xml/XMLPopulate',
+      'jsiso/iso/Isometric',
+      'domReady!'
+    ],
+    function(CanvasControl, CanvasInput, ImageLoader, XMLPopulate, Isometric) {
+
+      // -- FPS --------------------------------
+      window.requestAnimFrame = (function() {
+        return window.requestAnimationFrame || 
+        window.webkitRequestAnimationFrame  || 
+        window.mozRequestAnimationFrame     || 
+        window.oRequestAnimationFrame       ||  
+        window.msRequestAnimationFrame      || 
+        function(callback, element) {
+          window.setTimeout(callback, 1000 / 60);
+        };
+      })();
+      // ---------------------------------------
+
+      function launch() {
+
+        var XML = new XMLPopulate(); // Used for loading the XML maps TODO: Change maps to JSON rather than XML
+        var imgLoader = new ImageLoader(); // Used for loading all images used within game
+
+        XML.loadXML('../XMLFiles.php?folder=/space/'); // PHP is used to output a list of images within the directory for easier loading
+        var groundImages = imgLoader.loadImageArray(XML.getContent('files', 'file'));
 
 
-    function launch() {
+        var loadTimer = setInterval(loadAll, 100);
 
-      var XML = new XMLPopulate(); // Used for loading the XML maps TODO: Change maps to JSON rather than XML
-      var imgLoader = new ImageLoader(); // Used for loading all images used within game
+        function loadAll() {
+          if (imgLoader.loaded === imgLoader.to_load) {
+            XML.loadXML('sample5.xml'); // Load the map 
 
-      XML.loadXML('/com/xml/XMLFiles.php?folder=img/space/'); // PHP is used to output a list of images within the directory for easier loading
-      var groundImages = imgLoader.loadImageArray('/img/space/', XML.getContent('files', 'file'));
-
-
-      var loadTimer = setInterval(loadAll, 100);
-
-      function loadAll() {
-        if (imgLoader.loaded === imgLoader.to_load) {
-          XML.loadXML('sample5.xml'); // Load the map 
-
-          clearInterval(loadTimer);
-          var game = new main(0, 0, 8, 8);  // X & Y drawing position, and tile span to draw 
-          
-          game.init({
-            layers: [
-              game.createLayer({
-                title: "LayerOne",
-                layout: XML.getContent('field_one','row'),
-                graphics: groundImages.files,
-                graphicsDictionary: groundImages.dictionary, 
-                isometric: false, // Flag used to layout grid in non Isometric format
-                height: 80,
-                width: 80,
-                applyInteractions: true
-              })
-            ],
-          });
-        }
-      }
-    }
-
-    function main(x, y, xrange, yrange) {
-      
-      var self = this;
-      var mapLayers = [];
-
-      var context = canvas.create("canavas", 640, 640, {
-        display: "block",
-        marginLeft: "auto",
-        marginRight: "auto"
-      });
-
-
-      var input = new CanvasInput(document, canvas());
-
-      input.mouse_action(function(coords) {
-        mapLayers.map(function(layer) {
-          tile_coordinates =  layer.applyMouseFocus(coords.x, coords.y); // Get the current mouse location from X & Y Coords
-          layer.setTile(tile_coordinates.x, tile_coordinates.y, 4); // Force the chaning of tile graphic
-        });
-      });
-
-      input.mouse_move(function(coords) {
-        mapLayers.map(function(layer) {
-          tile_coordinates = layer.applyMouseFocus(coords.x, coords.y); // Apply mouse rollover via mouse location X & Y
-        });
-      }); 
-
-      this.draw = function() {
-        context.clearRect(0, 0, canvas().width, canvas().height);
-        for (i = x; i < 0 + xrange; i++) {
-          for (j = y; j < 0 + yrange; j++) {
-            mapLayers[0].draw(i,j);
+            clearInterval(loadTimer);
+            var game = new main(0, 0, 8, 8);  // X & Y drawing position, and tile span to draw 
+            
+            game.init({
+              layers: [
+                game.createLayer({
+                  title: "LayerOne",
+                  layout: XML.getContent('field_one','row'),
+                  graphics: groundImages.files,
+                  graphicsDictionary: groundImages.dictionary, 
+                  isometric: false, // Flag used to layout grid in non Isometric format
+                  height: 80,
+                  width: 80,
+                  applyInteractions: true
+                })
+              ],
+            });
           }
         }
-        requestAnimFrame(self.draw);
-      }
-      
-      this.createLayer = function(settings) {
-        var layer = new Isometric(context, settings.height, settings.width, canvas().height, canvas().width, settings.layout, settings.graphics, settings.graphicsDictionary);
-        layer.setupProperties(settings);
-        return layer;
       }
 
-      this.init = function(settings) {
-        mapLayers = settings.layers;
-        this.draw();
+      function main(x, y, xrange, yrange) {
+        
+        var self = this;
+        var mapLayers = [];
+
+        var context = CanvasControl.create("canavas", 640, 640, {
+          display: "block",
+          marginLeft: "auto",
+          marginRight: "auto"
+        });
+
+
+        var input = new CanvasInput(document, CanvasControl());
+
+        input.mouse_action(function(coords) {
+          mapLayers.map(function(layer) {
+            tile_coordinates =  layer.applyMouseFocus(coords.x, coords.y); // Get the current mouse location from X & Y Coords
+            layer.setTile(tile_coordinates.x, tile_coordinates.y, 4); // Force the chaning of tile graphic
+          });
+        });
+
+        input.mouse_move(function(coords) {
+          mapLayers.map(function(layer) {
+            tile_coordinates = layer.applyMouseFocus(coords.x, coords.y); // Apply mouse rollover via mouse location X & Y
+          });
+        }); 
+
+        this.draw = function() {
+          context.clearRect(0, 0, CanvasControl().width, CanvasControl().height);
+          for (i = x; i < 0 + xrange; i++) {
+            for (j = y; j < 0 + yrange; j++) {
+              mapLayers[0].draw(i,j);
+            }
+          }
+          requestAnimFrame(self.draw);
+        }
+        
+        this.createLayer = function(settings) {
+          var layer = new Isometric(context, settings.height, settings.width, CanvasControl().height, CanvasControl().width, settings.layout, settings.graphics, settings.graphicsDictionary);
+          layer.setupProperties(settings);
+          return layer;
+        }
+
+        this.init = function(settings) {
+          mapLayers = settings.layers;
+          this.draw();
+        }
+        
       }
-      
-    }
+
+      launch();
+    });
     </script>
   </head>
-  <body onLoad="launch()">
+  <body>
     <a href="https://twitter.com/Beakable" class="twitter-follow-button" data-show-count="false">Follow @Beakable</a>
   </body>
 </html>
