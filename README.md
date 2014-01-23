@@ -1,4 +1,4 @@
-HTML5 Canvas Isometric Engine
+HTML5 Canvas Tile Engine
 =========
 
 ![JSiso](http://jsiso.com/jsiso.png)
@@ -12,6 +12,7 @@ For a list of examples and further details checkout: http://jsiso.com
 
 Currently contained features are:
   - AMD structured using requireJS 
+  - Easily create 2D or 2D.5 layouts
   - Unlimited layer stacking
   - Heightmaps
   - Auto scaling of image dimensions
@@ -24,7 +25,6 @@ Currently contained features are:
   - Player vision limiting
   - Simple player device interaction
   - Easy Node Multiplayer Integration
-  - Basic support for Standard non Isometric tiles
 
 
 
