@@ -11,7 +11,7 @@ The most current running dev build can be viewed here: http://isometric.beakable
 For a list of examples and further details checkout: http://jsiso.com
 
 Currently contained features are:
-
+  - AMD structured using requireJS 
   - Unlimited layer stacking
   - Heightmaps
   - Auto scaling of image dimensions
