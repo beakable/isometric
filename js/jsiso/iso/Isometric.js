@@ -51,8 +51,6 @@ function(EffectLoader, utils) {
     var focusTilePosX = 0;
     var focusTilePosY = 0;
 
-    var applyIneractions = false;
-
     var alphaWhenFocusBehind =  {}; // Used for applying alpha to objects infront of focus 
 
     var tilesHide = null;
@@ -94,6 +92,7 @@ function(EffectLoader, utils) {
       var image_num = Number(mapLayout[i][j]);
       var distanceLighting = null;
       var distanceLightingSettings;
+      var k = 0;
       if (shadowDistance) {
         distanceLightingSettings = {
           distance: shadowDistance.distance,
@@ -107,10 +106,7 @@ function(EffectLoader, utils) {
 
           lightMap.map(function(light) {
             lightDist = Math.sqrt((Math.floor(i - light[0]) * Math.floor(i - light[0])) + (Math.floor(j - light[1]) * Math.floor(j - light[1])));
-            if (lightDist > distanceLighting) {
-
-            }
-            else {
+            if (lightDist <= distanceLighting) {
               if(distanceLighting / (distanceLightingSettings.darkness * distanceLightingSettings.distance) > lightDist / (light[2] * light[3])) {
                 distanceLighting = lightDist;
                 distanceLightingSettings.distance = light[2];
@@ -182,7 +178,7 @@ function(EffectLoader, utils) {
         }
         else {
           var stack = Math.round(Number(heightMap[i][j]));
-          for (var k = 0; k <= stack; k++) {
+          for (k = 0; k <= stack; k++) {
             if (heightMapOnTop && k === stack) {
 
               // If tile is to be placed on top of heightmap 
@@ -429,19 +425,9 @@ function(EffectLoader, utils) {
     function _adjustLight(setting, increase) {
       if (increase) {
         shadowDistance.distance += setting;
-        if (lightMap) {
-          lightMap.map(function(light) {
-            //light[3] += setting;
-          });
-        }
       }
       else {
         shadowDistance.distance -= setting;
-        if (lightMap) {
-          lightMap.map(function(light) {
-           // light[3] -= setting;
-          });
-        }
       }
     }
 
@@ -473,10 +459,6 @@ function(EffectLoader, utils) {
         focusTilePosX = Math.round(focusTilePosX / (tileHeight * curZoom));
       }
       return({x: focusTilePosX, y: focusTilePosY});
-    }
-
-    function _applyFocusClick(x, y, val) {
-       heightMap[x][y] = Number(heightMap[x][y]) + 1;
     }
 
     function _setTile(x, y, val) {
@@ -661,10 +643,6 @@ function(EffectLoader, utils) {
 
       applyFocus: function(tileX, tileY) {
         return _applyFocus(tileX, tileY);
-      },
-
-      applyFocusClick: function(tileX, tileY, val) {
-
       },
 
       align: function(position, screenDimension, size, offset) {
