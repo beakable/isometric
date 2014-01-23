@@ -26,6 +26,17 @@ Currently contained features are:
   - Easy Node Multiplayer Integration
   - Basic support for Standard non Isometric tiles
 
+
+
+Setup Instructions:
+
+1: In each of the samples you'll see something like: <script data-main="../js/jsiso.js" src="../js/require.js"></script>. These two paths will need to be correct in order for JsIso to work.
+
+2: Throughout the samples it makes use of a PHP script (XMLFiles.php) to read a directory and output a XML list of image files XML.loadXML('../XMLFiles.php?folder=/ground/');. This path will also need to be correct or you will need to pass an array of image paths manually through to the image loader imgLoader.loadImageArray(XML.getContent('files','file'), true);.
+
+3: That should be everything.
+
+
 Particles
 ![particles](https://f.cloud.github.com/assets/1159739/1322878/ca65cd72-3453-11e3-97f6-c6b0243787b0.png)
 
