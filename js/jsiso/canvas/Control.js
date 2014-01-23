@@ -29,25 +29,30 @@ define(function() {
     return !!(elem.getContext && elem.getContext('2d'));
   }
 
-  function _create(name, w, h, style) {
+  function _create(name, w, h, style, element) {
     if (_supported()) {
       canvasElement = document.createElement('canvas');
       canvasElement.id = name;
       canvasElement.width = w || window.innerWidth;
       canvasElement.height = h || window.innerHeight;
-      for (var s in style) {
-        canvasElement.style[s] = style[s];
+        for (var s in style) {
+          canvasElement.style[s] = style[s];
+        }
+        if (!element) {
+          return document.body.appendChild(canvasElement).getContext('2d');
+        }
+        else{
+          return document.getElementById(element).appendChild(canvasElement).getContext('2d');
+        }
       }
-      return document.body.appendChild(canvasElement).getContext('2d');
+      else {
+        var noCanvas = document.createElement("div");
+        noCanvas.style.color = "#FFF";
+        noCanvas.style.textAlign = "center";
+        noCanvas.innerHTML = "Sorry, you need to use a more modern browser. We like: <a href='https://www.google.com/intl/en/chrome/browser/'>Chrome</a> &amp; <a href='http://www.mozilla.org/en-US/firefox/new/'>Firefox</a>";
+        return document.body.appendChild(noCanvas);
+      }
     }
-    else {
-      var noCanvas = document.createElement("div");
-      noCanvas.style.color = "#FFF";
-      noCanvas.style.textAlign = "center";
-      noCanvas.innerHTML = "Sorry, you need to use a more modern browser. We like: <a href='https://www.google.com/intl/en/chrome/browser/'>Chrome</a> &amp; <a href='http://www.mozilla.org/en-US/firefox/new/'>Firefox</a>";
-      return document.body.appendChild(noCanvas);
-    }
-  }
 
   function _fullScreen() {
     document.body.style.margin = "0";
