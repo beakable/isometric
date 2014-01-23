@@ -29,6 +29,7 @@ Currently contained features are:
 
 
 Setup Instructions:
+-------------
 
 1: In each of the samples you'll see something like: ```<script data-main="../js/jsiso.js" src="../js/require.js"></script>```. These two paths will need to be correct in order for JsIso to work.
 
