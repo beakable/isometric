@@ -49,10 +49,10 @@ THE SOFTWARE.
       'jsiso/canvas/Input',
       'jsiso/img/ImageLoader',
       'jsiso/xml/XMLPopulate',
-      'jsiso/iso/Isometric',
+      'jsiso/tile/Field',
       'domReady!'
     ],
-    function(CanvasControl, CanvasInput, ImageLoader, XMLPopulate, Isometric) {
+    function(CanvasControl, CanvasInput, ImageLoader, XMLPopulate, TileFile) {
 
       // -- FPS --------------------------------
       window.requestAnimFrame = (function() {
@@ -204,7 +204,7 @@ THE SOFTWARE.
 
         
         this.createLayer = function(settings) {
-          var layer = new Isometric(context, settings.height, settings.width, CanvasControl().height, CanvasControl().width, settings.layout, settings.graphics, settings.graphicsDictionary);
+          var layer = new TileFile(context, settings.height, settings.width, CanvasControl().height, CanvasControl().width, settings.layout, settings.graphics, settings.graphicsDictionary);
           layer.applyHeightShadow(true, settings.shadow);
           layer.setupProperties(settings);
           layer.stackTiles(settings.heightMap);

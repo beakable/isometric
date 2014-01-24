@@ -49,10 +49,10 @@ THE SOFTWARE.
       'jsiso/canvas/Input',
       'jsiso/img/ImageLoader',
       'jsiso/xml/XMLPopulate',
-      'jsiso/iso/Isometric',
+      'jsiso/tile/Field',
       'domReady!'
     ],
-    function(CanvasControl, CanvasInput, ImageLoader, XMLPopulate, Isometric) {
+    function(CanvasControl, CanvasInput, ImageLoader, XMLPopulate, TileField) {
 
       // -- FPS --------------------------------
       window.requestAnimFrame = (function() {
@@ -92,7 +92,7 @@ THE SOFTWARE.
                   layout: XML.getContent('field_one','row'),
                   graphics: groundImages.files,
                   graphicsDictionary: groundImages.dictionary, 
-                  isometric: false, // Flag used to layout grid in non Isometric format
+                  isometric: false, // Flag used to layout grid in non isometric format
                   height: 80,
                   width: 80,
                   applyInteractions: true
@@ -141,7 +141,7 @@ THE SOFTWARE.
         }
         
         this.createLayer = function(settings) {
-          var layer = new Isometric(context, settings.height, settings.width, CanvasControl().height, CanvasControl().width, settings.layout, settings.graphics, settings.graphicsDictionary);
+          var layer = new TileField(context, settings.height, settings.width, CanvasControl().height, CanvasControl().width, settings.layout, settings.graphics, settings.graphicsDictionary);
           layer.setupProperties(settings);
           return layer;
         }

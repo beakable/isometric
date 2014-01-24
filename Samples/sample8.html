@@ -49,9 +49,16 @@ THE SOFTWARE.
 
     <script type="text/javascript">
 
-    require(['jsiso/canvas/Control', 'jsiso/canvas/Input', 'jsiso/img/ImageLoader', 'jsiso/xml/XMLPopulate', 'jsiso/iso/Isometric', 'domReady!'],
-      
-      function(CanvasControl, CanvasInput, ImageLoader, XMLPopulate, Isometric) {
+      require([
+        'jsiso/canvas/Control',
+        'jsiso/canvas/Input',
+        'jsiso/img/ImageLoader',
+        'jsiso/xml/XMLPopulate',
+        'jsiso/tile/Field',
+        'domReady!'
+      ],
+        
+      function(CanvasControl, CanvasInput, ImageLoader, XMLPopulate, TileFile) {
 
         // -- FPS --------------------------------
         window.requestAnimFrame = (function() {
@@ -92,7 +99,7 @@ THE SOFTWARE.
                     layout: XML.getContent('field_one','row'),
                     graphics: groundImages.files,
                     graphicsDictionary: groundImages.dictionary, 
-                    isometric: true, // Flag used to layout grid in Isometric format
+                    isometric: true, // Flag used to layout grid in isometric format
                     height: 34,
                     width: 17,
                     applyInteractions: true
@@ -225,7 +232,7 @@ THE SOFTWARE.
           }
           
           this.createLayer = function(settings) {
-            var layer = new Isometric(context, settings.height, settings.width, CanvasControl().height, CanvasControl().width, settings.layout, settings.graphics, settings.graphicsDictionary);
+            var layer = new TileFile(context, settings.height, settings.width, CanvasControl().height, CanvasControl().width, settings.layout, settings.graphics, settings.graphicsDictionary);
             layer.setupProperties(settings);
             graphics = settings.graphics;
             layer.align("v-center", CanvasControl().height, yrange, 0); // Center canvas drawing Y
