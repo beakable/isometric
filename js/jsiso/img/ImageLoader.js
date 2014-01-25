@@ -20,50 +20,71 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE. 
 */
 
-/** jsiso/img/ImageLoader simply takes an array of image paths and preloads them ready for use. **/
 
+
+/***
+
+jsiso/img/ImageLoader 
+
+Simply takes an array of image paths and 
+preloads them ready for use
+
+**/
 define(function() {
 
   // Private properties for ImageLoader
 
-  var loaded = 0; // Images total the preloader has loaded.
-
-  var loading = 0; // Images total the preloader needs to load.
-
-  function _loadArray(imageFilePathArray, removePath) {
-    var images = [];
-    loading = imageFilePathArray.length;
-    imageFilePathArray.map(function(img) {
-      imgName = img;
-      if (removePath) {
-        imgName = img.split("/").pop();
-      }
-      images[imgName] = new Image();
-      images[imgName].src = img;
-      images[imgName].onload = function() {
-        loaded ++;
-      };
-    });
-    if (removePath) {
-      for (var i = 0; i < imageFilePathArray.length; i++) {
-        imageFilePathArray[i] = imageFilePathArray[i].split("/").pop();
-      }
-    }
-    return {files: images, dictionary: imageFilePathArray};
-  }
-
-   // Return ImageLoader Class
-
   return function() {
 
-     // Public properties for ImageLoader:
+    var _loaded = 0; // Images total the preloader has loaded
+
+    var _loading = 0; // Images total the preloader needs to load
+
+    function _loadArray(imageFilePathArray, removePath) {
+      var images = [];
+      _loading = imageFilePathArray.length;
+      imageFilePathArray.map(function(img) {
+        imgName = img;
+        if (removePath) {
+          imgName = img.split("/").pop();
+        }
+        images[imgName] = new Image();
+        images[imgName].src = img;
+        images[imgName].onload = function() {
+          _loaded ++;
+        };
+      });
+      if (removePath) {
+        for (var i = 0; i < imageFilePathArray.length; i++) {
+          imageFilePathArray[i] = imageFilePathArray[i].split("/").pop();
+        }
+      }
+      return {files: images, dictionary: imageFilePathArray};
+    }
+
+
+    // ----
+    // -- Public properties for ImageLoader
+    // ----
 
     return {
+
+      loaded: _loaded,
+      loading: _loading,
+
+      /**
+      * Loads an Array of images and returns an object containing preloaded 
+        images and dictionary of images for calling
+      * @param {Array} Contains all the paths and files.extenstion to be preloaded
+      * @param {Boolean} If path should be removed from dictionary so lookup is via filename.ext only
+      * @return {Object} via _loadArray returns an object containing { files: {Array} preloadedImages, dictionary: {Array} imageNames}
+      */
       loadImageArray: function(imageFilePathArray, removePath) {
         // imageFilePathArray - Array of paths and file name locations to be preloaded in.
         // removePath - Bool if true will remove paths from dictionary leaving only filenames and image extension.
         return _loadArray(imageFilePathArray, removePath);
       }
+
     };
   };
 });

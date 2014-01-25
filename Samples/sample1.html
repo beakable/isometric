@@ -97,7 +97,7 @@ THE SOFTWARE.
         var loadTimer = setInterval(loadAll, 100);
 
         function loadAll() {
-          if (imgLoader.loaded === imgLoader.to_load) {
+          if (imgLoader.loaded === imgLoader.loading) {
            XML.loadXML('sample1.xml');// Load the map 
 
             clearInterval(loadTimer);
