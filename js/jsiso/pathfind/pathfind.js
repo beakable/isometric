@@ -20,9 +20,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE. 
 */
 
-/*
+/***
 
-  Pathfinding function for isometric game
+  jsiso/pathdind/pathfind
+
   Using the A* Pathfind method
   
   item: - The item being tracked, allows us to assign a webworker to them
@@ -31,7 +32,8 @@ THE SOFTWARE.
   m: map array of map tiles
     - 0 = Clear
     - 1 or bigger = block
-*/
+
+***/
 define(['module'], function(self) {
 
 
