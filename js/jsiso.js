@@ -1,3 +1,3 @@
 requirejs.config({
-    baseUrl: "/project/js/"
+    baseUrl: "/js/"
 });
