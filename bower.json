@@ -7,7 +7,6 @@
     "Edward Smyth <edward@zoby.eu>"
   ],
   "description": "isometric tile-based engine in javascript",
-  "main": "js/jsiso.js",
   "moduleType": [
     "amd"
   ],
