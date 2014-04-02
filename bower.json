@@ -23,7 +23,7 @@
     "bower_components",
     "test",
     "tests",
-    "public/bower_components"
+    "README.md"
   ],
   "dependencies": {
     "requirejs": "~2.1.11"
