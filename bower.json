@@ -4,6 +4,7 @@
   "homepage": "http://jsiso.com",
   "authors": [
     "Iain Hamilton <iain@beakable.com>",
+    "Anthony Moralez <iain@beakable.com>",
     "Edward Smyth <edward@zoby.eu>"
   ],
   "description": "isometric tile-based engine in javascript",
