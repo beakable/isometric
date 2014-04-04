@@ -6,9 +6,9 @@ HTML5 Canvas Tile Engine
 
 This repo contains an MIT Licensed Isometric HTML5 tile engine Copyright © 2013 of Iain Hamilton and Edward Smyth.
 
-The most current running dev build can be viewed here: http://isometric.beakable.com/
-
 For a list of examples and further details checkout: http://jsiso.com
+
+For a Repo containing all the samples featured on jsiso.com checkout: https://github.com/anthonymoralez/jsiso-samples
 
 Currently contained features are:
   - AMD structured using requireJS 
