@@ -89,10 +89,18 @@ function(EffectLoader, utils) {
       }
       var resizedTileHeight;
       var stackGraphic = null;
-      var image_num = Number(mapLayout[i][j]);
+
+      var graphicValue = mapLayout[i][j];
+      if (Number(graphicValue) >= 0) {
+
+      }
+      else {
+
+      }
       var distanceLighting = null;
       var distanceLightingSettings;
       var k = 0;
+
       if (shadowDistance) {
         distanceLightingSettings = {
           distance: shadowDistance.distance,
@@ -120,11 +128,13 @@ function(EffectLoader, utils) {
         }
         distanceLighting =  distanceLighting / (distanceLightingSettings.darkness * distanceLightingSettings.distance);
       }
-      if ((!zeroIsBlank) || (zeroIsBlank && image_num) || tileImageOverwite) {
+      if ((!zeroIsBlank) || (zeroIsBlank && graphicValue) || tileImageOverwite) {
         if (zeroIsBlank) {
-          image_num--;
+          if (Number(graphicValue) >= 0) {
+            graphicValue--;
+          }
         }
-        if(tilesHide && image_num >= hideSettings.hideStart && image_num <= hideSettings.hideEnd) {
+        if(tilesHide && graphicValue >= hideSettings.hideStart && graphicValue <= hideSettings.hideEnd) {
           stackGraphic = tileImages[hideSettings.planeGraphic];
         }
         else if(tileImageOverwite) {
@@ -135,7 +145,9 @@ function(EffectLoader, utils) {
             stackGraphic = stackTileGraphic;
           }
           else {
-            stackGraphic = tileImages[tileImagesDictionary[image_num]];
+            if (Number(graphicValue) >= 0) {
+              stackGraphic = tileImages[tileImagesDictionary[graphicValue]];
+            }
           }
         }
 
@@ -227,9 +239,28 @@ function(EffectLoader, utils) {
 
                     }
                     else {
-                      stackGraphic = tileImages[tileImagesDictionary[image_num]];
-                      //resizedTileHeight = stackGraphic.height / (stackGraphic.width / tileWidth);
-                      ctx.drawImage(stackGraphic, 0, 0, stackGraphic.width, stackGraphic.height, xpos, ypos + ((k - 1) * ((tileHeight - heightOffset - resizedTileHeight) * curZoom)), (tileWidth * curZoom), (stackGraphic.height / (stackGraphic.width / tileWidth) * curZoom));
+
+                      
+                      
+
+                      if (Number(graphicValue) >= 0) {
+                        // reset stackGraphic
+
+                        stackGraphic = tileImages[tileImagesDictionary[graphicValue]];
+                      
+                        ctx.drawImage(stackGraphic, 0, 0, stackGraphic.width, stackGraphic.height, xpos, ypos + ((k - 1) * ((tileHeight - heightOffset - resizedTileHeight) * curZoom)), (tileWidth * curZoom), (stackGraphic.height / (stackGraphic.width / tileWidth) * curZoom));
+                      }
+                      else {
+                        ctx.fillStyle = 'rgba' + graphicValue;
+                        ctx.beginPath();
+                        ctx.moveTo(xpos, ypos + ((k - 1) * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom) / 2);
+                        ctx.lineTo(xpos + (tileHeight * curZoom), ypos + ((k - 1) * ((tileHeight - resizedTileHeight) * curZoom)));
+                        ctx.lineTo(xpos + (tileHeight * curZoom) * 2, ypos + ((k - 1) * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom) / 2);
+                        ctx.lineTo(xpos + (tileHeight * curZoom), ypos + ((k - 1) * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom));
+                        ctx.fill();
+
+                      }
+
                     }
                   }
                   else {
@@ -248,13 +279,12 @@ function(EffectLoader, utils) {
                 // Apply distane shadows from light source
 
                 ctx.save();
-                //ctx.globalCompositeOperation = 'source-atop';
                 ctx.fillStyle = 'rgba(' + distanceLightingSettings.color + ',' + distanceLighting + ')';
                 ctx.beginPath();
-                ctx.moveTo(xpos - 2, ypos - 1 + ((k - 1) * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom) / 2);
-                ctx.lineTo(xpos - 1 + (tileHeight * curZoom), ypos - 2 + ((k - 1) * ((tileHeight - resizedTileHeight) * curZoom)));
-                ctx.lineTo(xpos + 2 + (tileHeight * curZoom) * 2, ypos - 1 + ((k - 1) * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom) / 2);
-                ctx.lineTo(xpos + 1 + (tileHeight * curZoom), ypos + 2 + ((k - 1) * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom));
+                ctx.moveTo(xpos, ypos + ((k - 1) * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom) / 2);
+                ctx.lineTo(xpos + (tileHeight * curZoom), ypos + ((k - 1) * ((tileHeight - resizedTileHeight) * curZoom)));
+                ctx.lineTo(xpos + (tileHeight * curZoom) * 2, ypos + ((k - 1) * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom) / 2);
+                ctx.lineTo(xpos + (tileHeight * curZoom), ypos + ((k - 1) * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom));
                 ctx.fill();
                 ctx.restore();
               }
@@ -509,73 +539,13 @@ function(EffectLoader, utils) {
     }
 
     function _rotate(setting) {
-      var tempArray = [];
-      var tempLine = [];
-      var tempArrayTwo = [];
-      var tempLineTwo = [];
-      var tempArrayThree =[];
-      var tempLineThree = [];
-      var i,j ;
-      if (setting === "left") {
-        for (i = 0; i < mapLayout.length; i++) {
-          for (j = mapLayout.length - 1; j >= 0; j--) {
-            tempLine.push(mapLayout[j][i]);
-            if (stackTiles) {
-              tempLineTwo.push(heightMap[j][i]);
-            }
-            if (particleTiles) {
-              tempLineThree.push(particleMap[j][i]);
-            }
-          }
-          tempArray.push(tempLine);
-          tempLine = [];
-          if (stackTiles) {
-            tempArrayTwo.push(tempLineTwo);
-            tempLineTwo = [];
-          }
-          if (particleTiles) {
-            tempArrayThree.push(tempLineThree);
-            tempLineThree = [];
-          }
-        }
-        if (stackTiles) {
-          heightMap = tempArrayTwo;
-        }
-        if (particleTiles) {
-          heightMap = tempArrayThree;
-        }
-        mapLayout = tempArray;
+      if (stackTiles) {
+        heightMap = utils.rotateTwoDArray(heightMap, setting);
       }
-      else if (setting === "right") {
-        for (i = mapLayout.length -1; i >= 0; i--) {
-          for (j = 0; j < mapLayout.length; j++) {
-            tempLine.push(mapLayout[j][i]);
-            if (stackTiles) {
-              tempLineTwo.push(heightMap[j][i]);
-            }
-            if (particleTiles) {
-              tempLineThree.push(particleMap[j][i]);
-            }
-          }
-          tempArray.push(tempLine);
-          tempLine = [];
-          if (stackTiles) {
-            tempArrayTwo.push(tempLineTwo);
-            tempLineTwo = [];
-          }
-          if (particleTiles) {
-            tempArrayThree.push(tempLineThree);
-            tempLineThree = [];
-          }
-        }
-        if (stackTiles) {
-          heightMap = tempArrayTwo;
-        }
-        if (particleTiles) {
-          heightMap = tempArrayThree;
-        }
-        mapLayout = tempArray;
+      if (particleTiles) {
+        particleMap = utils.rotateTwoDArray(particleMap, setting);
       }
+      mapLayout = utils.rotateTwoDArray(mapLayout, setting);
     }
 
     return {
