@@ -150,8 +150,12 @@ function(EffectLoader, utils) {
             }
           }
         }
-
-        resizedTileHeight = stackGraphic.height / (stackGraphic.width / tileWidth);
+        if (Number(graphicValue) >= 0) {
+          resizedTileHeight = stackGraphic.height / (stackGraphic.width / tileWidth);
+        }
+        else {
+          resizedTileHeight = tileHeight;
+        }
         if (!isometric) {
           xpos = i * (tileHeight * curZoom) + drawX;
           ypos = j * (tileWidth  * curZoom) + drawY;
@@ -183,7 +187,21 @@ function(EffectLoader, utils) {
                   }
                 }
               }
-              ctx.drawImage(stackGraphic, 0, 0, stackGraphic.width, stackGraphic.height, xpos, (ypos + ((tileHeight - resizedTileHeight) * curZoom)), (tileWidth * curZoom), (resizedTileHeight * curZoom));
+
+              if (Number(graphicValue) >= 0) {
+                // reset stackGraphic
+                ctx.drawImage(stackGraphic, 0, 0, stackGraphic.width, stackGraphic.height, xpos, (ypos + ((tileHeight - resizedTileHeight) * curZoom)), (tileWidth * curZoom), (resizedTileHeight * curZoom));
+              }
+              else {
+                ctx.fillStyle = 'rgba' + graphicValue;
+                ctx.beginPath();
+                ctx.moveTo(xpos, ypos + ((k - 1) * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom) / 2);
+                ctx.lineTo(xpos + (tileHeight * curZoom), ypos + ((k - 1) * ((tileHeight - resizedTileHeight) * curZoom)));
+                ctx.lineTo(xpos + (tileHeight * curZoom) * 2, ypos + ((k - 1) * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom) / 2);
+                ctx.lineTo(xpos + (tileHeight * curZoom), ypos + ((k - 1) * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom));
+                ctx.fill();
+              }
+
               ctx.restore();
             }
           }
@@ -240,9 +258,6 @@ function(EffectLoader, utils) {
                     }
                     else {
 
-                      
-                      
-
                       if (Number(graphicValue) >= 0) {
                         // reset stackGraphic
 
@@ -258,7 +273,6 @@ function(EffectLoader, utils) {
                         ctx.lineTo(xpos + (tileHeight * curZoom) * 2, ypos + ((k - 1) * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom) / 2);
                         ctx.lineTo(xpos + (tileHeight * curZoom), ypos + ((k - 1) * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom));
                         ctx.fill();
-
                       }
 
                     }
