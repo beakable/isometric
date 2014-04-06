@@ -24,7 +24,7 @@ define([
 ],
 
 function(EffectLoader, utils) {
-  return function(ctx, tileWidth, tileHeight, mapWidth, mapHeight, mapLayout, tileImages, tileImagesDictionary) {
+  return function(ctx, mapWidth, mapHeight, mapLayout, tileImages, tileImagesDictionary) {
 
     var title = "";
     var zeroIsBlank = false;
@@ -64,6 +64,8 @@ function(EffectLoader, utils) {
 
 
     function _setup(settings) {
+        tileWidth = settings.width;
+        tileHeight = settings.height;
         lightMap = settings.lightMap;
         shadowDistance = settings.shadowDistance;
         title = settings.title;
@@ -91,12 +93,6 @@ function(EffectLoader, utils) {
       var stackGraphic = null;
 
       var graphicValue = mapLayout[i][j];
-      if (Number(graphicValue) >= 0) {
-
-      }
-      else {
-
-      }
       var distanceLighting = null;
       var distanceLightingSettings;
       var k = 0;
@@ -193,13 +189,24 @@ function(EffectLoader, utils) {
                 ctx.drawImage(stackGraphic, 0, 0, stackGraphic.width, stackGraphic.height, xpos, (ypos + ((tileHeight - resizedTileHeight) * curZoom)), (tileWidth * curZoom), (resizedTileHeight * curZoom));
               }
               else {
-                ctx.fillStyle = 'rgba' + graphicValue;
-                ctx.beginPath();
-                ctx.moveTo(xpos, ypos + ((k - 1) * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom) / 2);
-                ctx.lineTo(xpos + (tileHeight * curZoom), ypos + ((k - 1) * ((tileHeight - resizedTileHeight) * curZoom)));
-                ctx.lineTo(xpos + (tileHeight * curZoom) * 2, ypos + ((k - 1) * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom) / 2);
-                ctx.lineTo(xpos + (tileHeight * curZoom), ypos + ((k - 1) * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom));
-                ctx.fill();
+                if (!isometric) {
+                  ctx.fillStyle = 'rgba' + graphicValue;
+                  ctx.beginPath();
+                  ctx.moveTo(xpos, ypos);
+                  ctx.lineTo(xpos + (tileWidth * curZoom), ypos);
+                  ctx.lineTo(xpos + (tileWidth * curZoom), ypos + (tileHeight * curZoom));
+                  ctx.lineTo(xpos, ypos + (tileHeight * curZoom));
+                  ctx.fill();
+                }
+                else {
+                  ctx.fillStyle = 'rgba' + graphicValue;
+                  ctx.beginPath();
+                  ctx.moveTo(xpos, ypos + ((k - 1) * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom) / 2);
+                  ctx.lineTo(xpos + (tileHeight * curZoom), ypos + ((k - 1) * ((tileHeight - resizedTileHeight) * curZoom)));
+                  ctx.lineTo(xpos + (tileHeight * curZoom) * 2, ypos + ((k - 1) * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom) / 2);
+                  ctx.lineTo(xpos + (tileHeight * curZoom), ypos + ((k - 1) * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom));
+                  ctx.fill();
+                }
               }
 
               ctx.restore();
@@ -521,7 +528,12 @@ function(EffectLoader, utils) {
     function _align(position, screenDimension, size, offset) {
       switch(position) {
         case "h-center":
-          drawX = (screenDimension / 2) - ((tileWidth/4  * size) * curZoom) / (size/2);
+          if (isometric) {
+            drawX = (screenDimension / 2) - ((tileWidth / 4  * size) * curZoom) / (size / 2);
+          }
+          else {
+            drawX = (screenDimension / 2) - ((tileWidth/2  * size) * curZoom);
+          }
         break;
         case "v-center":
           drawY = (screenDimension / 2) - ((tileHeight/2 * size) * curZoom) - ((offset * tileHeight) * curZoom) / 4;
