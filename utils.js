@@ -48,6 +48,33 @@ define(function() {
 
     range: function(from, to) {
       return {from: from, to: to};
+    },
+
+    rotateTwoDArray: function(arrayLayout, direction) {
+      var tempArray = [],
+          tempLine = [],
+          i, j;
+      
+      if (direction === "left") {
+        for (i = 0; i < arrayLayout.length; i++) {
+          for (j = arrayLayout.length - 1; j >= 0; j--) {
+            tempLine.push(arrayLayout[j][i]);
+          }
+          tempArray.push(tempLine);
+          tempLine = [];
+        }
+        return tempArray;
+      }
+      else if (direction === "right") {
+        for (i = arrayLayout.length -1; i >= 0; i--) {
+          for (j = 0; j < arrayLayout.length; j++) {
+            tempLine.push(arrayLayout[j][i]);
+          }
+          tempArray.push(tempLine);
+          tempLine = [];
+        }
+        return tempArray;
+      }
     }
 
   };
