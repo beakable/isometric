@@ -147,8 +147,10 @@ function(EffectLoader, utils) {
           }
         }
         
-        var resizedTileHeight =  stackGraphic.height / (stackGraphic.width / tileWidth);
-        
+        var resizedTileHeight = 0;
+        if (stackGraphic) {
+          resizedTileHeight =  stackGraphic.height / (stackGraphic.width / tileWidth);
+        }
         if (!isometric) {
           xpos = i * (tileHeight * curZoom) + drawX;
           ypos = j * (tileWidth  * curZoom) + drawY;
@@ -198,10 +200,10 @@ function(EffectLoader, utils) {
                 else {
                   ctx.fillStyle = 'rgba' + graphicValue;
                   ctx.beginPath();
-                  ctx.moveTo(xpos, ypos - ((k ) * ((resizedTileHeight) * curZoom)) + (tileHeight * curZoom) / 2);
-                  ctx.lineTo(xpos + (tileHeight * curZoom), ypos - ((k ) * ((resizedTileHeight) * curZoom)));
-                  ctx.lineTo(xpos + (tileHeight * curZoom) * 2, ypos - ((k ) * ((resizedTileHeight) * curZoom)) + (tileHeight * curZoom) / 2);
-                  ctx.lineTo(xpos + (tileHeight * curZoom), ypos - ((k ) * ((resizedTileHeight) * curZoom)) + (tileHeight * curZoom));
+                  ctx.moveTo(xpos, ypos + ((k -1) * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom) / 2);
+                  ctx.lineTo(xpos + (tileHeight * curZoom), ypos + ((k -1) * ((tileHeight - resizedTileHeight) * curZoom)));
+                  ctx.lineTo(xpos + (tileHeight * curZoom) * 2, ypos + ((k -1) * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom) / 2);
+                  ctx.lineTo(xpos + (tileHeight * curZoom), ypos + ((k -1) * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom));
                   ctx.fill();
                 }
               }
