@@ -146,12 +146,9 @@ function(EffectLoader, utils) {
             }
           }
         }
-        if (Number(graphicValue) >= 0) {
-          resizedTileHeight =  stackGraphic.width / (stackGraphic.height / tileHeight);
-        }
-        else {
-          resizedTileHeight = tileHeight;
-        }
+        
+        var resizedTileHeight =  stackGraphic.height / (stackGraphic.width / tileWidth);
+        
         if (!isometric) {
           xpos = i * (tileHeight * curZoom) + drawX;
           ypos = j * (tileWidth  * curZoom) + drawY;
@@ -225,7 +222,7 @@ function(EffectLoader, utils) {
 
                   // Draw overwriting image on top of height map
                     
-                  ctx.drawImage(tileImageOverwite, 0, 0, tileImageOverwite.width, tileImageOverwite.height, xpos, ypos + ((k) * ((tileHeight - heightOffset - resizedTileHeight) * curZoom)) - (resizedTileHeight * curZoom), (tileWidth * curZoom), (stackGraphic.height / (stackGraphic.width / tileWidth) * curZoom));
+                  ctx.drawImage(tileImageOverwite, 0, 0, tileImageOverwite.width, tileImageOverwite.height, xpos, ypos + ((k - 1) *(tileHeight - heightOffset - tileHeight)) * curZoom - (resizedTileHeight  - tileHeight) * curZoom, (tileWidth * curZoom), (resizedTileHeight * curZoom));
                 }
                 else {
 
@@ -260,7 +257,8 @@ function(EffectLoader, utils) {
 
                       // Repeat tile graphic till it's reach heightmap max
 
-                      ctx.drawImage(stackGraphic, 0, 0, stackGraphic.width, stackGraphic.height, xpos, ypos - ((k + 1) * ((heightOffset + resizedTileHeight) * curZoom)), (tileWidth * curZoom), (stackGraphic.height / (stackGraphic.width / tileWidth) * curZoom));
+                      ctx.drawImage(stackGraphic, 0, 0, stackGraphic.width, stackGraphic.height, xpos, ypos + (k * ((tileHeight - heightOffset - resizedTileHeight) * curZoom)), (tileWidth * curZoom), (resizedTileHeight * curZoom));
+                    
                     }
                     else {
 
@@ -268,16 +266,15 @@ function(EffectLoader, utils) {
                         // reset stackGraphic
 
                         stackGraphic = tileImages[tileImagesDictionary[graphicValue]];
-                      
-                        ctx.drawImage(stackGraphic, 0, 0, stackGraphic.width, stackGraphic.height, xpos, ypos - (k * ((heightOffset + resizedTileHeight) * curZoom)), (tileWidth * curZoom), (stackGraphic.height / (stackGraphic.width / tileWidth) * curZoom));
+                        ctx.drawImage(stackGraphic, 0, 0, stackGraphic.width, stackGraphic.height, xpos, ypos + ((k - 1) * ((tileHeight - heightOffset - resizedTileHeight) * curZoom)), (tileWidth * curZoom), (stackGraphic.height / (stackGraphic.width / tileWidth) * curZoom));
                       }
                       else {
                         ctx.fillStyle = 'rgba' + graphicValue;
                         ctx.beginPath();
-                        ctx.moveTo(xpos, ypos - ((k ) * ((resizedTileHeight) * curZoom)) + (tileHeight * curZoom) / 2);
-                        ctx.lineTo(xpos + (tileHeight * curZoom), ypos - ((k ) * ((resizedTileHeight) * curZoom)));
-                        ctx.lineTo(xpos + (tileHeight * curZoom) * 2, ypos - ((k ) * ((resizedTileHeight) * curZoom)) + (tileHeight * curZoom) / 2);
-                        ctx.lineTo(xpos + (tileHeight * curZoom), ypos - ((k ) * ((resizedTileHeight) * curZoom)) + (tileHeight * curZoom));
+                        ctx.moveTo(xpos, ypos + ((k -1) * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom) / 2);
+                        ctx.lineTo(xpos + (tileHeight * curZoom), ypos + ((k -1) * ((tileHeight - resizedTileHeight) * curZoom)));
+                        ctx.lineTo(xpos + (tileHeight * curZoom) * 2, ypos + ((k -1) * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom) / 2);
+                        ctx.lineTo(xpos + (tileHeight * curZoom), ypos + ((k -1) * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom));
                         ctx.fill();
                       }
 
@@ -328,10 +325,10 @@ function(EffectLoader, utils) {
           else {
             ctx.fillStyle = 'rgba(255, 255, 120, 0.7)';
             ctx.beginPath();
-            ctx.moveTo(xpos, ypos - ((k - 1) * ((resizedTileHeight) * curZoom)) + (tileHeight * curZoom) / 2);
-            ctx.lineTo(xpos + (tileHeight * curZoom), ypos - ((k - 1) * ((resizedTileHeight) * curZoom)));
-            ctx.lineTo(xpos + (tileHeight * curZoom) * 2, ypos - ((k - 1) * ((resizedTileHeight) * curZoom)) + (tileHeight * curZoom) / 2);
-            ctx.lineTo(xpos + (tileHeight * curZoom), ypos - ((k - 1) * ((resizedTileHeight) * curZoom)) + (tileHeight * curZoom));
+            ctx.moveTo(xpos, ypos + ((k - 2) * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom) / 2);
+            ctx.lineTo(xpos + (tileHeight * curZoom), ypos + ((k - 2) * ((tileHeight - resizedTileHeight) * curZoom)));
+            ctx.lineTo(xpos + (tileHeight * curZoom) * 2, ypos + ((k - 2) * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom) / 2);
+            ctx.lineTo(xpos + (tileHeight * curZoom), ypos + ((k - 2) * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom));
             ctx.fill();
           }
         }
@@ -362,19 +359,20 @@ function(EffectLoader, utils) {
           nextStack = Math.round(Number(heightMap[i][j - 1]));
           currStack = Math.floor(Number(heightMap[i][j]));
           if (currStack < nextStack) {
+            shadowXpos = (i - j) * (tileHeight * curZoom) + drawX;
+            shadowYpos = (i + j) * (tileWidth / 4 * curZoom) + drawY;
             if (shadowSettings.verticalColor) {
 
-              // Apply Vertical shadow created from stacked tiles next to the tile
+              // Apply Vertical shadow created from stacked tiles
 
               if (!distanceLightingSettings  || (distanceLighting < distanceLightingSettings.darkness)) {
                 ctx.fillStyle = shadowSettings.verticalColor;
                 ctx.beginPath();
-                ctx.moveTo(xpos, ypos - ((currStack ) * ((resizedTileHeight) * curZoom)) + (tileHeight * curZoom) / 2);
-                ctx.lineTo(xpos + (tileHeight * curZoom), ypos - ((currStack) * ((resizedTileHeight) * curZoom)));
-                ctx.lineTo(xpos + (tileHeight * curZoom) * 2, ypos - ((currStack ) * ((resizedTileHeight) * curZoom)) + (tileHeight * curZoom) / 2);
-                ctx.lineTo(xpos + (tileHeight * curZoom), ypos - ((currStack) * ((resizedTileHeight) * curZoom)) + (tileHeight * curZoom));
+                ctx.moveTo(shadowXpos, shadowYpos + ((currStack - 1) * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom) / 2);
+                ctx.lineTo(shadowXpos + (tileHeight * curZoom), shadowYpos + ((currStack - 1) * ((tileHeight - resizedTileHeight) * curZoom)));
+                ctx.lineTo(shadowXpos + (tileHeight * curZoom) * 2, shadowYpos + ((currStack - 1) * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom) / 2);
+                ctx.lineTo(shadowXpos + (tileHeight * curZoom), shadowYpos + ((currStack - 1) * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom));
                 ctx.fill();
-                
               }
             }
             if (shadowSettings.horizontalColor) {
@@ -384,10 +382,10 @@ function(EffectLoader, utils) {
               if (!distanceLightingSettings  || (distanceLighting < distanceLightingSettings.darkness)) {
                 ctx.fillStyle = shadowSettings.horizontalColor;
                 ctx.beginPath();
-                ctx.moveTo(xpos + (tileHeight * curZoom), ypos - ((currStack) * (tileHeight * curZoom)));
-                ctx.lineTo(xpos + (tileHeight * curZoom), ypos - ((nextStack) * ((tileHeight + shadowSettings.offset) / ((tileHeight + shadowSettings.offset) / shadowSettings.offset)  * curZoom)));
-                ctx.lineTo(xpos + (tileHeight * curZoom) * 2, ypos - ((nextStack) * (tileHeight + shadowSettings.offset) / ((tileHeight + shadowSettings.offset) / shadowSettings.offset) * curZoom) + (tileHeight * curZoom) / 2);
-                ctx.lineTo(xpos + (tileHeight * curZoom) * 2, ypos - ((currStack) * ((tileHeight ) * curZoom)) + (tileHeight * curZoom) / 2);
+                ctx.moveTo(xpos + (tileHeight * curZoom), ypos - ((currStack - 1) * (tileHeight * curZoom)));
+                ctx.lineTo(xpos + (tileHeight * curZoom), ypos - ((nextStack - 1) * ((tileHeight + shadowSettings.offset) / ((tileHeight + shadowSettings.offset) / shadowSettings.offset)  * curZoom)));
+                ctx.lineTo(xpos + (tileHeight * curZoom) * 2, ypos - ((nextStack - 1) * (tileHeight + shadowSettings.offset) / ((tileHeight + shadowSettings.offset) / shadowSettings.offset) * curZoom) + (tileHeight * curZoom) / 2);
+                ctx.lineTo(xpos + (tileHeight * curZoom) * 2, ypos - ((currStack - 1) * ((tileHeight ) * curZoom)) + (tileHeight * curZoom) / 2);
                 ctx.fill();
               }
             }
