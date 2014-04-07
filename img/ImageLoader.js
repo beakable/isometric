@@ -42,7 +42,7 @@ define(function() {
 
     function _loadArray(imageFilePathArray, removePath) {
       var images = [];
-      _loading = imageFilePathArray.length;
+      _loading += imageFilePathArray.length;
       imageFilePathArray.map(function(img) {
         imgName = img;
         if (removePath) {
@@ -69,8 +69,9 @@ define(function() {
 
     return {
 
-      loaded: _loaded,
-      loading: _loading,
+      status: function() {
+        return {loaded: _loaded, loading: _loading};
+      },
 
       /**
       * Loads an Array of images and returns an object containing preloaded 
