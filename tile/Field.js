@@ -64,16 +64,27 @@ function(EffectLoader, utils) {
 
 
     function _setup(settings) {
-        tileWidth = settings.width;
-        tileHeight = settings.height;
-        lightMap = settings.lightMap;
-        shadowDistance = settings.shadowDistance;
-        title = settings.title;
-        zeroIsBlank = settings.zeroIsBlank;
-        if (settings.isometric !== undefined) {
-          isometric = settings.isometric;
-        }
-        alphaWhenFocusBehind = settings.alphaWhenFocusBehind;
+      tileWidth = settings.width;
+      tileHeight = settings.height;
+      lightMap = settings.lightMap;
+      shadowDistance = settings.shadowDistance;
+      title = settings.title;
+      zeroIsBlank = settings.zeroIsBlank;
+      
+      if (settings.isometric !== undefined) {
+        isometric = settings.isometric;
+      }
+
+      if (settings.shadow) {
+        _applyHeightShadow(true, settings.shadow);
+      }
+
+      if (settings.heightMap) {
+        _stackTiles(settings.heightMap);
+      }
+      
+      
+      alphaWhenFocusBehind = settings.alphaWhenFocusBehind;
     }
 
     function _draw(i, j, tileImageOverwite) {
@@ -144,10 +155,13 @@ function(EffectLoader, utils) {
             if (Number(graphicValue) >= 0) {
               stackGraphic = tileImages[tileImagesDictionary[graphicValue]];
             }
+            else {
+              stackGraphic = undefined;
+            }
           }
         }
         
-        var resizedTileHeight = 0;
+        resizedTileHeight = 0;
         if (stackGraphic) {
           resizedTileHeight =  stackGraphic.height / (stackGraphic.width / tileWidth);
         }
@@ -177,17 +191,21 @@ function(EffectLoader, utils) {
               ctx.save();
               if (alphaWhenFocusBehind && alphaWhenFocusBehind.apply === true) {
                 if ((i === focusTilePosX + 1 && j === focusTilePosY + 1) || (i === focusTilePosX && j === focusTilePosY + 1) || (i === focusTilePosX + 1 && j === focusTilePosY)) {
-                      if (alphaWhenFocusBehind.objectApplied && ((alphaWhenFocusBehind.objectApplied === null || alphaWhenFocusBehind.objectApplied && (resizedTileHeight * curZoom) > alphaWhenFocusBehind.objectApplied.height * curZoom))) {
+                  if (alphaWhenFocusBehind.objectApplied && ((alphaWhenFocusBehind.objectApplied === null || alphaWhenFocusBehind.objectApplied && (resizedTileHeight * curZoom) > alphaWhenFocusBehind.objectApplied.height * curZoom))) {
                     ctx.globalAlpha = 0.6;
                   }
                 }
               }
 
               if (Number(graphicValue) >= 0) {
-                // reset stackGraphic
+                // tile has a graphic ID
+
                 ctx.drawImage(stackGraphic, 0, 0, stackGraphic.width, stackGraphic.height, xpos, (ypos + ((tileHeight - resizedTileHeight) * curZoom)), (tileWidth * curZoom), (resizedTileHeight * curZoom));
+              
               }
               else {
+                // tile is an RGBA value
+
                 if (!isometric) {
                   ctx.fillStyle = 'rgba' + graphicValue;
                   ctx.beginPath();
@@ -214,21 +232,23 @@ function(EffectLoader, utils) {
         }
         else {
           var stack = Math.round(Number(heightMap[i][j]));
-          for (k = 0; k <= stack; k++) {
-            if (heightMapOnTop && k === stack) {
+          if (heightMapOnTop) {
 
-              // If tile is to be placed on top of heightmap 
+            // If tile is to be placed on top of heightmap 
 
-              if (!distanceLightingSettings || ( distanceLightingSettings && distanceLighting < distanceLightingSettings.darkness)) {
-                if (tileImageOverwite) {
+            if (!distanceLightingSettings || ( distanceLightingSettings && distanceLighting < distanceLightingSettings.darkness)) {
+              if (tileImageOverwite) {
 
-                  // Draw overwriting image on top of height map
-                    
-                  ctx.drawImage(tileImageOverwite, 0, 0, tileImageOverwite.width, tileImageOverwite.height, xpos, ypos + ((k - 1) *(tileHeight - heightOffset - tileHeight)) * curZoom - (resizedTileHeight  - tileHeight) * curZoom, (tileWidth * curZoom), (resizedTileHeight * curZoom));
-                }
-                else {
+                // Draw overwriting image on top of height map
+                  
+                ctx.drawImage(tileImageOverwite, 0, 0, tileImageOverwite.width, tileImageOverwite.height, xpos, ypos + ((stack - 1) *(tileHeight - heightOffset - tileHeight)) * curZoom - (resizedTileHeight  - tileHeight) * curZoom, (tileWidth * curZoom), (resizedTileHeight * curZoom));
+              }
+              else {
 
-                  // Draw the tile image on top of height map
+                // Draw the tile image on top of height map
+
+                if (Number(graphicValue) >= 0) {
+
                   ctx.save();
                   if (alphaWhenFocusBehind && alphaWhenFocusBehind.apply === true) {
                     if ((i === focusTilePosX + 1 && j === focusTilePosY + 1) || (i === focusTilePosX && j === focusTilePosY + 1) || (i === focusTilePosX + 1 && j === focusTilePosY)) {
@@ -237,14 +257,37 @@ function(EffectLoader, utils) {
                       }
                     }
                   }
-                  ctx.drawImage(stackGraphic, 0, 0, stackGraphic.width, stackGraphic.height, xpos, ypos + ((k - 1) * (tileHeight - heightOffset - tileHeight)) * curZoom - (resizedTileHeight  - tileHeight) * curZoom, (tileWidth * curZoom), (resizedTileHeight * curZoom));
+                  ctx.drawImage(stackGraphic, 0, 0, stackGraphic.width, stackGraphic.height, xpos, ypos + ((stack - 1) * (tileHeight - heightOffset - tileHeight)) * curZoom - (resizedTileHeight  - tileHeight) * curZoom, (tileWidth * curZoom), (resizedTileHeight * curZoom));
                   ctx.restore();
+                }
+                else {
+                  if (!isometric) {
+                    ctx.fillStyle = 'rgba' + graphicValue;
+                    ctx.beginPath();
+                    ctx.moveTo(xpos, ypos);
+                    ctx.lineTo(xpos + (tileWidth * curZoom), ypos);
+                    ctx.lineTo(xpos + (tileWidth * curZoom), ypos + (tileHeight * curZoom));
+                    ctx.lineTo(xpos, ypos + (tileHeight * curZoom));
+                    ctx.fill();
+                  }
+                  else {
+                    ctx.fillStyle = 'rgba' + graphicValue;
+                    ctx.beginPath();
+                    ctx.moveTo(xpos, ypos + ((stack -1) * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom) / 2);
+                    ctx.lineTo(xpos + (tileHeight * curZoom), ypos + ((stack -1) * ((tileHeight - resizedTileHeight) * curZoom)));
+                    ctx.lineTo(xpos + (tileHeight * curZoom) * 2, ypos + ((stack -1) * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom) / 2);
+                    ctx.lineTo(xpos + (tileHeight * curZoom), ypos + ((stack -1) * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom));
+                    ctx.fill();
+                  }
                 }
               }
             }
-            else if(!heightMapOnTop) {
+          }
+          else {
 
-              // If tile is to be repeated for heightmap
+            // If tile is to be repeated for heightmap
+
+            for (k = 0; k <= stack; k++) {
 
               if (!distanceLightingSettings || ( distanceLightingSettings && distanceLighting < distanceLightingSettings.darkness)) {
                 if (tileImageOverwite) {
@@ -258,9 +301,10 @@ function(EffectLoader, utils) {
                     if (k !== stack) {
 
                       // Repeat tile graphic till it's reach heightmap max
+                      if (stackGraphic) {
+                        ctx.drawImage(stackGraphic, 0, 0, stackGraphic.width, stackGraphic.height, xpos, ypos + (k * ((tileHeight - heightOffset - resizedTileHeight) * curZoom)), (tileWidth * curZoom), (resizedTileHeight * curZoom));
+                      }
 
-                      ctx.drawImage(stackGraphic, 0, 0, stackGraphic.width, stackGraphic.height, xpos, ypos + (k * ((tileHeight - heightOffset - resizedTileHeight) * curZoom)), (tileWidth * curZoom), (resizedTileHeight * curZoom));
-                    
                     }
                     else {
 
@@ -283,7 +327,22 @@ function(EffectLoader, utils) {
                     }
                   }
                   else {
-                    ctx.drawImage(stackGraphic, 0, 0, stackGraphic.width, stackGraphic.height, xpos, ypos + (k * ((tileHeight - heightOffset - resizedTileHeight) * curZoom)), (tileWidth * curZoom), (resizedTileHeight * curZoom));
+
+                    // No stack graphic specified so draw tile at top
+                    if (k === stack) {
+                      if (Number(graphicValue) >= 0) {
+                        ctx.drawImage(stackGraphic, 0, 0, stackGraphic.width, stackGraphic.height, xpos, ypos + (k * ((tileHeight - heightOffset - resizedTileHeight) * curZoom)), (tileWidth * curZoom), (resizedTileHeight * curZoom));
+                      }
+                      else {
+                        ctx.fillStyle = 'rgba' + graphicValue;
+                        ctx.beginPath();
+                        ctx.moveTo(xpos, ypos + ((k -1) * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom) / 2);
+                        ctx.lineTo(xpos + (tileHeight * curZoom), ypos + ((k -1) * ((tileHeight - resizedTileHeight) * curZoom)));
+                        ctx.lineTo(xpos + (tileHeight * curZoom) * 2, ypos + ((k -1) * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom) / 2);
+                        ctx.lineTo(xpos + (tileHeight * curZoom), ypos + ((k -1) * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom));
+                        ctx.fill();
+                      }
+                    }
                   }
                 }
               }
@@ -415,7 +474,9 @@ function(EffectLoader, utils) {
 
     function _stackTiles(settings) {
       stackTiles = true;
-      stackTileGraphic = settings.heightTile;
+      if (settings.heightTile) {
+        stackTileGraphic = settings.heightTile;
+      }
       heightMap = settings.map;
       heightOffset = settings.offset;
       heightMapOnTop = settings.heightMapOnTop || false;
