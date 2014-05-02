@@ -1,0 +1,42 @@
+{
+  "name": "isometric",
+  "homepage": "http://jsiso.com",
+  "authors": [
+    "Iain Hamilton <iain@beakable.com>",
+    "Anthony Moralez <iain@beakable.com>",
+    "Edward Smyth <edward@zoby.eu>"
+  ],
+  "description": "isometric tile-based engine in javascript",
+  "directory": "jsiso",
+  "moduleType": [
+    "amd"
+  ],
+  "keywords": [
+    "isometric",
+    "tiles",
+    "canvas",
+    "requirejs"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests",
+    "README.md"
+  ],
+  "dependencies": {
+    "requirejs": "~2.1.11"
+  },
+  "_release": "cff8a7bf86",
+  "_resolution": {
+    "type": "branch",
+    "branch": "master",
+    "commit": "cff8a7bf86d8145c669946d8856734a3a8d5040c"
+  },
+  "_source": "git://github.com/beakable/isometric.git",
+  "_target": "*",
+  "_originalSource": "JsIso",
+  "_direct": true
+}

@@ -24,7 +24,7 @@ define([
 ],
 
 function(EffectLoader, utils) {
-  return function(ctx, mapWidth, mapHeight, mapLayout, tileImages, tileImagesDictionary) {
+  return function(ctx, mapWidth, mapHeight, mapLayout) {
 
     var title = "";
     var zeroIsBlank = false;
@@ -32,6 +32,9 @@ function(EffectLoader, utils) {
     var stackTileGraphic = null;
     var drawX = 0;
     var drawY = 0;
+
+    var tileHeight = 0;
+    var tileWidth = 0;
 
     var heightMap = null;
     var lightMap = null;
@@ -62,15 +65,22 @@ function(EffectLoader, utils) {
 
     var isometric = true;
 
-
     function _setup(settings) {
-      tileWidth = settings.width;
-      tileHeight = settings.height;
+      tileWidth = settings.tileWidth;
+      tileHeight = settings.tileHeight;
       lightMap = settings.lightMap;
       shadowDistance = settings.shadowDistance;
       title = settings.title;
       zeroIsBlank = settings.zeroIsBlank;
-      
+
+      mapLayout = settings.layout;
+
+      if (settings.graphics) {
+        tileImages = settings.graphics;
+      }
+      if (settings.graphicsDictionary) {
+        tileImagesDictionary = settings.graphicsDictionary;
+      }
       if (settings.isometric !== undefined) {
         isometric = settings.isometric;
       }
@@ -83,6 +93,24 @@ function(EffectLoader, utils) {
         _stackTiles(settings.heightMap);
       }
       
+      if (settings.width) {
+        var row = [];
+        var col = 0;
+        mapLayout = [];
+        for (var i = 0; i < settings.layout.length; i++) {
+          col ++;
+          if (col !== settings.width) {
+            row.push(settings.layout[i]);
+          }
+          else {
+            row.push(settings.layout[i]);
+            mapLayout.push(row);
+            row = [];
+            col = 0;
+
+          }
+        }
+      }
       
       alphaWhenFocusBehind = settings.alphaWhenFocusBehind;
     }
@@ -107,6 +135,12 @@ function(EffectLoader, utils) {
       var distanceLighting = null;
       var distanceLightingSettings;
       var k = 0;
+
+      var stack = 0;
+      if (heightMap) {
+        stack = Math.round(Number(heightMap[i][j]));
+        k = stack;
+      }
 
       if (shadowDistance) {
         distanceLightingSettings = {
@@ -203,7 +237,7 @@ function(EffectLoader, utils) {
                 ctx.drawImage(stackGraphic, 0, 0, stackGraphic.width, stackGraphic.height, xpos, (ypos + ((tileHeight - resizedTileHeight) * curZoom)), (tileWidth * curZoom), (resizedTileHeight * curZoom));
               
               }
-              else {
+              else if (graphicValue != -1) {
                 // tile is an RGBA value
 
                 if (!isometric) {
@@ -231,7 +265,7 @@ function(EffectLoader, utils) {
           }
         }
         else {
-          var stack = Math.round(Number(heightMap[i][j]));
+          
           if (heightMapOnTop) {
 
             // If tile is to be placed on top of heightmap 
@@ -260,7 +294,7 @@ function(EffectLoader, utils) {
                   ctx.drawImage(stackGraphic, 0, 0, stackGraphic.width, stackGraphic.height, xpos, ypos + ((stack - 1) * (tileHeight - heightOffset - tileHeight)) * curZoom - (resizedTileHeight  - tileHeight) * curZoom, (tileWidth * curZoom), (resizedTileHeight * curZoom));
                   ctx.restore();
                 }
-                else {
+                else if (graphicValue != -1) {
                   if (!isometric) {
                     ctx.fillStyle = 'rgba' + graphicValue;
                     ctx.beginPath();
@@ -273,10 +307,10 @@ function(EffectLoader, utils) {
                   else {
                     ctx.fillStyle = 'rgba' + graphicValue;
                     ctx.beginPath();
-                    ctx.moveTo(xpos, ypos + ((stack -1) * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom) / 2);
-                    ctx.lineTo(xpos + (tileHeight * curZoom), ypos + ((stack -1) * ((tileHeight - resizedTileHeight) * curZoom)));
-                    ctx.lineTo(xpos + (tileHeight * curZoom) * 2, ypos + ((stack -1) * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom) / 2);
-                    ctx.lineTo(xpos + (tileHeight * curZoom), ypos + ((stack -1) * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom));
+                    ctx.moveTo(xpos, ypos - ((stack -1) * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom) / 2);
+                    ctx.lineTo(xpos + (tileHeight * curZoom), ypos - ((stack -1) * ((tileHeight - resizedTileHeight) * curZoom)));
+                    ctx.lineTo(xpos + (tileHeight * curZoom) * 2, ypos - ((stack -1) * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom) / 2);
+                    ctx.lineTo(xpos + (tileHeight * curZoom), ypos - ((stack -1) * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom));
                     ctx.fill();
                   }
                 }
@@ -314,7 +348,7 @@ function(EffectLoader, utils) {
                         stackGraphic = tileImages[tileImagesDictionary[graphicValue]];
                         ctx.drawImage(stackGraphic, 0, 0, stackGraphic.width, stackGraphic.height, xpos, ypos + ((k - 1) * ((tileHeight - heightOffset - resizedTileHeight) * curZoom)), (tileWidth * curZoom), (stackGraphic.height / (stackGraphic.width / tileWidth) * curZoom));
                       }
-                      else {
+                      else if (graphicValue != -1) {
                         ctx.fillStyle = 'rgba' + graphicValue;
                         ctx.beginPath();
                         ctx.moveTo(xpos, ypos + ((k -1) * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom) / 2);
@@ -333,15 +367,18 @@ function(EffectLoader, utils) {
                       if (Number(graphicValue) >= 0) {
                         ctx.drawImage(stackGraphic, 0, 0, stackGraphic.width, stackGraphic.height, xpos, ypos + (k * ((tileHeight - heightOffset - resizedTileHeight) * curZoom)), (tileWidth * curZoom), (resizedTileHeight * curZoom));
                       }
-                      else {
+                      else if (graphicValue != -1) {
                         ctx.fillStyle = 'rgba' + graphicValue;
                         ctx.beginPath();
-                        ctx.moveTo(xpos, ypos + ((k -1) * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom) / 2);
-                        ctx.lineTo(xpos + (tileHeight * curZoom), ypos + ((k -1) * ((tileHeight - resizedTileHeight) * curZoom)));
-                        ctx.lineTo(xpos + (tileHeight * curZoom) * 2, ypos + ((k -1) * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom) / 2);
-                        ctx.lineTo(xpos + (tileHeight * curZoom), ypos + ((k -1) * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom));
+                        ctx.moveTo(xpos, ypos - ((stack -1) * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom) / 2);
+                        ctx.lineTo(xpos + (tileHeight * curZoom), ypos - ((stack -1) * ((tileHeight - resizedTileHeight) * curZoom)));
+                        ctx.lineTo(xpos + (tileHeight * curZoom) * 2, ypos - ((stack -1) * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom) / 2);
+                        ctx.lineTo(xpos + (tileHeight * curZoom), ypos - ((stack -1) * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom));
                         ctx.fill();
                       }
+                    }
+                    else {
+                      ctx.drawImage(stackGraphic, 0, 0, stackGraphic.width, stackGraphic.height, xpos, ypos + (k * ((tileHeight - heightOffset - resizedTileHeight) * curZoom)), (tileWidth * curZoom), (resizedTileHeight * curZoom));
                     }
                   }
                 }
@@ -359,12 +396,11 @@ function(EffectLoader, utils) {
                 ctx.save();
                 ctx.fillStyle = 'rgba(' + distanceLightingSettings.color + ',' + distanceLighting + ')';
                 ctx.beginPath();
-                ctx.moveTo(xpos, ypos - ((k ) * ((resizedTileHeight) * curZoom)) + (tileHeight * curZoom) / 2);
-                ctx.lineTo(xpos + (tileHeight * curZoom), ypos - ((k ) * ((resizedTileHeight) * curZoom)));
-                ctx.lineTo(xpos + (tileHeight * curZoom) * 2, ypos - ((k ) * ((resizedTileHeight) * curZoom)) + (tileHeight * curZoom) / 2);
-                ctx.lineTo(xpos + (tileHeight * curZoom), ypos - ((k ) * ((resizedTileHeight) * curZoom)) + (tileHeight * curZoom));
+                ctx.moveTo(xpos, ypos + ((k -1) * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom) / 2);
+                ctx.lineTo(xpos + (tileHeight * curZoom), ypos + ((k -1) * ((tileHeight - resizedTileHeight) * curZoom)));
+                ctx.lineTo(xpos + (tileHeight * curZoom) * 2, ypos + ((k -1) * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom) / 2);
+                ctx.lineTo(xpos + (tileHeight * curZoom), ypos + ((k -1) * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom));
                 ctx.fill();
-                ctx.restore();
               }
             }
           }
@@ -427,7 +463,7 @@ function(EffectLoader, utils) {
               // Apply Vertical shadow created from stacked tiles
 
               if (!distanceLightingSettings  || (distanceLighting < distanceLightingSettings.darkness)) {
-                ctx.fillStyle = shadowSettings.verticalColor;
+                ctx.fillStyle = 'rgba' + (typeof shadowSettings.verticalColor === 'string' ? shadowSettings.verticalColor : shadowSettings.verticalColor[i][j]);
                 ctx.beginPath();
                 ctx.moveTo(shadowXpos, shadowYpos + ((currStack - 1) * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom) / 2);
                 ctx.lineTo(shadowXpos + (tileHeight * curZoom), shadowYpos + ((currStack - 1) * ((tileHeight - resizedTileHeight) * curZoom)));
@@ -441,7 +477,7 @@ function(EffectLoader, utils) {
               // Apply Horizontal shadows on stacked tiles
 
               if (!distanceLightingSettings  || (distanceLighting < distanceLightingSettings.darkness)) {
-                ctx.fillStyle = shadowSettings.horizontalColor;
+                ctx.fillStyle = 'rgba' + (typeof shadowSettings.horizontalColor === 'string' ? shadowSettings.horizontalColor : shadowSettings.horizontalColor[i][j]);
                 ctx.beginPath();
                 ctx.moveTo(xpos + (tileHeight * curZoom), ypos - ((currStack - 1) * (tileHeight * curZoom)));
                 ctx.lineTo(xpos + (tileHeight * curZoom), ypos - ((nextStack - 1) * ((tileHeight + shadowSettings.offset) / ((tileHeight + shadowSettings.offset) / shadowSettings.offset)  * curZoom)));
@@ -460,7 +496,7 @@ function(EffectLoader, utils) {
           if(currStack > 0) {
             shadowXpos = (i - j) * (tileHeight * curZoom) + drawX;
             shadowYpos = (i + j) * (tileWidth / 4 * curZoom) + drawY;
-            ctx.fillStyle = shadowSettings.verticalColor;
+            ctx.fillStyle = 'rgba' + (typeof shadowSettings.verticalColor === 'string' ? shadowSettings.verticalColor : shadowSettings.verticalColor[i][j]);
             ctx.beginPath();
             ctx.moveTo(shadowXpos, shadowYpos + (currStack * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom) / 2);
             ctx.lineTo(shadowXpos + (tileHeight * curZoom), shadowYpos + (currStack * ((tileHeight - resizedTileHeight) * curZoom)));
@@ -623,6 +659,17 @@ function(EffectLoader, utils) {
       }
     }
 
+    function _flip(setting) {
+      if (stackTiles) {
+        heightMap = utils.flipTwoDArray(heightMap, setting);
+      }
+      if (particleTiles) {
+        particleMap = utils.flipTwoDArray(particleMap, setting);
+      }
+      mapLayout = utils.flipTwoDArray(mapLayout, setting);
+
+    }
+
     function _rotate(setting) {
       if (stackTiles) {
         heightMap = utils.rotateTwoDArray(heightMap, setting);
@@ -635,7 +682,7 @@ function(EffectLoader, utils) {
 
     return {
 
-      setupProperties: function(settings) {
+      setup: function(settings) {
         return _setup(settings);
       },
 
@@ -715,6 +762,11 @@ function(EffectLoader, utils) {
       rotate: function(direction) {
         // left || right
         return _rotate(direction);
+      },
+
+      flip: function(direction) {
+        // horizontal || vertical
+        return _flip(direction);
       },
 
       toggleGraphicsHide: function(toggle) {

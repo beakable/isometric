@@ -82,6 +82,9 @@ define(function() {
     }
   }
 
+  function _style(setting, value) {
+    canvasElement.style[setting] = value;
+  }
 
   /**
   * Fullscreens the Canvas object
@@ -124,6 +127,7 @@ define(function() {
   canvas.create = _create;
   canvas.fullScreen = _fullScreen;
   canvas.update = _update;
+  canvas.style = _style;
 
 
   // Return Canvas Object

@@ -40,7 +40,45 @@ define(function() {
 
     var _loading = 0; // Images total the preloader needs to load
 
-    function _loadArray(imageFilePathArray, removePath) {
+    var _onloadfn = null;
+
+    function _splitSpriteSheet(spritesheet) {
+
+      var images = [];
+      var ctx = document.createElement('canvas');
+      var tileManip;
+      var imageFilePathArray = [];
+      var spriteID = 0;
+
+      var tileRow;
+      var tileCol;
+
+      _loading += spritesheet.files[spritesheet.dictionary[0]].width / spritesheet.width * spritesheet.files[spritesheet.dictionary[0]].height / spritesheet.height;
+      ctx.width = spritesheet.width;
+      ctx.height = spritesheet.height;
+      tileManip = ctx.getContext('2d');
+      for (var i = 0; i < spritesheet.files[spritesheet.dictionary[0]].height / spritesheet.height; i++) {
+        for (var j = 0; j < spritesheet.files[spritesheet.dictionary[0]].width / spritesheet.width; j++) {
+          tileManip.drawImage(spritesheet.files[spritesheet.dictionary[0]], j * (spritesheet.width) + spritesheet.offsetX, i * (spritesheet.height) + spritesheet.offsetY,  spritesheet.width + spritesheet.offsetX , spritesheet.height  + spritesheet.offsetY, 0, 0, spritesheet.width, spritesheet.height);
+          imageFilePathArray[spriteID] = spriteID;
+          images[spriteID] = new Image();
+          images[spriteID].src = ctx.toDataURL();
+          tileManip.clearRect (0, 0, spritesheet.width, spritesheet.height);
+          images[spriteID].onload = function () {
+            _loaded ++;
+            if (_loaded === _loading && _onloadfn) {
+              _onload({files: images, dictionary: imageFilePathArray});
+            }
+          };
+          spriteID ++;
+        }
+      }
+
+
+    }
+
+
+    function _loadArray(imageFilePathArray, removePath, spritesheet) {
       var images = [];
       _loading += imageFilePathArray.length;
       imageFilePathArray.map(function(img) {
@@ -52,6 +90,18 @@ define(function() {
         images[imgName].src = img;
         images[imgName].onload = function() {
           _loaded ++;
+          if (_loaded === _loading && _onloadfn && !spritesheet) {
+            _onload({files: images, dictionary: imageFilePathArray});
+          }
+          if (_loaded === _loading && spritesheet) {
+            _splitSpriteSheet({files: images,
+              dictionary: imageFilePathArray,
+              width: spritesheet.width,
+              height: spritesheet.height,
+              offsetX: spritesheet.offsetX,
+              offsetY: spritesheet.offsetY
+            });
+          }
         };
       });
       if (removePath) {
@@ -61,6 +111,11 @@ define(function() {
       }
       return {files: images, dictionary: imageFilePathArray};
     }
+
+    function _onload(images) {
+      _onloadfn(images);
+    }
+
 
 
     // ----
@@ -73,6 +128,10 @@ define(function() {
         return {loaded: _loaded, loading: _loading};
       },
 
+      onload: function (fn) {
+        _onloadfn = fn;
+      },
+
       /**
       * Loads an Array of images and returns an object containing preloaded 
         images and dictionary of images for calling
@@ -80,10 +139,10 @@ define(function() {
       * @param {Boolean} If path should be removed from dictionary so lookup is via filename.ext only
       * @return {Object} via _loadArray returns an object containing { files: {Array} preloadedImages, dictionary: {Array} imageNames}
       */
-      loadImageArray: function(imageFilePathArray, removePath) {
+      loadImageArray: function(imageFilePathArray, removePath, spritesheet) {
         // imageFilePathArray - Array of paths and file name locations to be preloaded in.
         // removePath - Bool if true will remove paths from dictionary leaving only filenames and image extension.
-        return _loadArray(imageFilePathArray, removePath);
+        return _loadArray(imageFilePathArray, removePath, spritesheet);
       }
 
     };
