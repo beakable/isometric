@@ -32,7 +32,7 @@ define(function() {
         emitters.push(emitter);
       },
 
-      Draw: function (x, y) {
+      Draw: function (x, y, scale) {
         if (!this.pause) {
           for (var i = 0, tmpTotal = emitters.length; i < tmpTotal; i++) {
             if (!emitters[i].loaded) {
@@ -41,6 +41,9 @@ define(function() {
               emitters[i].Load();
             }
             emitters[i].ShiftTo(x, y);
+            if (scale) {
+              emitters[i].Scale(scale);
+            }
             emitters[i].Draw();
           }
         }

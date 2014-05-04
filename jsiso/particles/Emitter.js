@@ -74,6 +74,8 @@ function(Particle, utils) {
 
       radiusRange: utils.range(10, 10),
 
+      scale: 1,
+
       Load: function() {
         this.particles = [];
         for (var i = 0; i < pcount; i++) {
@@ -84,6 +86,10 @@ function(Particle, utils) {
 
       ShiftTo: function (x, y) {
         this.ShiftBy(x - this.x, y - this.y);
+      },
+
+      Scale: function (scale) {
+        this.scale = scale;
       },
 
       ShiftBy: function (xoffset, yoffset) {
@@ -132,9 +138,9 @@ function(Particle, utils) {
 
         p.active = true;
 
-        p.x = this.x + utils.rand(this.xRange.from, this.xRange.to) + this.xOffset;
+        p.x = this.x + utils.rand(this.xRange.from * this.scale, this.xRange.to * this.scale) + this.xOffset;
 
-        p.y = this.y + utils.rand(this.yRange.from, this.yRange.to) + this.yOffset;
+        p.y = this.y + utils.rand(this.yRange.from * this.scale, this.yRange.to * this.scale) + this.yOffset;
 
         p.drawdelay = utils.rand(this.drawdelayRange.from, this.drawdelayRange.to);
 
@@ -148,25 +154,25 @@ function(Particle, utils) {
 
         p.g = utils.rand(this.greenRange.from, this.greenRange.to);
 
-        p.xi = utils.rand(this.xiRange.from, this.xiRange.to);
+        p.xi = utils.rand(this.xiRange.from * this.scale, this.xiRange.to * this.scale);
 
-        p.yi = utils.rand(this.yiRange.from, this.yiRange.to);
+        p.yi = utils.rand(this.yiRange.from * this.scale, this.yiRange.to * this.scale);
 
-        p.xg = utils.rand(this.xgRange.from, this.xgRange.to);
+        p.xg = utils.rand(this.xgRange.from * this.scale, this.xgRange.to * this.scale);
 
-        p.yg = utils.rand(this.ygRange.from, this.ygRange.to);
+        p.yg = utils.rand(this.ygRange.from * this.scale, this.ygRange.to * this.scale);
 
         p.slowdown = utils.rand(this.slowdownRange.from * 1000, this.slowdownRange.to * 1000) / 1000;
 
-        p.radius = utils.rand(this.radiusRange.from, this.radiusRange.to);
+        p.radius = utils.rand(this.radiusRange.from * this.scale, this.radiusRange.to * this.scale);
 
-        p.minxb = xboundRange.from;
+        p.minxb = xboundRange.from * this.scale;
 
-        p.maxxb = xboundRange.to;
+        p.maxxb = xboundRange.to * this.scale;
 
-        p.minyb = yboundRange.from;
+        p.minyb = yboundRange.from * this.scale;
 
-        p.maxyb = yboundRange.to;
+        p.maxyb = yboundRange.to * this.scale;
 
         return p;
       }

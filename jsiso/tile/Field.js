@@ -51,6 +51,7 @@ function(EffectLoader, utils) {
 
     var curZoom = 1;
     var mouseUsed = false;
+    var applyInteractions = false;
     var focusTilePosX = 0;
     var focusTilePosY = 0;
 
@@ -72,7 +73,12 @@ function(EffectLoader, utils) {
       shadowDistance = settings.shadowDistance;
       title = settings.title;
       zeroIsBlank = settings.zeroIsBlank;
+      applyInteractions = settings.applyInteractions;
 
+      if (settings.particleMap) {
+        _particleTiles(settings.particleMap);
+      }
+      
       mapLayout = settings.layout;
 
       if (settings.graphics) {
@@ -125,13 +131,13 @@ function(EffectLoader, utils) {
       if (i > mapLayout.length - 1) {
         i = mapLayout.length - 1;
       }
-      if (j > mapLayout[i].length - 1) {
+      if (mapLayout[i] && j > mapLayout[i].length - 1) {
         j = mapLayout[i].length - 1;
       }
       var resizedTileHeight;
       var stackGraphic = null;
 
-      var graphicValue = mapLayout[i][j];
+      var graphicValue = (mapLayout[i] ? mapLayout[i][j] : 0);
       var distanceLighting = null;
       var distanceLightingSettings;
       var k = 0;
@@ -386,62 +392,20 @@ function(EffectLoader, utils) {
             }
             ctx.restore();
           }
-          if (distanceLightingSettings) {
-            if (distanceLightingSettings.color !== false) {
-            -- k;
-             if ( distanceLighting < distanceLightingSettings.darkness) {
-
-                // Apply distane shadows from light source
-
-                ctx.save();
-                ctx.fillStyle = 'rgba(' + distanceLightingSettings.color + ',' + distanceLighting + ')';
-                ctx.beginPath();
-                ctx.moveTo(xpos, ypos + ((k -1) * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom) / 2);
-                ctx.lineTo(xpos + (tileHeight * curZoom), ypos + ((k -1) * ((tileHeight - resizedTileHeight) * curZoom)));
-                ctx.lineTo(xpos + (tileHeight * curZoom) * 2, ypos + ((k -1) * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom) / 2);
-                ctx.lineTo(xpos + (tileHeight * curZoom), ypos + ((k -1) * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom));
-                ctx.fill();
-              }
-            }
-          }
-
-        }
-      }
-      if (mouseUsed) {
-        if (i === focusTilePosX && j === focusTilePosY) {
-          // Apply mouse over tile coloring
-          if (!isometric) {
-            ctx.fillStyle = 'rgba(255, 255, 120, 0.7)';
-            ctx.beginPath();
-            ctx.moveTo(xpos * curZoom, ypos * curZoom);
-            ctx.lineTo(xpos + tileHeight * curZoom, ypos * curZoom);
-            ctx.lineTo(xpos + tileHeight * curZoom, ypos + tileHeight * curZoom);
-            ctx.lineTo(xpos * curZoom, ypos + tileHeight * curZoom);
-            ctx.fill();
-          }
-          else {
-            ctx.fillStyle = 'rgba(255, 255, 120, 0.7)';
-            ctx.beginPath();
-            ctx.moveTo(xpos, ypos + ((k - 2) * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom) / 2);
-            ctx.lineTo(xpos + (tileHeight * curZoom), ypos + ((k - 2) * ((tileHeight - resizedTileHeight) * curZoom)));
-            ctx.lineTo(xpos + (tileHeight * curZoom) * 2, ypos + ((k - 2) * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom) / 2);
-            ctx.lineTo(xpos + (tileHeight * curZoom), ypos + ((k - 2) * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom));
-            ctx.fill();
-          }
         }
       }
       if (particleTiles) {
 
         // Draw Particles
         if (!distanceLightingSettings || ( distanceLightingSettings && distanceLighting < distanceLightingSettings.darkness)) {
-          if (Number(particleMap[i][j]) !== 0) {
+          if (particleMap[i] && particleMap[i][j] !== undefined && Number(particleMap[i][j]) !== 0) {
             if (!particleMapHolder[i]) {
               particleMapHolder[i] = [];
             }
             if (!particleMapHolder[i][j]) {
               particleMapHolder[i][j] = new EffectLoader().getEffect(particleMap[i][j], ctx, utils.range(0, mapHeight), utils.range(0, mapWidth));
             }
-            particleMapHolder[i][j].Draw(xpos, ypos + ((k - 1) *(tileHeight - heightOffset - tileHeight)) * curZoom - (resizedTileHeight  - tileHeight) * curZoom, (tileWidth * curZoom));
+            particleMapHolder[i][j].Draw(xpos, ypos + ((k - 1) * (tileHeight - heightOffset - tileHeight)) * curZoom - (resizedTileHeight  - tileHeight) * curZoom, curZoom);
           }
         }
       }
@@ -502,6 +466,57 @@ function(EffectLoader, utils) {
             ctx.lineTo(shadowXpos + (tileHeight * curZoom), shadowYpos + (currStack * ((tileHeight - resizedTileHeight) * curZoom)));
             ctx.lineTo(shadowXpos + (tileHeight * curZoom) * 2, shadowYpos + (currStack * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom) / 2);
             ctx.lineTo(shadowXpos + (tileHeight * curZoom), shadowYpos + (currStack * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom));
+            ctx.fill();
+          }
+        }
+      }
+      if (distanceLightingSettings) {
+        if (distanceLightingSettings.color !== false) {
+          -- k;
+          if (distanceLighting < distanceLightingSettings.darkness) {
+
+            // Apply distane shadows from light source
+            if (!isometric) {
+              ctx.fillStyle = 'rgba(' + distanceLightingSettings.color + ',' + distanceLighting + ')';
+              ctx.beginPath();
+              ctx.moveTo(xpos, ypos);
+              ctx.lineTo(xpos + tileHeight * curZoom, ypos);
+              ctx.lineTo(xpos + tileHeight * curZoom, ypos + tileHeight * curZoom);
+              ctx.lineTo(xpos, ypos + tileHeight * curZoom);
+              ctx.fill();
+            }
+            else {
+              ctx.fillStyle = 'rgba(' + distanceLightingSettings.color + ',' + distanceLighting + ')';
+              ctx.beginPath();
+              ctx.moveTo(xpos, ypos + ((k - 2) * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom) / 2);
+              ctx.lineTo(xpos + (tileHeight * curZoom), ypos + ((k - 2) * ((tileHeight - resizedTileHeight) * curZoom)));
+              ctx.lineTo(xpos + (tileHeight * curZoom) * 2, ypos + ((k - 2) * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom) / 2);
+              ctx.lineTo(xpos + (tileHeight * curZoom), ypos + ((k - 2) * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom));
+              ctx.fill();
+            }
+
+          }
+        }
+      }
+      if (mouseUsed && applyInteractions) {
+        if (i === focusTilePosX && j === focusTilePosY) {
+          // Apply mouse over tile coloring
+          if (!isometric) {
+            ctx.fillStyle = 'rgba(255, 255, 120, 0.7)';
+            ctx.beginPath();
+            ctx.moveTo(xpos, ypos);
+            ctx.lineTo(xpos + tileHeight * curZoom, ypos);
+            ctx.lineTo(xpos + tileHeight * curZoom, ypos + tileHeight * curZoom);
+            ctx.lineTo(xpos, ypos + tileHeight * curZoom);
+            ctx.fill();
+          }
+          else {
+            ctx.fillStyle = 'rgba(255, 255, 120, 0.7)';
+            ctx.beginPath();
+            ctx.moveTo(xpos, ypos + ((k - 2) * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom) / 2);
+            ctx.lineTo(xpos + (tileHeight * curZoom), ypos + ((k - 2) * ((tileHeight - resizedTileHeight) * curZoom)));
+            ctx.lineTo(xpos + (tileHeight * curZoom) * 2, ypos + ((k - 2) * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom) / 2);
+            ctx.lineTo(xpos + (tileHeight * curZoom), ypos + ((k - 2) * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom));
             ctx.fill();
           }
         }
@@ -580,8 +595,8 @@ function(EffectLoader, utils) {
     function _getXYCoords(x, y) {
       var positionY, positionX;
       if (!isometric) {
-        positionY = Math.round((y - tileWidth / 2) / tileWidth);
-        positionX = Math.round((x - tileHeight / 2) / tileHeight);
+        positionY = Math.round((y - (tileWidth * curZoom) / 2)/ (tileWidth * curZoom));
+        positionX = Math.round((x - (tileHeight * curZoom) / 2)/ (tileHeight * curZoom));
       }
       else {
         positionY = (2 * (y - drawY) - x + drawX) / 2;
@@ -595,8 +610,8 @@ function(EffectLoader, utils) {
     function _applyMouseFocus(x, y) {
       mouseUsed = true;
       if (!isometric) {
-        focusTilePosY = Math.round((y - tileWidth/2)/tileWidth);
-        focusTilePosX = Math.round((x - tileHeight/2)/tileHeight);
+        focusTilePosY = Math.round((y - (tileWidth * curZoom) / 2)/ (tileWidth * curZoom));
+        focusTilePosX = Math.round((x - (tileHeight * curZoom) / 2)/ (tileHeight * curZoom));
       }
       else {
         focusTilePosY = (2 * (y - drawY) - x + drawX) / 2;
@@ -613,6 +628,13 @@ function(EffectLoader, utils) {
 
     function _setHeightmapTile(x, y, val) {
       heightMap[x][y] = val;
+    }
+
+    function _setParticlemapTile(x, y, val) {
+      if(!particleMap[x]) {
+        particleMap[x] = [];
+      }
+      particleMap[x][y] = val;
     }
 
     function _applyFocus(xPos, yPos) {
@@ -733,6 +755,10 @@ function(EffectLoader, utils) {
 
       setLight: function(tileX, tileY) {
         return _setLight(tileX, tileY);
+      },
+
+      setParticlemapTile: function(tileX, tileY, val) {
+        _setParticlemapTile(tileX, tileY, val);
       },
 
       getXYCoords: function(XPosition, YPosition) {
