@@ -52,14 +52,15 @@ define(function() {
 
       var tileRow;
       var tileCol;
-
-      _loading += spritesheet.files[spritesheet.dictionary[0]].width / spritesheet.width * spritesheet.files[spritesheet.dictionary[0]].height / spritesheet.height;
+      var spritesheetCols = Math.floor(spritesheet.files[spritesheet.dictionary[0]].width / (spritesheet.width));
+      var spritesheetRows = Math.floor(spritesheet.files[spritesheet.dictionary[0]].height / (spritesheet.height));
+      _loading +=  spritesheetCols * spritesheetRows;
       ctx.width = spritesheet.width;
       ctx.height = spritesheet.height;
       tileManip = ctx.getContext('2d');
-      for (var i = 0; i < spritesheet.files[spritesheet.dictionary[0]].height / spritesheet.height; i++) {
-        for (var j = 0; j < spritesheet.files[spritesheet.dictionary[0]].width / spritesheet.width; j++) {
-          tileManip.drawImage(spritesheet.files[spritesheet.dictionary[0]], j * (spritesheet.width) + spritesheet.offsetX, i * (spritesheet.height) + spritesheet.offsetY,  spritesheet.width + spritesheet.offsetX , spritesheet.height  + spritesheet.offsetY, 0, 0, spritesheet.width, spritesheet.height);
+      for (var i = 0; i < spritesheetRows; i++) {
+        for (var j = 0; j < spritesheetCols; j++) {
+          tileManip.drawImage(spritesheet.files[spritesheet.dictionary[0]], j * (spritesheet.width + spritesheet.offsetX  + spritesheet.spacing) + spritesheet.spacing, i * (spritesheet.height + spritesheet.offsetY + spritesheet.spacing) + spritesheet.spacing,  spritesheet.width + spritesheet.offsetX - spritesheet.spacing, spritesheet.height  + spritesheet.offsetY - spritesheet.spacing, 0, 0, spritesheet.width, spritesheet.height);
           imageFilePathArray[spriteID] = spriteID;
           images[spriteID] = new Image();
           images[spriteID].src = ctx.toDataURL();
@@ -98,8 +99,9 @@ define(function() {
               dictionary: imageFilePathArray,
               width: spritesheet.width,
               height: spritesheet.height,
-              offsetX: spritesheet.offsetX,
-              offsetY: spritesheet.offsetY
+              offsetX: (spritesheet.offsetX || 0),
+              offsetY: (spritesheet.offsetY || 0),
+              spacing: (spritesheet.spacing || 0)
             });
           }
         };
@@ -115,8 +117,7 @@ define(function() {
     function _onload(images) {
       _onloadfn(images);
     }
-
-
+ 
 
     // ----
     // -- Public properties for ImageLoader
