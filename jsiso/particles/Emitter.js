@@ -138,9 +138,9 @@ function(Particle, utils) {
 
         p.active = true;
 
-        p.x = this.x + utils.rand(this.xRange.from * this.scale, this.xRange.to * this.scale) + this.xOffset;
+        p.x = this.x + utils.rand(this.xRange.from * this.scale, this.xRange.to * this.scale) + this.xOffset * this.scale;
 
-        p.y = this.y + utils.rand(this.yRange.from * this.scale, this.yRange.to * this.scale) + this.yOffset;
+        p.y = this.y + utils.rand(this.yRange.from * this.scale, this.yRange.to * this.scale) + this.yOffset * this.scale;
 
         p.drawdelay = utils.rand(this.drawdelayRange.from, this.drawdelayRange.to);
 

@@ -158,16 +158,13 @@ function(EffectLoader, utils) {
         if (lightMap) {
           var lightDist = 0;
           // Calculate which light source is closest
-
           lightMap.map(function(light) {
             lightDist = Math.sqrt((Math.floor(i - light[0]) * Math.floor(i - light[0])) + (Math.floor(j - light[1]) * Math.floor(j - light[1])));
-            if (lightDist <= distanceLighting) {
               if(distanceLighting / (distanceLightingSettings.darkness * distanceLightingSettings.distance) > lightDist / (light[2] * light[3])) {
                 distanceLighting = lightDist;
                 distanceLightingSettings.distance = light[2];
                 distanceLightingSettings.darkness = light[3];
               }
-            }
           });
         }
         if(distanceLighting > distanceLightingSettings.distance){
@@ -480,9 +477,9 @@ function(EffectLoader, utils) {
               ctx.fillStyle = 'rgba(' + distanceLightingSettings.color + ',' + distanceLighting + ')';
               ctx.beginPath();
               ctx.moveTo(xpos, ypos);
-              ctx.lineTo(xpos + tileHeight * curZoom, ypos);
-              ctx.lineTo(xpos + tileHeight * curZoom, ypos + tileHeight * curZoom);
-              ctx.lineTo(xpos, ypos + tileHeight * curZoom);
+              ctx.lineTo(xpos + Math.round(tileHeight * curZoom), ypos);
+              ctx.lineTo(xpos + Math.round(tileHeight * curZoom), ypos + Math.round(tileHeight * curZoom));
+              ctx.lineTo(xpos, ypos + Math.round(tileHeight * curZoom));
               ctx.fill();
             }
             else {
@@ -637,6 +634,10 @@ function(EffectLoader, utils) {
       particleMap[x][y] = val;
     }
 
+    function _setLightmap(lightmapArray) {
+      lightMap = lightmapArray;
+    }
+
     function _applyFocus(xPos, yPos) {
       focusTilePosX = xPos;
       focusTilePosY = yPos;
@@ -755,6 +756,10 @@ function(EffectLoader, utils) {
 
       setLight: function(tileX, tileY) {
         return _setLight(tileX, tileY);
+      },
+
+      setLightmap: function(lightmap) {
+        _setLightmap(lightmap);
       },
 
       setParticlemapTile: function(tileX, tileY, val) {
