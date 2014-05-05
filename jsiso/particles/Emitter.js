@@ -1,5 +1,5 @@
 ﻿/*  
-Copyright (c) 2013 Iain Hamilton & Edward Smyth
+Copyright (c) 2014 Iain Hamilton
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -75,6 +75,10 @@ function(Particle, utils) {
       radiusRange: utils.range(10, 10),
 
       scale: 1,
+
+      x: x,
+
+      y: y,
 
       Load: function() {
         this.particles = [];

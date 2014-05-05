@@ -40,10 +40,10 @@ define(function() {
               emitters[i].y = y;
               emitters[i].Load();
             }
-            emitters[i].ShiftTo(x, y);
             if (scale) {
               emitters[i].Scale(scale);
             }
+            emitters[i].ShiftTo(x, y);
             emitters[i].Draw();
           }
         }

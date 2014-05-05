@@ -1,4 +1,4 @@
-/*  Copyright (c) 2013 Iain Hamilton & Edward Smyth
+/*  Copyright (c) 2014 Iain Hamilton
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -124,8 +124,8 @@ function(EffectLoader, utils) {
     function _draw(i, j, tileImageOverwite) {
 
       var xpos, ypos;
-      i = Math.floor(i);
-      j = Math.floor(j);
+      i = Math.round(i);
+      j = Math.round(j);
       if (i < 0) { i = 0; }
       if (j < 0) { j = 0; }
       if (i > mapLayout.length - 1) {
@@ -154,12 +154,12 @@ function(EffectLoader, utils) {
           darkness: shadowDistance.darkness,
           color: shadowDistance.color
         };
-        distanceLighting = Math.sqrt((Math.floor(i - lightX) * Math.floor(i - lightX)) + (Math.floor(j - lightY) * Math.floor(j - lightY)));
+        distanceLighting = Math.sqrt((Math.round(i - lightX) * Math.round(i - lightX)) + (Math.round(j - lightY) * Math.round(j - lightY)));
         if (lightMap) {
           var lightDist = 0;
           // Calculate which light source is closest
           lightMap.map(function(light) {
-            lightDist = Math.sqrt((Math.floor(i - light[0]) * Math.floor(i - light[0])) + (Math.floor(j - light[1]) * Math.floor(j - light[1])));
+            lightDist = Math.sqrt((Math.round(i - light[0]) * Math.round(i - light[0])) + (Math.round(j - light[1]) * Math.round(j - light[1])));
               if(distanceLighting / (distanceLightingSettings.darkness * distanceLightingSettings.distance) > lightDist / (light[2] * light[3])) {
                 distanceLighting = lightDist;
                 distanceLightingSettings.distance = light[2];
@@ -415,7 +415,7 @@ function(EffectLoader, utils) {
 
         if (heightMap) {
           nextStack = Math.round(Number(heightMap[i][j - 1]));
-          currStack = Math.floor(Number(heightMap[i][j]));
+          currStack = Math.round(Number(heightMap[i][j]));
           if (currStack < nextStack) {
             shadowXpos = (i - j) * (tileHeight * curZoom) + drawX;
             shadowYpos = (i + j) * (tileWidth / 4 * curZoom) + drawY;
@@ -453,7 +453,7 @@ function(EffectLoader, utils) {
 
           // Shadows without height map e.g. Object Shadows
 
-          currStack = Math.floor(Number(mapLayout[i][j - 1]));
+          currStack = Math.round(Number(mapLayout[i][j - 1]));
           if(currStack > 0) {
             shadowXpos = (i - j) * (tileHeight * curZoom) + drawX;
             shadowYpos = (i + j) * (tileWidth / 4 * curZoom) + drawY;
@@ -472,14 +472,14 @@ function(EffectLoader, utils) {
           -- k;
           if (distanceLighting < distanceLightingSettings.darkness) {
 
-            // Apply distane shadows from light source
+            // Apply distance shadows from light source
             if (!isometric) {
               ctx.fillStyle = 'rgba(' + distanceLightingSettings.color + ',' + distanceLighting + ')';
               ctx.beginPath();
               ctx.moveTo(xpos, ypos);
-              ctx.lineTo(xpos + Math.round(tileHeight * curZoom), ypos);
-              ctx.lineTo(xpos + Math.round(tileHeight * curZoom), ypos + Math.round(tileHeight * curZoom));
-              ctx.lineTo(xpos, ypos + Math.round(tileHeight * curZoom));
+              ctx.lineTo(xpos + tileHeight * curZoom, ypos);
+              ctx.lineTo(xpos + tileHeight * curZoom, ypos + tileHeight * curZoom);
+              ctx.lineTo(xpos, ypos + tileHeight * curZoom);
               ctx.fill();
             }
             else {
