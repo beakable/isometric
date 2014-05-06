@@ -4,27 +4,30 @@ HTML5 Canvas Tile Engine
 ![JSiso](http://jsiso.com/jsiso.png)
 
 
-This repo contains an MIT Licensed Isometric HTML5 tile engine Copyright © 2013 of Iain Hamilton and Edward Smyth.
+This repo contains an MIT Licensed Isometric HTML5 tile engine Copyright © 2014 of Iain Hamilton.
 
 For a list of examples and further details checkout: http://jsiso.com
 
 For a Repo containing all the samples featured on jsiso.com checkout: https://github.com/anthonymoralez/jsiso-samples
 
 Currently contained features are:
-  - AMD structured using requireJS 
-  - Easily create 2D or 2D.5 layouts
-  - Unlimited layer stacking
-  - Heightmaps
-  - Auto scaling of image dimensions
-  - Zooming (not 100% perfect yet)
-  - Rotating (not 100% perfect yet - Rotates whole map but doesn't readjust view)
-  - Simple Collision
-  - AI Pathfinding using Web Workers
-  - Custom built Particle Engine
-  - Easy fake lighting
-  - Player vision limiting
-  - Simple player device interaction
-  - Easy Node Multiplayer Integration
+- Implements AMD through RequireJS
+- Easily build complex isometric 2D.5 layouts or flat 2D layouts
+- Tiled Editor format support
+- Unlimited layer stacking
+- Isometric heightmaps
+- Auto scaling of image dimensions
+- Spritesheet and individual one by one tile image loading
+- RGBA tile values
+- Zooming
+- Rotating
+- Simple Collision
+- AI Pathfinding using Web Workers
+- Custom built Particle Engine
+- Easy fake lighting
+- Player vision limiting
+- Simple player device interaction
+- Apply the same code accross tile formats
 
 
 
