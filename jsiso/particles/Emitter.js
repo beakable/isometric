@@ -103,7 +103,9 @@ function(Particle, utils) {
         this.y += yoffset;
       },
 
-      Draw: function () {
+      Draw: function (x, y) {
+        if (x) { this.x = x; }
+        if (y) { this.y = y; }
         if (this.loaded && !this.pause) {
 
           ctx.save();
@@ -120,7 +122,7 @@ function(Particle, utils) {
 
             if (loop && !this.particles[i].active) {
 
-              this.particles[i] = this.CreateParticle();
+              this.particles[i] = this.CreateParticle(this.particles[i]);
 
             }
 
@@ -136,10 +138,15 @@ function(Particle, utils) {
 
       },
 
-      CreateParticle: function() {
+      CreateParticle: function(reload) {
 
-        var p = new Particle();
-
+        var p;
+        if (reload) {
+          p = reload;
+        }
+        else {
+          p = new Particle();
+        }
         p.active = true;
 
         p.x = this.x + utils.rand(this.xRange.from * this.scale, this.xRange.to * this.scale) + this.xOffset * this.scale;

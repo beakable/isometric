@@ -88,7 +88,7 @@ function(utils) {
             // Draw the particle
 
             if (Number(this.x) &&  Number(this.y)) {
-
+              context.save();
               var p = context.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.radius);
 
               p.addColorStop(0, rgbstr);
@@ -124,6 +124,7 @@ function(utils) {
                   this.active = false;
 
               }
+              context.restore();
             }
           }
 
