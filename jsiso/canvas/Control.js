@@ -97,6 +97,12 @@ define(function() {
     document.body.style.overflow = "hidden";
     canvasElement.height = window.innerHeight;
     canvasElement.width = window.innerWidth;
+    canvasElement.style.position = "absolute";
+    canvasElement.style.zIndex = 100;
+    window.onresize = function(e){
+      _update(0, 0);
+      //I think we need a repaint here.
+    };
     window.scrollTo(0, 1);
   }
 
