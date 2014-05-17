@@ -80,28 +80,27 @@ define(function() {
       var tempArray = [],
           tempLine = [],
           i, j;
-      
+      var w = arrayLayout.length;
+      var h = (arrayLayout[0] ? arrayLayout[0].length : 0);
       if (direction === "left") {
-        for (i = 0; i < arrayLayout.length; i++) {
-          for (j = arrayLayout[i].length - 1; j >= 0; j--) {
-            if (arrayLayout[j]) {
-              tempLine.push(arrayLayout[j][i]);
+        for (i = 0; i < h; i++) {
+          for (j = 0; j < w; j++) {
+            if (!tempArray[i]) {
+              tempArray[i] = [];
             }
+            tempArray[i][j] = arrayLayout[w - j - 1][i];
           }
-          tempArray.push(tempLine);
-          tempLine = [];
         }
         return tempArray;
       }
       else if (direction === "right") {
-        for (i = arrayLayout.length -1; i >= 0; i--) {
-          for (j = 0; j < arrayLayout[i].length; j++) {
-            if (arrayLayout[j]) {
-              tempLine.push(arrayLayout[j][i]);
+        for (i = 0; i < h; i++) {
+          for (j = 0; j < w; j++) {
+            if (!tempArray[i]) {
+              tempArray[i] = [];
             }
+            tempArray[i][j] = arrayLayout[j][h - i - 1];
           }
-          tempArray.push(tempLine);
-          tempLine = [];
         }
         return tempArray;
       }
