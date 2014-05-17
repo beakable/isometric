@@ -20,10 +20,11 @@ THE SOFTWARE. */
 
 define([
   'jsiso/particles/EffectLoader',
+  'jsiso/particles/Emitter',
   'jsiso/utils'
 ],
 
-function(EffectLoader, utils) {
+function(EffectLoader, Emitter, utils) {
   return function(ctx, mapWidth, mapHeight, mapLayout) {
 
     var title = "";
@@ -49,6 +50,8 @@ function(EffectLoader, utils) {
 
     var heightMapOnTop = false;
 
+    var particleEffects = null;
+
     var curZoom = 1;
     var mouseUsed = false;
     var applyInteractions = false;
@@ -66,6 +69,9 @@ function(EffectLoader, utils) {
 
     var isometric = true;
 
+    var tileImages = [];
+    var tileImagesDictionary = [];
+
     function _setup(settings) {
       tileWidth = settings.tileWidth;
       tileHeight = settings.tileHeight;
@@ -78,8 +84,9 @@ function(EffectLoader, utils) {
       if (settings.particleMap) {
         _particleTiles(settings.particleMap);
       }
-      
-      mapLayout = settings.layout;
+      if (settings.layout) {
+        mapLayout = settings.layout;
+      }
 
       if (settings.graphics) {
         tileImages = settings.graphics;
@@ -98,10 +105,15 @@ function(EffectLoader, utils) {
       if (settings.heightMap) {
         _stackTiles(settings.heightMap);
       }
+
+      if(settings.particleEffects) {
+        particleEffects = settings.particleEffects;
+      }
       
       if (settings.width) {
         var row = [];
         var col = 0;
+
         mapLayout = [];
         for (var i = 0; i < settings.layout.length; i++) {
           col ++;
@@ -236,9 +248,9 @@ function(EffectLoader, utils) {
 
               if (Number(graphicValue) >= 0) {
                 // tile has a graphic ID
-
-                ctx.drawImage(stackGraphic, 0, 0, stackGraphic.width, stackGraphic.height, xpos, (ypos + ((tileHeight - resizedTileHeight) * curZoom)), (tileWidth * curZoom), (resizedTileHeight * curZoom));
-              
+                if (stackGraphic !== undefined) {
+                  ctx.drawImage(stackGraphic, 0, 0, stackGraphic.width, stackGraphic.height, xpos, (ypos + ((tileHeight - resizedTileHeight) * curZoom)), (tileWidth * curZoom), (resizedTileHeight * curZoom));
+                }
               }
               else if (graphicValue != -1) {
                 // tile is an RGBA value
@@ -400,7 +412,16 @@ function(EffectLoader, utils) {
               particleMapHolder[i] = [];
             }
             if (!particleMapHolder[i][j]) {
-              particleMapHolder[i][j] = new EffectLoader().getEffect(particleMap[i][j], ctx, utils.range(0, mapHeight), utils.range(0, mapWidth));
+              if (particleEffects && particleEffects[particleMap[i][j]]) {
+                particleMapHolder[i][j] = new Emitter(ctx, 0, 0, particleEffects[particleMap[i][j]].pcount, particleEffects[particleMap[i][j]].loop, utils.range(0, mapHeight), utils.range(0, mapWidth));
+                for(var partK in particleEffects[particleMap[i][j]]) {
+                  particleMapHolder[i][j][partK] = particleEffects[particleMap[i][j]][partK];
+                }
+                particleMapHolder[i][j].Load();
+              }
+              else {
+                particleMapHolder[i][j] = new EffectLoader().getEffect(particleMap[i][j], ctx, utils.range(0, mapHeight), utils.range(0, mapWidth));
+              }
             }
             particleMapHolder[i][j].Draw(xpos, ypos + ((k - 1) * (tileHeight - heightOffset - tileHeight)) * curZoom - (resizedTileHeight  - tileHeight) * curZoom, curZoom);
           }
@@ -474,13 +495,15 @@ function(EffectLoader, utils) {
 
             // Apply distance shadows from light source
             if (!isometric) {
-              ctx.fillStyle = 'rgba(' + distanceLightingSettings.color + ',' + distanceLighting + ')';
-              ctx.beginPath();
-              ctx.moveTo(xpos, ypos);
-              ctx.lineTo(xpos + tileHeight * curZoom, ypos);
-              ctx.lineTo(xpos + tileHeight * curZoom, ypos + tileHeight * curZoom);
-              ctx.lineTo(xpos, ypos + tileHeight * curZoom);
-              ctx.fill();
+              if (stackGraphic !== undefined || (zeroIsBlank && stackGraphic !== 0)) {
+                ctx.fillStyle = 'rgba(' + distanceLightingSettings.color + ',' + distanceLighting + ')';
+                ctx.beginPath();
+                ctx.moveTo(xpos, ypos);
+                ctx.lineTo(xpos + tileHeight * curZoom, ypos);
+                ctx.lineTo(xpos + tileHeight * curZoom, ypos + tileHeight * curZoom);
+                ctx.lineTo(xpos, ypos + tileHeight * curZoom);
+                ctx.fill();
+              }
             }
             else {
               ctx.fillStyle = 'rgba(' + distanceLightingSettings.color + ',' + distanceLighting + ')';
