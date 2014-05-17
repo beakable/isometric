@@ -48,8 +48,7 @@ define(function() {
       var ctx = document.createElement('canvas');
       var tileManip;
       var imageFilePathArray = [];
-      var spriteID = 0;
-
+      var spriteID = (spritesheet.firstgid || 0);
       var tileRow;
       var tileCol;
       var spritesheetCols = Math.floor(spritesheet.files[spritesheet.dictionary[0]].width / (spritesheet.width));
@@ -74,8 +73,6 @@ define(function() {
           spriteID ++;
         }
       }
-
-
     }
 
 
@@ -101,7 +98,8 @@ define(function() {
               height: spritesheet.height,
               offsetX: (spritesheet.offsetX || 0),
               offsetY: (spritesheet.offsetY || 0),
-              spacing: (spritesheet.spacing || 0)
+              spacing: (spritesheet.spacing || 0),
+              firstgid: (spritesheet.firstgid || 0)
             });
           }
         };
