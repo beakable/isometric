@@ -650,6 +650,24 @@ function(EffectLoader, Emitter, utils) {
       heightMap[x][y] = val;
     }
 
+    function _tileInView(tileX, tileY) {
+      var distanceLighting = Math.sqrt((Math.round(tileX - lightX) * Math.round(tileX - lightX)) + (Math.round(tileY - lightY) * Math.round(tileY - lightY)));
+      if (lightMap) {
+        var lightDist = 0;
+        // Calculate which light source is closest
+        lightMap.map(function(light) {
+          lightDist = Math.sqrt((Math.round(tileX - light[0]) * Math.round(tileX - light[0])) + (Math.round(tileY - light[1]) * Math.round(tileY - light[1])));
+            if(distanceLighting / (shadowDistance.darkness * shadowDistance.distance) > lightDist / (light[2] * light[3])) {
+              distanceLighting = lightDist;
+            }
+        });
+      }
+      if(distanceLighting / (shadowDistance.darkness * shadowDistance.distance) > shadowDistance.darkness){
+        return false;
+      }
+      return true;
+    }
+
     function _setParticlemapTile(x, y, val) {
       if(!particleMap[x]) {
         particleMap[x] = [];
@@ -807,6 +825,10 @@ function(EffectLoader, Emitter, utils) {
 
       hideGraphics: function(toggle, settings) {
         return _hideGraphics(toggle, settings);
+      },
+
+      tileInView: function(tileX, tileY) {
+        return _tileInView(tileX, tileY);
       },
 
       applyHeightShadow: function(toggle, settings) {
