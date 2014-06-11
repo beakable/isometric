@@ -878,39 +878,39 @@ function(EffectLoader, Emitter, utils) {
         return shadowDistance.distance;
       },
 
-      move: function(direction, speed) {
+      move: function(direction, distance) {
         // left || right || up || down
-        speed = speed || tileHeight;
+        distance = distance || tileHeight;
         if (isometric) {
           if (direction === "up") {
-            drawY += speed/2 * curZoom;
-            drawX += speed * curZoom;
+            drawY += distance/2 * curZoom;
+            drawX += distance * curZoom;
           }
           else if (direction === "down") {
-            drawY += speed/2 * curZoom;
-            drawX -= speed * curZoom;
+            drawY += distance/2 * curZoom;
+            drawX -= distance * curZoom;
           }
           else if (direction === "left") {
-            drawY -= speed/2 * curZoom;
-            drawX -= speed * curZoom;
+            drawY -= distance/2 * curZoom;
+            drawX -= distance * curZoom;
           }
           else if (direction === "right") {
-            drawY -= speed/2 * curZoom;
-            drawX += speed * curZoom;
+            drawY -= distance/2 * curZoom;
+            drawX += distance * curZoom;
           }
         }
         else {
           if (direction === "up") {
-            drawY += speed * curZoom;
+            drawY += distance * curZoom;
           }
           else if (direction === "down") {
-            drawY -= speed * curZoom;
+            drawY -= distance * curZoom;
           }
           else if (direction === "left") {
-            drawX += speed * curZoom;
+            drawX += distance * curZoom;
           }
           else if (direction === "right") {
-            drawX -= speed * curZoom;
+            drawX -= distance * curZoom;
           }
         }
       }
