@@ -870,30 +870,50 @@ function(EffectLoader, Emitter, utils) {
         drawY = y;
       },
 
+      getOffset: function() {
+        return {x: drawX, y: drawY};
+      },
+
       getLightness: function() {
         return shadowDistance.distance;
       },
 
-      move: function(direction) {
+      move: function(direction, speed) {
         // left || right || up || down
-        if (direction === "up") {
-          drawY += tileHeight/2 * curZoom;
-          drawX += tileHeight * curZoom;
+        speed = speed || tileHeight;
+        if (isometric) {
+          if (direction === "up") {
+            drawY += speed/2 * curZoom;
+            drawX += speed * curZoom;
+          }
+          else if (direction === "down") {
+            drawY += speed/2 * curZoom;
+            drawX -= speed * curZoom;
+          }
+          else if (direction === "left") {
+            drawY -= speed/2 * curZoom;
+            drawX -= speed * curZoom;
+          }
+          else if (direction === "right") {
+            drawY -= speed/2 * curZoom;
+            drawX += speed * curZoom;
+          }
         }
-        else if (direction === "down") {
-          drawY += tileHeight/2 * curZoom;
-          drawX -= tileHeight * curZoom;
-        }
-        else if (direction === "left") {
-          drawY -= tileHeight/2 * curZoom;
-          drawX -= tileHeight * curZoom;
-        }
-        else if (direction === "right") {
-          drawY -= tileHeight/2 * curZoom;
-          drawX += tileHeight * curZoom;
+        else {
+          if (direction === "up") {
+            drawY += speed * curZoom;
+          }
+          else if (direction === "down") {
+            drawY -= speed * curZoom;
+          }
+          else if (direction === "left") {
+            drawX += speed * curZoom;
+          }
+          else if (direction === "right") {
+            drawX -= speed * curZoom;
+          }
         }
       }
-
     };
   };
 });
