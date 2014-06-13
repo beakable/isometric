@@ -866,8 +866,12 @@ function(EffectLoader, Emitter, utils) {
       },
 
       setOffset: function(x, y) {
-        drawX = x;
-        drawY = y;
+        if (x !== null) {
+          drawX = x;
+        }
+        if (y !== null) {
+          drawY = y;
+        }
       },
 
       getOffset: function() {
