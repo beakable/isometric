@@ -70,12 +70,9 @@ define([], function() {
     }
 
     function _setFocus(posX, posY, rangeX, rangeY) {
-      // Focus camera on particular position
-      var xyNextPos = {x: posX, y: posY};
       var xyMapOffset;
-  
-      startX = xyNextPos.x - rangeX / 2;
-      startY = xyNextPos.y - rangeY / 2;
+      startX = posX - rangeX / 2;
+      startY = posY - rangeY / 2;
       mapLayers.forEach(function(layer) {
       if (startX < 0) {
         layer.setOffset(-tileWidth * posX + (posX * tileWidth), null);
@@ -109,8 +106,8 @@ define([], function() {
         startY: startY,
         pinFocusX: focusX,
         pinFocusY: focusY,
-        tileX: xyNextPos.x,
-        tileY: xyNextPos.y
+        tileX: posX,
+        tileY: posY
       };
     }
 
@@ -199,8 +196,8 @@ define([], function() {
 
       move: function(direction, distance, startX, startY, rangeX, rangeY) {
         return _move(direction, distance, startX, startY, rangeX, rangeY);
-      },
-
+      }
+      
     };
   };
 });
