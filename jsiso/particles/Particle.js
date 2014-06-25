@@ -26,50 +26,50 @@ define([
 
 function(utils) {
 
-  var age = 0;
-
-  this.active = true; // draw or not
-
-  this.drawdelay = -1; // how old before the particle can start drawing
-
-  this.life = 1.0;    // particle lifespan
-
-  this.fade = 0.01;   // fade speed
-
-  this.r = 255;       // red intensity
-
-  this.g = 0;         // green intensity
-
-  this.b = 0;         // blue intensity
-
-  this.x = 0.0;       // x position
-
-  this.y = 0.0;       // y position
-
-  this.xi = 0.1;      // x axis speed
-
-  this.yi = 0.0;      // y axis speed
-
-  this.xg = 0.0;      // x gravity strength
-
-  this.yg = 0.0;      // y gravity strength
-
-  this.radius = 5.0;  // particle radius
-
-  this.slowdown = 2.0; // particle speed slowdown
-
-  this.minxb = -1;     // min x axis boundry
-
-  this.maxxb = 999999; // max x axis boundry
-
-  this.minyb = -1;     // min y axis boundry
-
-  this.maxyb = 999999; // max y axis boundry
+  return function () {
 
 
-  return function() {
+    var age = 0;
 
     return {
+    
+      active: true, // draw or not
+
+      drawdelay: -1, // how old before the particle can start drawing
+
+      life: 1.0,    // particle lifespan
+
+      fade: 0.01,   // fade speed
+
+      r: 255,       // red intensity
+
+      g: 0,         // green intensity
+
+      b: 0,         // blue intensity
+
+      x: 0.0,       // x position
+
+      y: 0.0,       // y position
+
+      xi: 0.1,      // x axis speed
+
+      yi: 0.0,      // y axis speed
+
+      xg: 0.0,      // x gravity strength
+
+      yg: 0.0,      // y gravity strength
+
+      radius: 5.0,  // particle radius
+
+      slowdown: 2.0, // particle speed slowdown
+
+      minxb: -1,     // min x axis boundry
+
+      maxxb: 999999, // max x axis boundry
+
+      minyb: -1,     // min y axis boundry
+
+      maxyb: 999999, // max y axis boundry
 
       Draw: function(context) {
 
