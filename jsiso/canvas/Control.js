@@ -54,15 +54,33 @@ define(function() {
   * @param {Object} style
   * @return {Object} Canvas
   */
+
+  function _getRatio() {
+    var ctx = document.createElement("canvas").getContext("2d"),
+    dpr = window.devicePixelRatio || 1,
+    bsr = ctx.webkitBackingStorePixelRatio ||
+      ctx.mozBackingStorePixelRatio ||
+      ctx.msBackingStorePixelRatio ||
+      ctx.oBackingStorePixelRatio ||
+      ctx.backingStorePixelRatio || 1;
+
+    return dpr / bsr;
+  }
+
+
   function _create(name, w, h, style, element) {
     if (_supported()) {
+      var pixelRatio = _getRatio();
       canvasElement = document.createElement('canvas');
       canvasElement.id = name;
-      canvasElement.width = w || window.innerWidth;
-      canvasElement.height = h || window.innerHeight;
+      canvasElement.style.width = w + "px";
+      canvasElement.style.height = h + "px";
+      canvasElement.width = w * pixelRatio|| window.innerWidth;
+      canvasElement.height = h * pixelRatio || window.innerHeight;
       for (var s in style) {
         canvasElement.style[s] = style[s];
       }
+      canvasElement.getContext("2d").setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
       if (!element) {
         // Append Canvas into document body
         return document.body.appendChild(canvasElement).getContext('2d');
@@ -92,18 +110,19 @@ define(function() {
   function _fullScreen() {
     document.body.style.margin = "0";
     document.body.style.padding = "0";
-    document.body.style.height = window.innerHeight;
-    document.body.style.width = window.innerWidth;
     document.body.style.overflow = "hidden";
+    canvasElement.style.width = window.innerWidth + "px";
+    canvasElement.style.height = window.innerHeight + "px";
     canvasElement.height = window.innerHeight;
     canvasElement.width = window.innerWidth;
     canvasElement.style.position = "absolute";
     canvasElement.style.zIndex = 100;
+    
     window.onresize = function(e){
       _update(0, 0);
       //I think we need a repaint here.
     };
-    window.scrollTo(0, 1);
+    window.top.scrollTo(0, 1);
   }
 
 
