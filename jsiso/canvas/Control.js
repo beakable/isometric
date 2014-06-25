@@ -70,21 +70,24 @@ define(function() {
   }
 
 
-  function _create(name, w, h, style, element) {
+  function _create(name, w, h, style, element, usePixelRatio) {
+    var pxRatio = 1;
     if (_supported()) {
-      var pixelRatio = _getRatio();
+      if (usePixelRatio) {
+        pxRatio = _getRatio();
+      }
       width = w;
       height = h;
       canvasElement = document.createElement('canvas');
       canvasElement.id = name;
       canvasElement.style.width = w + "px";
       canvasElement.style.height = h + "px";
-      canvasElement.width = w * pixelRatio || window.innerWidth;
-      canvasElement.height = h * pixelRatio || window.innerHeight;
+      canvasElement.width = w * pxRatio || window.innerWidth;
+      canvasElement.height = h * pxRatio || window.innerHeight;
       for (var s in style) {
         canvasElement.style[s] = style[s];
       }
-      canvasElement.getContext("2d").setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
+      canvasElement.getContext("2d").setTransform(pxRatio, 0, 0, pxRatio, 0, 0);
       if (!element) {
         // Append Canvas into document body
         return document.body.appendChild(canvasElement).getContext('2d');
@@ -112,8 +115,6 @@ define(function() {
   * Fullscreens the Canvas object
   */
   function _fullScreen() {
-    width = window.innerWidth;
-    height = window.innerHeight;
     document.body.style.margin = "0";
     document.body.style.padding = "0";
     document.body.style.overflow = "hidden";
@@ -148,8 +149,6 @@ define(function() {
   * @return {HTML} Canvas element
   */
   function canvas() {
-    canvasElement.width = width;
-    canvasElement.height = height;
     return canvasElement;
   }
 
@@ -161,7 +160,6 @@ define(function() {
   canvas.fullScreen = _fullScreen;
   canvas.update = _update;
   canvas.style = _style;
-  canvas.width = width;
 
 
   // Return Canvas Object
