@@ -53,7 +53,7 @@ define(function() {
       else {
         keyCode = e.keyCode;
       }
-      callback(keyCode, pressed);
+      callback(keyCode, pressed, e);
     }
 
 
@@ -138,15 +138,19 @@ define(function() {
       * @param {Function} Callback function
       */
       mobile: function(callback) {
+        var touchendCoords = {};
         // Callback returns when screen is touched and when screen touch ends
         canvas.addEventListener('touchstart', function(event) {
           event.preventDefault();
-          _mobileInput(event, callback, true);
+          _mobileInput(event, function(coords, pressed) {
+            touchendCoords = coords;
+            callback(coords, pressed);
+          }, true);
         }, false);
         canvas.addEventListener('touchend', function(event) {
           event.preventDefault();
-          _mobileInput(event, callback, false);
-        }, false);
+          callback(touchendCoords, false);
+        });
       },
 
 
