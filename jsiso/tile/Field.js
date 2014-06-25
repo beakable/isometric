@@ -567,6 +567,10 @@ function(EffectLoader, Emitter, utils) {
       return mapLayout;
     }
 
+    function _setLayout(data) {
+      mapLayout = data;
+    }
+
     function _getHeightLayout() {
       return heightMap;
     }
@@ -610,6 +614,19 @@ function(EffectLoader, Emitter, utils) {
       else {
         shadowDistance.distance -= setting;
       }
+    }
+
+    function _getTilePos(x, y) {
+      var  xpos, ypos;
+      if (!isometric) {
+        xpos = x * (tileHeight * curZoom) + drawX;
+        ypos = y * (tileWidth  * curZoom) + drawY;
+      }
+      else {
+        xpos = (x - y) * (tileHeight * curZoom) + drawX;
+        ypos = (x + y) * (tileWidth / 4 * curZoom) + drawY;
+      }
+      return {x: xpos, y: ypos};
     }
 
     function _getXYCoords(x, y) {
@@ -766,6 +783,10 @@ function(EffectLoader, Emitter, utils) {
         return _getLayout();
       },
 
+      setLayout: function(data) {
+        _setLayout(data);
+      },
+
       getHeightLayout: function() {
         return _getHeightLayout();
       },
@@ -872,6 +893,10 @@ function(EffectLoader, Emitter, utils) {
         if (y !== null) {
           drawY = y;
         }
+      },
+
+      getTilePos: function(x, y) {
+        return _getTilePos(x, y);
       },
 
       getOffset: function() {
