@@ -104,6 +104,42 @@ define(function() {
         }
         return tempArray;
       }
+    },
+
+    lineSplit: function(ctx, text, width) {
+      var textLines = [];
+      var elements = "";
+      var line = "";
+      var tempLine = "";
+      var lastword = null;
+      if(ctx.measureText(text).width > width) {
+        elements = text.split(" ");
+        for (var i = 0; i < elements.length; i++) {
+          tempLine += elements[i] + " ";
+          if (ctx.measureText(tempLine).width < width) {
+            line += elements[i] + " ";
+            lastword = elements[i];
+          }
+          else {
+            if (lastword && lastword !== elements[i]) { // Prevent getitng locked in a large word
+              i --;
+              textLines.push(line);
+            }
+            else {
+              textLines.push(tempLine);
+            }
+            line = "";
+            tempLine = "";
+          }
+        }
+      }
+      else{
+        textLines[0] = text;
+      }
+      if (line !== "") {
+        textLines.push(line);
+      }
+      return textLines;
     }
 
   };
