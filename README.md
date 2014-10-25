@@ -1,8 +1,6 @@
 HTML5 Canvas Tile Engine
 =========
 
-[![Coverage Status](https://coveralls.io/repos/beakable/isometric/badge.png)](https://coveralls.io/r/beakable/isometric)
-
 
 ![JSiso](http://jsiso.com/jsiso.png)
 
