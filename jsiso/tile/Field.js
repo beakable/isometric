@@ -138,13 +138,13 @@ function(EffectLoader, Emitter, utils) {
       var xpos, ypos;
       i = Math.round(i);
       j = Math.round(j);
-      if (i < 0) { i = 0; }
-      if (j < 0) { j = 0; }
+      if (i < 0) { return; }
+      if (j < 0) { return; }
       if (i > mapLayout.length - 1) {
-        i = mapLayout.length - 1;
+        return;
       }
       if (mapLayout[i] && j > mapLayout[i].length - 1) {
-        j = mapLayout[i].length - 1;
+        return;
       }
       var resizedTileHeight;
       var stackGraphic = null;
@@ -169,15 +169,19 @@ function(EffectLoader, Emitter, utils) {
         distanceLighting = Math.sqrt((Math.round(i - lightX) * Math.round(i - lightX)) + (Math.round(j - lightY) * Math.round(j - lightY)));
         if (lightMap) {
           var lightDist = 0;
+          var lightI;
+          var lightJ;
           // Calculate which light source is closest
-          lightMap.map(function(light) {
-            lightDist = Math.sqrt((Math.round(i - light[0]) * Math.round(i - light[0])) + (Math.round(j - light[1]) * Math.round(j - light[1])));
-              if(distanceLighting / (distanceLightingSettings.darkness * distanceLightingSettings.distance) > lightDist / (light[2] * light[3])) {
-                distanceLighting = lightDist;
-                distanceLightingSettings.distance = light[2];
-                distanceLightingSettings.darkness = light[3];
-              }
-          });
+          for (var light = 0; light < lightMap.length; light++) {
+            lightI = Math.round(i - lightMap[light][0]);
+            lightJ = Math.round(j - lightMap[light][1]);
+            lightDist = Math.sqrt(lightI * lightI + lightJ * lightJ);
+            if(distanceLighting / (distanceLightingSettings.darkness * distanceLightingSettings.distance) > lightDist / (lightMap[light][2] * lightMap[light][3])) {
+              distanceLighting = lightDist;
+              distanceLightingSettings.distance = lightMap[light][2];
+              distanceLightingSettings.darkness = lightMap[light][3];
+            }
+          }
         }
         if(distanceLighting > distanceLightingSettings.distance){
           distanceLighting = distanceLightingSettings.distance;
@@ -672,12 +676,14 @@ function(EffectLoader, Emitter, utils) {
       if (lightMap) {
         var lightDist = 0;
         // Calculate which light source is closest
-        lightMap.map(function(light) {
-          lightDist = Math.sqrt((Math.round(tileX - light[0]) * Math.round(tileX - light[0])) + (Math.round(tileY - light[1]) * Math.round(tileY - light[1])));
-            if(distanceLighting / (shadowDistance.darkness * shadowDistance.distance) > lightDist / (light[2] * light[3])) {
-              distanceLighting = lightDist;
-            }
-        });
+        for (var light = 0; light < lightMap.length; light++) {
+          lightI = Math.round(tileX - lightMap[light][0]);
+          lightJ = Math.round(tileXY - lightMap[light][1]);
+          lightDist = Math.sqrt(lightI * lightI + lightJ * lightJ);
+          if(distanceLighting / (shadowDistance.darkness * shadowDistance.distance) > lightDist / (light[2] * light[3])) {
+            distanceLighting = lightDist;
+          }
+        }
       }
       if(distanceLighting / (shadowDistance.darkness * shadowDistance.distance) > shadowDistance.darkness){
         return false;
