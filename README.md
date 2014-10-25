@@ -11,6 +11,9 @@ For a list of examples and further details checkout: http://jsiso.com
 
 For a Repo containing all the samples featured on jsiso.com checkout: https://github.com/anthonymoralez/jsiso-samples
 
+![noniso](https://cloud.githubusercontent.com/assets/1159739/4778380/9ee88a06-5be7-11e4-9237-45c3020bdc84.jpg)
+
+
 Currently contained features are:
 - Implements AMD through RequireJS
 - Easily build complex isometric 2D.5 layouts or flat 2D layouts
