@@ -678,7 +678,7 @@ function(EffectLoader, Emitter, utils) {
         // Calculate which light source is closest
         for (var light = 0; light < lightMap.length; light++) {
           lightI = Math.round(tileX - lightMap[light][0]);
-          lightJ = Math.round(tileXY - lightMap[light][1]);
+          lightJ = Math.round(tileY - lightMap[light][1]);
           lightDist = Math.sqrt(lightI * lightI + lightJ * lightJ);
           if(distanceLighting / (shadowDistance.darkness * shadowDistance.distance) > lightDist / (light[2] * light[3])) {
             distanceLighting = lightDist;
