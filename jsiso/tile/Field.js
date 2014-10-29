@@ -407,30 +407,6 @@ function(EffectLoader, Emitter, utils) {
           }
         }
       }
-      if (particleTiles) {
-
-        // Draw Particles
-        if (!distanceLightingSettings || ( distanceLightingSettings && distanceLighting < distanceLightingSettings.darkness)) {
-          if (particleMap[i] && particleMap[i][j] !== undefined && Number(particleMap[i][j]) !== 0) {
-            if (!particleMapHolder[i]) {
-              particleMapHolder[i] = [];
-            }
-            if (!particleMapHolder[i][j]) {
-              if (particleEffects && particleEffects[particleMap[i][j]]) {
-                particleMapHolder[i][j] = new Emitter(ctx, 0, 0, particleEffects[particleMap[i][j]].pcount, particleEffects[particleMap[i][j]].loop, utils.range(0, mapHeight), utils.range(0, mapWidth));
-                for(var partK in particleEffects[particleMap[i][j]]) {
-                  particleMapHolder[i][j][partK] = particleEffects[particleMap[i][j]][partK];
-                }
-                particleMapHolder[i][j].Load();
-              }
-              else {
-                particleMapHolder[i][j] = new EffectLoader().getEffect(particleMap[i][j], ctx, utils.range(0, mapHeight), utils.range(0, mapWidth));
-              }
-            }
-            particleMapHolder[i][j].Draw(xpos, ypos + ((k - 1) * (tileHeight - heightOffset - tileHeight)) * curZoom - (resizedTileHeight  - tileHeight) * curZoom, curZoom);
-          }
-        }
-      }
 
       if (heightShadows) {
         var nextStack = 0;
@@ -542,6 +518,30 @@ function(EffectLoader, Emitter, utils) {
             ctx.lineTo(xpos + (tileHeight * curZoom) * 2, ypos + ((k - 2) * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom) / 2);
             ctx.lineTo(xpos + (tileHeight * curZoom), ypos + ((k - 2) * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom));
             ctx.fill();
+          }
+        }
+      }
+      if (particleTiles) {
+
+        // Draw Particles
+        if (particleMap[i] && particleMap[i][j] !== undefined && Number(particleMap[i][j]) !== 0) {
+          if (!distanceLightingSettings || ( distanceLightingSettings && distanceLighting < distanceLightingSettings.darkness)) {
+            if (!particleMapHolder[i]) {
+              particleMapHolder[i] = [];
+            }
+            if (!particleMapHolder[i][j]) {
+              if (particleEffects && particleEffects[particleMap[i][j]]) {
+                particleMapHolder[i][j] = new Emitter(ctx, 0, 0, particleEffects[particleMap[i][j]].pcount, particleEffects[particleMap[i][j]].loop, utils.range(0, mapHeight), utils.range(0, mapWidth));
+                for (var partK in particleEffects[particleMap[i][j]]) {
+                  particleMapHolder[i][j][partK] = particleEffects[particleMap[i][j]][partK];
+                }
+                particleMapHolder[i][j].Load();
+              }
+              else {
+                particleMapHolder[i][j] = new EffectLoader().getEffect(particleMap[i][j], ctx, utils.range(0, mapHeight), utils.range(0, mapWidth));
+              }
+            }
+            particleMapHolder[i][j].Draw(xpos, ypos + ((k - 1) * (tileHeight - heightOffset - tileHeight)) * curZoom - (resizedTileHeight  - tileHeight) * curZoom, curZoom);
           }
         }
       }
@@ -915,37 +915,63 @@ function(EffectLoader, Emitter, utils) {
 
       move: function(direction, distance) {
         // left || right || up || down
+        var particle, subPart;
+
         distance = distance || tileHeight;
         if (isometric) {
           if (direction === "up") {
-            drawY += distance/2 * curZoom;
+            drawY += distance / 2 * curZoom;
             drawX += distance * curZoom;
           }
           else if (direction === "down") {
-            drawY += distance/2 * curZoom;
+            drawY += distance / 2 * curZoom;
             drawX -= distance * curZoom;
           }
           else if (direction === "left") {
-            drawY -= distance/2 * curZoom;
+            drawY -= distance / 2 * curZoom;
             drawX -= distance * curZoom;
           }
           else if (direction === "right") {
-            drawY -= distance/2 * curZoom;
+            drawY -= distance / 2 * curZoom;
             drawX += distance * curZoom;
           }
         }
         else {
           if (direction === "up") {
             drawY += distance * curZoom;
+            // Offset moving for particle effect particles
+            for (particle in particleMapHolder) {
+              for (subPart in particleMapHolder[particle]) {
+                particleMapHolder[particle][subPart].ShiftBy(0, distance * curZoom);
+              }
+            }
           }
           else if (direction === "down") {
             drawY -= distance * curZoom;
+            // Offset moving for particle effect particles
+            for (particle in particleMapHolder) {
+              for (subPart in particleMapHolder[particle]) {
+                particleMapHolder[particle][subPart].ShiftBy(0, -distance * curZoom);
+              }
+            }
           }
           else if (direction === "left") {
             drawX += distance * curZoom;
+            // Offset moving for particle effect particles
+            for (particle in particleMapHolder) {
+              for (subPart in particleMapHolder[particle]) {
+                particleMapHolder[particle][subPart].ShiftBy(distance * curZoom, 0);
+              }
+            }
           }
           else if (direction === "right") {
             drawX -= distance * curZoom;
+            // Offset moving for particle effect particles
+            for (particle in particleMapHolder) {
+              for (subPart in particleMapHolder[particle]) {
+                particleMapHolder[particle][subPart].ShiftBy(-distance * curZoom, 0);
+              }
+            }
           }
         }
       }
