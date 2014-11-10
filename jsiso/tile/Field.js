@@ -571,8 +571,28 @@ function(EffectLoader, Emitter, utils) {
       return mapLayout;
     }
 
-    function _setLayout(data) {
-      mapLayout = data;
+    function _setLayout(data, width) {
+      if (width) {
+        var row = [];
+        var col = 0;
+
+        mapLayout = [];
+        for (var i = 0; i < data.length; i++) {
+          col ++;
+          if (col !== width) {
+            row.push(data[i]);
+          }
+          else {
+            row.push(data[i]);
+            mapLayout.push(row);
+            row = [];
+            col = 0;
+          }
+        }
+      }
+      else {
+        mapLayout = data;
+      }
     }
 
     function _getHeightLayout() {
@@ -751,7 +771,7 @@ function(EffectLoader, Emitter, utils) {
         heightMap = utils.flipTwoDArray(heightMap, setting);
       }
       if (particleTiles) {
-        particleMap = utils.flipTwoDArray(particleMap, setting);
+      // -- particleMap = utils.flipTwoDArray(particleMap, setting);
       }
       mapLayout = utils.flipTwoDArray(mapLayout, setting);
 
@@ -762,7 +782,7 @@ function(EffectLoader, Emitter, utils) {
         heightMap = utils.rotateTwoDArray(heightMap, setting);
       }
       if (particleTiles) {
-        particleMap = utils.rotateTwoDArray(particleMap, setting);
+      // -- particleMap = utils.rotateTwoDArray(particleMap, setting);
       }
       mapLayout = utils.rotateTwoDArray(mapLayout, setting);
     }
@@ -789,8 +809,8 @@ function(EffectLoader, Emitter, utils) {
         return _getLayout();
       },
 
-      setLayout: function(data) {
-        _setLayout(data);
+      setLayout: function(data, width) {
+        _setLayout(data, width);
       },
 
       getHeightLayout: function() {
@@ -832,6 +852,10 @@ function(EffectLoader, Emitter, utils) {
 
       setParticlemapTile: function(tileX, tileY, val) {
         _setParticlemapTile(tileX, tileY, val);
+      },
+
+      clearParticlemap: function() {
+        particleMap = [];
       },
 
       getXYCoords: function(XPosition, YPosition) {
