@@ -79,6 +79,27 @@ define([], function() {
       var i;
       startX = posX - screenWidth / 2;
       startY = posY - screenHeight / 2;
+      
+      if (screenHeight * tileHeight > mapHeight) {
+        for (i = 0; i < mapLayers.length; i++) {
+          mapLayers[i].setOffset(null, Math.floor(screenHeight * tileHeight / 2 - mapHeight / 2));
+        }
+      }
+      else {
+        for (i = 0; i < mapLayers.length; i++) {
+          if (startY < 0) {
+            mapLayers[i].setOffset(null, Math.floor(-tileHeight * posY + (posY * tileHeight)));
+          }
+          else {
+            if (startY + screenHeight > mapHeight / tileHeight) {
+              mapLayers[i].setOffset(null, Math.floor(mapHeight / tileHeight) - (screenHeight * tileHeight) / 2) ;
+            }
+            else {
+              mapLayers[i].setOffset(null, Math.floor(-tileHeight * posY + (screenHeight / 2 * tileHeight)));
+            }
+          }
+        }
+      }
       if (screenWidth * tileWidth > mapWidth) {
         for (i = 0; i < mapLayers.length; i++) {
           mapLayers[i].setOffset(Math.floor(screenWidth * tileWidth / 2 - mapWidth / 2), Math.floor(screenHeight * tileHeight / 2 - mapHeight / 2));
@@ -87,7 +108,7 @@ define([], function() {
       else {
         for (i = 0; i < mapLayers.length; i++) {
           if (startX < 0) {
-            mapLayers[i].setOffset(Math.floor(-tileWidth * posX + (screenWidth / 2 * tileHeight)), null);
+            mapLayers[i].setOffset(Math.floor(-tileWidth * posX + (posX * tileWidth)), null);
           }
           else {
             if (startX + screenWidth > mapWidth / tileWidth) {
@@ -95,17 +116,6 @@ define([], function() {
             }
             else {
               mapLayers[i].setOffset(Math.floor(-tileWidth * posX + (screenWidth / 2 * tileHeight)), null);
-            }
-          }
-          if (startY < 0) {
-            mapLayers[i].setOffset(null, Math.floor(-tileHeight * posY + (screenHeight / 2 * tileHeight)));
-          }
-          else {
-            if (startY + screenHeight > mapHeight / tileHeight) {
-              mapLayers[i].setOffset(null, Math.floor(mapHeight / tileHeight) - (screenHeight * tileHeight) / 2);
-            }
-            else {
-              mapLayers[i].setOffset(null, Math.floor(-tileHeight * posY + (screenHeight / 2 * tileHeight)));
             }
           }
         }
@@ -128,15 +138,9 @@ define([], function() {
     function _move(direction, distance, startX, startY, rangeX, rangeY) {
       var xyMapOffset = mapLayers[0].getOffset();
       var xyNextPos = _getXYCoords(focusX - xyMapOffset.x, focusY - xyMapOffset.y);
-
       switch(direction) {
         case "up":
           if (xyNextPos.y <= startY + screenHeight / 2 && focusY < (screenHeight / 2 * tileHeight) && xyMapOffset.y <= 0) {
-            for (i = 0; i < mapLayers.length; i++) {
-              mapLayers[i].move("up", distance);
-            }
-          }
-          else if(xyMapOffset.y <= 0) {
             for (i = 0; i < mapLayers.length; i++) {
               mapLayers[i].move("up", distance);
             }
@@ -157,11 +161,6 @@ define([], function() {
         break;
         case "left":
           if (xyNextPos.x <= startX + screenWidth / 2 && focusX < (screenWidth / 2 * tileWidth) && xyMapOffset.x <= 0) {
-            for (i = 0; i < mapLayers.length; i++) {
-              mapLayers[i].move("left", distance);
-            }
-          }
-          else if(xyMapOffset.x <= 0) {
             for (i = 0; i < mapLayers.length; i++) {
               mapLayers[i].move("left", distance);
             }
