@@ -33,11 +33,11 @@ function(utils) {
 
     return {
     
-      active: true, // draw or not
+      active: false, // draw or not
 
       drawdelay: -1, // how old before the particle can start drawing
 
-      life: 1.0,    // particle lifespan
+      life: 0,    // particle lifespan
 
       fade: 0.01,   // fade speed
 
@@ -88,16 +88,13 @@ function(utils) {
             // Draw the particle
 
             if (Number(this.x) &&  Number(this.y)) {
-              context.save();
               var p = context.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.radius);
 
               p.addColorStop(0, rgbstr);
-
               p.addColorStop(1, rgbbgstr);
-
               context.fillStyle = p;
-
               context.fillRect(this.x - this.radius, this.y - this.radius, this.radius * 2, this.radius * 2);
+
 
               // Update the position base on speed and direction
 
@@ -124,7 +121,6 @@ function(utils) {
                   this.active = false;
 
               }
-              context.restore();
             }
           }
 
