@@ -111,18 +111,20 @@ define(function() {
               resolve({files: images, dictionary: graphic.graphics});
             }
             else {
-              _splitSpriteSheet({
-                files: images,
-                dictionary: graphic.graphics,
-                width: graphic.spritesheet.width,
-                height: graphic.spritesheet.height,
-                offsetX: (graphic.spritesheet.offsetX || 0),
-                offsetY: (graphic.spritesheet.offsetY || 0),
-                spacing: (graphic.spritesheet.spacing || 0),
-                firstgid: (graphic.spritesheet.firstgid || 0)
-              }).then(function(response) {
-                resolve(response);
-              });
+              if (graphic.spritesheet) {
+                _splitSpriteSheet({
+                  files: images,
+                  dictionary: graphic.graphics,
+                  width: graphic.spritesheet.width,
+                  height: graphic.spritesheet.height,
+                  offsetX: (graphic.spritesheet.offsetX || 0),
+                  offsetY: (graphic.spritesheet.offsetY || 0),
+                  spacing: (graphic.spritesheet.spacing || 0),
+                  firstgid: (graphic.spritesheet.firstgid || 0)
+                }).then(function(response) {
+                  resolve(response);
+                });
+              }
             }
           };
         });
