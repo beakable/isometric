@@ -140,7 +140,7 @@ define([], function() {
       var xyNextPos = _getXYCoords(focusX - xyMapOffset.x, focusY - xyMapOffset.y);
       switch(direction) {
         case "up":
-          if (xyNextPos.y <= startY + screenHeight / 2 && focusY < (screenHeight / 2 * tileHeight) && xyMapOffset.y <= 0) {
+          if (xyNextPos.y - 1 <= startY + screenHeight / 2 && focusY < (screenHeight / 2 * tileHeight) && xyMapOffset.y <= 0) {
             for (i = 0; i < mapLayers.length; i++) {
               mapLayers[i].move("up", distance);
             }
@@ -160,7 +160,7 @@ define([], function() {
           }
         break;
         case "left":
-          if (xyNextPos.x <= startX + screenWidth / 2 && focusX < (screenWidth / 2 * tileWidth) && xyMapOffset.x <= 0) {
+          if (xyNextPos.x - 1 <= startX + screenWidth / 2 && focusX < (screenWidth / 2 * tileWidth) && xyMapOffset.x <= 0) {
             for (i = 0; i < mapLayers.length; i++) {
               mapLayers[i].move("left", distance);
             }
