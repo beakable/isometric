@@ -150,7 +150,7 @@ define([], function() {
           }
         break;
         case "down":
-          if (xyNextPos.y >= screenHeight / 2 && xyMapOffset.y >= -mapHeight + tileHeight + focusY + (screenHeight / 2 * tileHeight)) {
+          if (xyNextPos.y >= screenHeight / 2 && focusY > (screenHeight / 2 * tileHeight) && xyMapOffset.y >= -mapHeight + tileHeight + focusY + (screenHeight / 2 * tileHeight)) {
             for (i = 0; i < mapLayers.length; i++) {
               mapLayers[i].move("down", distance);
             }
