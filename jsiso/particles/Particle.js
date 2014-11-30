@@ -75,7 +75,7 @@ function(utils) {
 
         if (this.active) {
 
-          if (this.drawdelay == -1 || age > this.drawdelay) {
+          if (this.drawdelay == -1 || age >= this.drawdelay) {
 
             // Determine alpha based on life
 
@@ -87,7 +87,8 @@ function(utils) {
 
             // Draw the particle
 
-            if (Number(this.x) &&  Number(this.y)) {
+            if (Number(this.x) !== undefined &&  Number(this.y) !== undefined) {
+              
               var p = context.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.radius);
 
               p.addColorStop(0, rgbstr);

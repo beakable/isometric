@@ -80,10 +80,10 @@ function(Particle, utils) {
 
       y: y,
 
-      Load: function() {
+      Load: function(x, y) {
         this.particles = [];
         for (var i = 0; i < pcount; i++) {
-          this.particles.push(this.CreateParticle(false, false));
+          this.particles.push(this.CreateParticle(false, false, x, y));
         }
         this.loaded = true;
       },
@@ -119,7 +119,7 @@ function(Particle, utils) {
 
             this.particles[i].Draw(ctx);
 
-            if (loop && !this.particles[i].active) {
+            if (loop && loop !== "false" && !this.particles[i].active) {
 
               this.particles[i] = this.CreateParticle(this.particles[i], true);
 
@@ -130,14 +130,13 @@ function(Particle, utils) {
           ctx.restore();
 
           this.xshiftOffset = 0;
-
           this.yshiftOffset = 0;
 
         }
 
       },
 
-      CreateParticle: function(reload, draw) {
+      CreateParticle: function(reload, draw, x , y) {
 
         var p;
         if (reload) {
@@ -146,14 +145,22 @@ function(Particle, utils) {
         else {
           p = new Particle();
         }
-        if (draw) {
+        if (draw || loop === false || loop === "false") {
           p.active = true;
+          if (x) {
+            p.x = x + utils.rand(this.xRange.from * this.scale, this.xRange.to * this.scale) + this.xOffset * this.scale;
+          }
+          else {
+            p.x = this.x + utils.rand(this.xRange.from * this.scale, this.xRange.to * this.scale) + this.xOffset * this.scale;
+          }
+          if (y) {
+            p.y = y + utils.rand(this.yRange.from * this.scale, this.yRange.to * this.scale) + this.yOffset * this.scale;
+          }
+          else {
+            p.y = this.y + utils.rand(this.yRange.from * this.scale, this.yRange.to * this.scale) + this.yOffset * this.scale;
+          }
 
-          p.x = this.x + utils.rand(this.xRange.from * this.scale, this.xRange.to * this.scale) + this.xOffset * this.scale;
-
-          p.y = this.y + utils.rand(this.yRange.from * this.scale, this.yRange.to * this.scale) + this.yOffset * this.scale;
-
-          p.drawdelay = utils.rand(this.drawdelayRange.from, this.drawdelayRange.to);
+          p.drawdelay = 0;
 
           p.life = utils.rand(this.lifeRange.from * 1000, this.lifeRange.to * 1000) / 1000;
 
