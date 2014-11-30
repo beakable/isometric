@@ -39,8 +39,12 @@ define([], function() {
     var startY = 0;
     var focusX = 0;
     var focusY = 0;
+    var rangeX = 0;
+    var rangeY = 0;
     
     var isometric = false;
+
+    var xyNextPos = {};
 
     function _setup(layers, mapW, mapH, tileW, tileH, screenW, screenH, curZ) {
       mapLayers = layers;
@@ -74,9 +78,12 @@ define([], function() {
       return {x: positionX, y: positionY};
     }
 
-    function _setFocus(posX, posY, rangeX, rangeY) {
+    function _setFocus(posX, posY, cameraRangeX, cameraRangeY) {
       var xyMapOffset;
       var i;
+      rangeX = cameraRangeX;
+      rangeY = cameraRangeY;
+
       startX = posX - screenWidth / 2;
       startY = posY - screenHeight / 2;
       
@@ -123,7 +130,7 @@ define([], function() {
       xyMapOffset = mapLayers[0].getOffset();
       focusX = posX * tileWidth + xyMapOffset.x;
       focusY = posY * tileHeight + xyMapOffset.y;
-      var xyNextPos = _getXYCoords(focusX - xyMapOffset.x, focusY - xyMapOffset.y);
+      xyNextPos = _getXYCoords(focusX - xyMapOffset.x, focusY - xyMapOffset.y);
       return {
         startX: Math.floor(xyNextPos.x - rangeX / 2),
         startY: Math.floor(xyNextPos.y - rangeY / 2),
@@ -135,9 +142,9 @@ define([], function() {
     }
 
     // direction: "up", "down", "left", "right" - distance: int
-    function _move(direction, distance, startX, startY, rangeX, rangeY) {
+    function _move(direction, distance) {
       var xyMapOffset = mapLayers[0].getOffset();
-      var xyNextPos = _getXYCoords(focusX - xyMapOffset.x, focusY - xyMapOffset.y);
+      xyNextPos = _getXYCoords(focusX - xyMapOffset.x, focusY - xyMapOffset.y);
       switch(direction) {
         case "up":
           if (xyNextPos.y - 1 <= startY + screenHeight / 2 && focusY < (screenHeight / 2 * tileHeight) && xyMapOffset.y <= 0) {
@@ -204,17 +211,43 @@ define([], function() {
         return _setFocus(posX, posY, rangeX, rangeY);
       },
 
-      getFocus: function() {
+      setPinFocusY: function(y) {
+        focusY = y;
         return {
-          startX: startX,
-          startY: startY,
+          startX: Math.floor(startX),
+          startY: Math.floor(startY),
           pinFocusX: focusX,
-          pinFocusY: focusY
+          pinFocusY: focusY,
+          tileX: Math.floor(xyNextPos.x),
+          tileY: Math.floor(xyNextPos.y)
         };
       },
 
-      move: function(direction, distance, startX, startY, rangeX, rangeY) {
-        return _move(direction, distance, startX, startY, rangeX, rangeY);
+      setPinFocusX: function(x) {
+        focusX = x;
+        return {
+          startX: Math.floor(startX),
+          startY: Math.floor(startY),
+          pinFocusX: focusX,
+          pinFocusY: focusY,
+          tileX: Math.floor(xyNextPos.x),
+          tileY: Math.floor(xyNextPos.y)
+        };
+      },
+
+      getFocus: function() {
+        return {
+          startX: Math.floor(startX),
+          startY: Math.floor(startY),
+          pinFocusX: focusX,
+          pinFocusY: focusY,
+          tileX: Math.floor(xyNextPos.x),
+          tileY: Math.floor(xyNextPos.y)
+        };
+      },
+
+      move: function(direction, distance) {
+        return _move(direction, distance);
       }
       
     };
