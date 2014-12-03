@@ -133,6 +133,76 @@ function(EffectLoader, Emitter, utils) {
       alphaWhenFocusBehind = settings.alphaWhenFocusBehind;
     }
 
+    // Used for drawing horizontal shadows on top of tiles or RGBA tiles when color value is passed
+    function _drawHorizontalColorOverlay(xpos, ypos, graphicValue, stack, resizedTileHeight) {
+
+      if (!isometric) {
+        ctx.fillStyle = 'rgba' + graphicValue;
+        ctx.beginPath();
+        ctx.moveTo(xpos, ypos);
+        ctx.lineTo(xpos + (tileWidth * curZoom), ypos);
+        ctx.lineTo(xpos + (tileWidth * curZoom), ypos + (tileHeight * curZoom));
+        ctx.lineTo(xpos, ypos + (tileHeight * curZoom));
+        ctx.fill();
+      }
+      else {
+        var tileOffset;
+        if (tileHeight < resizedTileHeight) {
+          tileOffset = (tileHeight - resizedTileHeight) * curZoom;
+        }
+        else {
+          tileOffset = (resizedTileHeight - tileHeight) * curZoom;
+        }
+        ctx.fillStyle = 'rgba' + graphicValue;
+        ctx.beginPath();
+        ctx.moveTo(xpos, ypos + ((stack - 1) * (tileOffset)) + (tileHeight * curZoom) / 2);
+        ctx.lineTo(xpos + (tileHeight * curZoom), ypos + ((stack - 1) * (tileOffset)));
+        ctx.lineTo(xpos + (tileHeight * curZoom) * 2, ypos + ((stack - 1) * (tileOffset)) + (tileHeight * curZoom) / 2);
+        ctx.lineTo(xpos + (tileHeight * curZoom), ypos + ((stack - 1) * (tileOffset)) + (tileHeight * curZoom));
+        ctx.fill();
+      }
+
+    }
+
+
+    // Used for drawing vertical shadows on top of tiles in isometric view if switched on
+    function _drawVeritcalColorOverlay(xpos, ypos, graphicValue, currStack, nextStack, shadowSettings) {
+
+        ctx.fillStyle = 'rgba' + graphicValue;
+        ctx.beginPath();
+        ctx.moveTo(xpos + (tileHeight * curZoom), ypos - ((currStack - 1) * (tileHeight * curZoom)));
+        ctx.lineTo(xpos + (tileHeight * curZoom), ypos - ((nextStack - 1) * ((tileHeight + shadowSettings.offset) / ((tileHeight + shadowSettings.offset) / shadowSettings.offset)  * curZoom)));
+        ctx.lineTo(xpos + (tileHeight * curZoom) * 2, ypos - ((nextStack - 1) * (tileHeight + shadowSettings.offset) / ((tileHeight + shadowSettings.offset) / shadowSettings.offset) * curZoom) + (tileHeight * curZoom) / 2);
+        ctx.lineTo(xpos + (tileHeight * curZoom) * 2, ypos - ((currStack - 1) * ((tileHeight ) * curZoom)) + (tileHeight * curZoom) / 2);
+        ctx.fill();
+
+    }
+
+
+    // Used for drawing particle effects applied to tiles
+    function _drawParticles(xpos, ypos, i, j, stack, distanceLighting, distanceLightingSettings, resizedTileHeight) {
+      if (particleMap[i] && particleMap[i][j] !== undefined && Number(particleMap[i][j]) !== 0) {
+        if (!distanceLightingSettings || ( distanceLightingSettings && distanceLighting < distanceLightingSettings.darkness)) {
+          if (!particleMapHolder[i]) {
+            particleMapHolder[i] = [];
+          }
+          if (!particleMapHolder[i][j]) {
+            if (particleEffects && particleEffects[particleMap[i][j]]) {
+              particleMapHolder[i][j] = new Emitter(ctx, 0, 0, particleEffects[particleMap[i][j]].pcount, particleEffects[particleMap[i][j]].loop, utils.range(0, mapHeight), utils.range(0, mapWidth));
+              for (var partK in particleEffects[particleMap[i][j]]) {
+                particleMapHolder[i][j][partK] = particleEffects[particleMap[i][j]][partK];
+              }
+              particleMapHolder[i][j].Load();
+            }
+            else {
+              particleMapHolder[i][j] = new EffectLoader().getEffect(particleMap[i][j], ctx, utils.range(0, mapHeight), utils.range(0, mapWidth));
+            }
+          }
+          particleMapHolder[i][j].Draw(xpos, ypos + ((stack - 1) * (tileHeight - heightOffset - tileHeight)) * curZoom - (resizedTileHeight  - tileHeight) * curZoom, curZoom);
+        }
+      }
+    }
+
     function _draw(i, j, tileImageOverwite) {
 
       var xpos, ypos;
@@ -256,27 +326,9 @@ function(EffectLoader, Emitter, utils) {
                   ctx.drawImage(stackGraphic, 0, 0, stackGraphic.width, stackGraphic.height, xpos, (ypos + ((tileHeight - resizedTileHeight) * curZoom)), (tileWidth * curZoom), (resizedTileHeight * curZoom));
                 }
               }
-              else if (graphicValue != -1) {
+              else if (graphicValue != - 1) {
                 // tile is an RGBA value
-
-                if (!isometric) {
-                  ctx.fillStyle = 'rgba' + graphicValue;
-                  ctx.beginPath();
-                  ctx.moveTo(xpos, ypos);
-                  ctx.lineTo(xpos + (tileWidth * curZoom), ypos);
-                  ctx.lineTo(xpos + (tileWidth * curZoom), ypos + (tileHeight * curZoom));
-                  ctx.lineTo(xpos, ypos + (tileHeight * curZoom));
-                  ctx.fill();
-                }
-                else {
-                  ctx.fillStyle = 'rgba' + graphicValue;
-                  ctx.beginPath();
-                  ctx.moveTo(xpos, ypos + ((k -1) * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom) / 2);
-                  ctx.lineTo(xpos + (tileHeight * curZoom), ypos + ((k -1) * ((tileHeight - resizedTileHeight) * curZoom)));
-                  ctx.lineTo(xpos + (tileHeight * curZoom) * 2, ypos + ((k -1) * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom) / 2);
-                  ctx.lineTo(xpos + (tileHeight * curZoom), ypos + ((k -1) * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom));
-                  ctx.fill();
-                }
+                _drawHorizontalColorOverlay(xpos, ypos, graphicValue, k, resizedTileHeight);
               }
 
               ctx.restore();
@@ -313,25 +365,8 @@ function(EffectLoader, Emitter, utils) {
                   ctx.drawImage(stackGraphic, 0, 0, stackGraphic.width, stackGraphic.height, xpos, ypos + ((stack - 1) * (tileHeight - heightOffset - tileHeight)) * curZoom - (resizedTileHeight  - tileHeight) * curZoom, (tileWidth * curZoom), (resizedTileHeight * curZoom));
                   ctx.restore();
                 }
-                else if (graphicValue != -1) {
-                  if (!isometric) {
-                    ctx.fillStyle = 'rgba' + graphicValue;
-                    ctx.beginPath();
-                    ctx.moveTo(xpos, ypos);
-                    ctx.lineTo(xpos + (tileWidth * curZoom), ypos);
-                    ctx.lineTo(xpos + (tileWidth * curZoom), ypos + (tileHeight * curZoom));
-                    ctx.lineTo(xpos, ypos + (tileHeight * curZoom));
-                    ctx.fill();
-                  }
-                  else {
-                    ctx.fillStyle = 'rgba' + graphicValue;
-                    ctx.beginPath();
-                    ctx.moveTo(xpos, ypos - ((stack -1) * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom) / 2);
-                    ctx.lineTo(xpos + (tileHeight * curZoom), ypos - ((stack -1) * ((tileHeight - resizedTileHeight) * curZoom)));
-                    ctx.lineTo(xpos + (tileHeight * curZoom) * 2, ypos - ((stack -1) * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom) / 2);
-                    ctx.lineTo(xpos + (tileHeight * curZoom), ypos - ((stack -1) * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom));
-                    ctx.fill();
-                  }
+                else if (graphicValue != - 1) {
+                  _drawHorizontalColorOverlay(xpos, ypos, graphicValue, stack, resizedTileHeight);
                 }
               }
             }
@@ -367,14 +402,8 @@ function(EffectLoader, Emitter, utils) {
                         stackGraphic = tileImages[tileImagesDictionary[graphicValue]];
                         ctx.drawImage(stackGraphic, 0, 0, stackGraphic.width, stackGraphic.height, xpos, ypos + ((k - 1) * ((tileHeight - heightOffset - resizedTileHeight) * curZoom)), (tileWidth * curZoom), (stackGraphic.height / (stackGraphic.width / tileWidth) * curZoom));
                       }
-                      else if (graphicValue != -1) {
-                        ctx.fillStyle = 'rgba' + graphicValue;
-                        ctx.beginPath();
-                        ctx.moveTo(xpos, ypos + ((k -1) * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom) / 2);
-                        ctx.lineTo(xpos + (tileHeight * curZoom), ypos + ((k -1) * ((tileHeight - resizedTileHeight) * curZoom)));
-                        ctx.lineTo(xpos + (tileHeight * curZoom) * 2, ypos + ((k -1) * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom) / 2);
-                        ctx.lineTo(xpos + (tileHeight * curZoom), ypos + ((k -1) * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom));
-                        ctx.fill();
+                      else if (graphicValue != - 1) {
+                        _drawHorizontalColorOverlay(xpos, ypos, graphicValue, k, resizedTileHeight);
                       }
 
                     }
@@ -386,14 +415,8 @@ function(EffectLoader, Emitter, utils) {
                       if (Number(graphicValue) >= 0) {
                         ctx.drawImage(stackGraphic, 0, 0, stackGraphic.width, stackGraphic.height, xpos, ypos + (k * ((tileHeight - heightOffset - resizedTileHeight) * curZoom)), (tileWidth * curZoom), (resizedTileHeight * curZoom));
                       }
-                      else if (graphicValue != -1) {
-                        ctx.fillStyle = 'rgba' + graphicValue;
-                        ctx.beginPath();
-                        ctx.moveTo(xpos, ypos - ((stack -1) * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom) / 2);
-                        ctx.lineTo(xpos + (tileHeight * curZoom), ypos - ((stack -1) * ((tileHeight - resizedTileHeight) * curZoom)));
-                        ctx.lineTo(xpos + (tileHeight * curZoom) * 2, ypos - ((stack -1) * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom) / 2);
-                        ctx.lineTo(xpos + (tileHeight * curZoom), ypos - ((stack -1) * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom));
-                        ctx.fill();
+                      else if (graphicValue != - 1) {
+                        _drawHorizontalColorOverlay(xpos, ypos, graphicValue, stack, resizedTileHeight);
                       }
                     }
                     else {
@@ -415,37 +438,24 @@ function(EffectLoader, Emitter, utils) {
         var shadowYpos = 0;
 
         if (heightMap) {
+
           nextStack = Math.round(Number(heightMap[i][j - 1]));
           currStack = Math.round(Number(heightMap[i][j]));
+
           if (currStack < nextStack) {
             shadowXpos = (i - j) * (tileHeight * curZoom) + drawX;
             shadowYpos = (i + j) * (tileWidth / 4 * curZoom) + drawY;
-            if (shadowSettings.verticalColor) {
 
-              // Apply Vertical shadow created from stacked tiles
-
+            // Apply Horizontal shadow created from stacked tiles
+            if (shadowSettings.horizontalColor) {
               if (!distanceLightingSettings  || (distanceLighting < distanceLightingSettings.darkness)) {
-                ctx.fillStyle = 'rgba' + (typeof shadowSettings.verticalColor === 'string' ? shadowSettings.verticalColor : shadowSettings.verticalColor[i][j]);
-                ctx.beginPath();
-                ctx.moveTo(shadowXpos, shadowYpos + ((currStack - 1) * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom) / 2);
-                ctx.lineTo(shadowXpos + (tileHeight * curZoom), shadowYpos + ((currStack - 1) * ((tileHeight - resizedTileHeight) * curZoom)));
-                ctx.lineTo(shadowXpos + (tileHeight * curZoom) * 2, shadowYpos + ((currStack - 1) * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom) / 2);
-                ctx.lineTo(shadowXpos + (tileHeight * curZoom), shadowYpos + ((currStack - 1) * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom));
-                ctx.fill();
+                _drawHorizontalColorOverlay(shadowXpos, shadowYpos, (typeof shadowSettings.verticalColor === 'string' ? shadowSettings.verticalColor : shadowSettings.verticalColor[i][j]), currStack, resizedTileHeight);
               }
             }
-            if (shadowSettings.horizontalColor) {
-
-              // Apply Horizontal shadows on stacked tiles
-
+            // Apply Vertical shadow created from stacked tiles
+            if (shadowSettings.verticalColor) {
               if (!distanceLightingSettings  || (distanceLighting < distanceLightingSettings.darkness)) {
-                ctx.fillStyle = 'rgba' + (typeof shadowSettings.horizontalColor === 'string' ? shadowSettings.horizontalColor : shadowSettings.horizontalColor[i][j]);
-                ctx.beginPath();
-                ctx.moveTo(xpos + (tileHeight * curZoom), ypos - ((currStack - 1) * (tileHeight * curZoom)));
-                ctx.lineTo(xpos + (tileHeight * curZoom), ypos - ((nextStack - 1) * ((tileHeight + shadowSettings.offset) / ((tileHeight + shadowSettings.offset) / shadowSettings.offset)  * curZoom)));
-                ctx.lineTo(xpos + (tileHeight * curZoom) * 2, ypos - ((nextStack - 1) * (tileHeight + shadowSettings.offset) / ((tileHeight + shadowSettings.offset) / shadowSettings.offset) * curZoom) + (tileHeight * curZoom) / 2);
-                ctx.lineTo(xpos + (tileHeight * curZoom) * 2, ypos - ((currStack - 1) * ((tileHeight ) * curZoom)) + (tileHeight * curZoom) / 2);
-                ctx.fill();
+                _drawVeritcalColorOverlay(xpos, ypos, (typeof shadowSettings.horizontalColor === 'string' ? shadowSettings.horizontalColor : shadowSettings.horizontalColor[i][j]), currStack, nextStack, shadowSettings);
               }
             }
           }
@@ -458,13 +468,7 @@ function(EffectLoader, Emitter, utils) {
           if(currStack > 0) {
             shadowXpos = (i - j) * (tileHeight * curZoom) + drawX;
             shadowYpos = (i + j) * (tileWidth / 4 * curZoom) + drawY;
-            ctx.fillStyle = 'rgba' + (typeof shadowSettings.verticalColor === 'string' ? shadowSettings.verticalColor : shadowSettings.verticalColor[i][j]);
-            ctx.beginPath();
-            ctx.moveTo(shadowXpos, shadowYpos + (currStack * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom) / 2);
-            ctx.lineTo(shadowXpos + (tileHeight * curZoom), shadowYpos + (currStack * ((tileHeight - resizedTileHeight) * curZoom)));
-            ctx.lineTo(shadowXpos + (tileHeight * curZoom) * 2, shadowYpos + (currStack * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom) / 2);
-            ctx.lineTo(shadowXpos + (tileHeight * curZoom), shadowYpos + (currStack * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom));
-            ctx.fill();
+            _drawHorizontalColorOverlay(shadowXpos, shadowYpos, (typeof shadowSettings.verticalColor === 'string' ? shadowSettings.verticalColor : shadowSettings.verticalColor[i][j]), k, resizedTileHeight);
           }
         }
       }
@@ -474,76 +478,21 @@ function(EffectLoader, Emitter, utils) {
           if (distanceLighting < distanceLightingSettings.darkness) {
 
             // Apply distance shadows from light source
-            if (!isometric) {
-              if (stackGraphic !== undefined || (zeroIsBlank && stackGraphic !== 0)) {
-                ctx.fillStyle = 'rgba(' + distanceLightingSettings.color + ',' + distanceLighting + ')';
-                ctx.beginPath();
-                ctx.moveTo(xpos, ypos);
-                ctx.lineTo(xpos + tileHeight * curZoom, ypos);
-                ctx.lineTo(xpos + tileHeight * curZoom, ypos + tileHeight * curZoom);
-                ctx.lineTo(xpos, ypos + tileHeight * curZoom);
-                ctx.fill();
-              }
+            if (stackGraphic !== undefined || (zeroIsBlank && stackGraphic !== 0)) {
+              _drawHorizontalColorOverlay(xpos, ypos, ('(' + distanceLightingSettings.color + ',' + distanceLighting + ')'), k, resizedTileHeight);
             }
-            else {
-              ctx.fillStyle = 'rgba(' + distanceLightingSettings.color + ',' + distanceLighting + ')';
-              ctx.beginPath();
-              ctx.moveTo(xpos, ypos + ((k - 2) * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom) / 2);
-              ctx.lineTo(xpos + (tileHeight * curZoom), ypos + ((k - 2) * ((tileHeight - resizedTileHeight) * curZoom)));
-              ctx.lineTo(xpos + (tileHeight * curZoom) * 2, ypos + ((k - 2) * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom) / 2);
-              ctx.lineTo(xpos + (tileHeight * curZoom), ypos + ((k - 2) * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom));
-              ctx.fill();
-            }
-
           }
         }
       }
       if (mouseUsed && applyInteractions) {
         if (i === focusTilePosX && j === focusTilePosY) {
           // Apply mouse over tile coloring
-          if (!isometric) {
-            ctx.fillStyle = 'rgba(255, 255, 120, 0.7)';
-            ctx.beginPath();
-            ctx.moveTo(xpos, ypos);
-            ctx.lineTo(xpos + tileHeight * curZoom, ypos);
-            ctx.lineTo(xpos + tileHeight * curZoom, ypos + tileHeight * curZoom);
-            ctx.lineTo(xpos, ypos + tileHeight * curZoom);
-            ctx.fill();
-          }
-          else {
-            ctx.fillStyle = 'rgba(255, 255, 120, 0.7)';
-            ctx.beginPath();
-            ctx.moveTo(xpos, ypos + ((k - 2) * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom) / 2);
-            ctx.lineTo(xpos + (tileHeight * curZoom), ypos + ((k - 2) * ((tileHeight - resizedTileHeight) * curZoom)));
-            ctx.lineTo(xpos + (tileHeight * curZoom) * 2, ypos + ((k - 2) * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom) / 2);
-            ctx.lineTo(xpos + (tileHeight * curZoom), ypos + ((k - 2) * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom));
-            ctx.fill();
-          }
+          _drawHorizontalColorOverlay(xpos, ypos, ('(255, 255, 120, 0.7)'), k - 1, resizedTileHeight);
         }
       }
       if (particleTiles) {
-
         // Draw Particles
-        if (particleMap[i] && particleMap[i][j] !== undefined && Number(particleMap[i][j]) !== 0) {
-          if (!distanceLightingSettings || ( distanceLightingSettings && distanceLighting < distanceLightingSettings.darkness)) {
-            if (!particleMapHolder[i]) {
-              particleMapHolder[i] = [];
-            }
-            if (!particleMapHolder[i][j]) {
-              if (particleEffects && particleEffects[particleMap[i][j]]) {
-                particleMapHolder[i][j] = new Emitter(ctx, 0, 0, particleEffects[particleMap[i][j]].pcount, particleEffects[particleMap[i][j]].loop, utils.range(0, mapHeight), utils.range(0, mapWidth));
-                for (var partK in particleEffects[particleMap[i][j]]) {
-                  particleMapHolder[i][j][partK] = particleEffects[particleMap[i][j]][partK];
-                }
-                particleMapHolder[i][j].Load();
-              }
-              else {
-                particleMapHolder[i][j] = new EffectLoader().getEffect(particleMap[i][j], ctx, utils.range(0, mapHeight), utils.range(0, mapWidth));
-              }
-            }
-            particleMapHolder[i][j].Draw(xpos, ypos + ((k - 1) * (tileHeight - heightOffset - tileHeight)) * curZoom - (resizedTileHeight  - tileHeight) * curZoom, curZoom);
-          }
-        }
+        _drawParticles(xpos, ypos, i, j, k, distanceLighting, distanceLightingSettings, resizedTileHeight);
       }
     }
 
@@ -684,7 +633,11 @@ function(EffectLoader, Emitter, utils) {
     }
 
     function _setTile(x, y, val) {
+      if (!mapLayout[x]) {
+        mapLayout[x] = [];
+      }
       mapLayout[x][y] = val;
+
     }
 
     function _setHeightmapTile(x, y, val) {
