@@ -36,35 +36,33 @@ THE SOFTWARE.
 ***/
 define(['module'], function(self) {
 
+  var workers = [];
 
-  return function (item, start, end, map, diagonal, callback, force) {
+  return function (id, start, end, map, diagonal, force) {
 
-    if (start[0] != end[0] || start[1] != end[1]) {
+    if (workers[id] === undefined) {
+      workers[id] = (new Worker(self.uri.replace("pathfind.js", "worker.js?") + Math.random()));
+    }
 
-      // Ensure Web worker is supported
-      if (typeof Worker !== 'undefined') {
+    return new Promise(function(resolve, reject) {
 
-        if (typeof item.pathfind !== 'object') {
+      if (start[0] != end[0] || start[1] != end[1]) {
 
-          item.pathfind = {
-          worker: new Worker(self.uri.replace("pathfind.js", "worker.js?") + Math.random()), // Fix to get web worker path from any location
-            end: end,
-            path: undefined,
-            active: false
-          };
+        var pathfind = {
+          worker: workers[id], // Fix to get web worker path from any location
+          end: end,
+          path: undefined,
+          active: false
+        };
 
-          // Event Listener
-          item.pathfind.worker.addEventListener('message', function(e) {
-
-            if (typeof e.data[0] !== 'function') {
-
-              item.pathfind.active = false;
-              item.pathfind.path = e.data;
-
-              callback(e.data); // Pass data to callback function
-            }
-          }, false);
-        }
+        // Event Listener
+        pathfind.worker.addEventListener('message', function(e) {
+          if (typeof e.data[0] !== 'function') {
+            pathfind.active = false;
+            pathfind.path = e.data;
+            resolve(e.data); // Pass data to resolve function
+          }
+        }, false);
 
         var pathfindWorker = function (p) {
             if (!p.active) {
@@ -75,37 +73,34 @@ define(['module'], function(self) {
           };
 
         // Check if end location is same as previous loop
-        if ((force !== undefined && !force) && item.pathfind.end[0] == end[0] && item.pathfind.end[1] == end[1] && item.pathfind.path !== undefined) {
+        if ((force !== undefined && !force) && pathfind.end[0] == end[0] && pathfind.end[1] == end[1] && pathfind.path !== undefined) {
 
           // Loop through current path
-          for (var i = 0, len = item.pathfind.path.length; i < len; i++) {
-            if (item.pathfind.path[i].x == start[0] && item.pathfind.path[i].y == start[1]) {
-              item.pathfind.path.splice(0, i);
-              callback(item.pathfind.path);
+          for (var i = 0, len = pathfind.path.length; i < len; i++) {
+            if (pathfind.path[i].x == start[0] && pathfind.path[i].y == start[1]) {
+              pathfind.path.splice(0, i);
+              resolve(pathfind.path);
               return true;
             }
           }
 
           // If location not located
-          pathfindWorker(item.pathfind);
+          pathfindWorker(pathfind);
 
         }
         else {
-          item.pathfind.end = end;
-          item.pathfind.path = undefined;
+          pathfind.end = end;
+          pathfind.path = undefined;
 
           // Perform Search
-          pathfindWorker(item.pathfind);
+          pathfindWorker(pathfind);
         }
 
-
       } else {
-        callback([]); // Return blank array for non supported browsers
-        return true;
+        workers[id].terminate();
+        workers[id] = undefined;
+        return false; // No need for pathfind required
       }
-
-    } else {
-      return false; // No need for pathfind required
-    }
+    });
   };
 });
