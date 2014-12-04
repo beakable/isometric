@@ -77,15 +77,14 @@ self.addEventListener('message', function(evt) {
 	/* 
 		Set-up Variables
 	*/
-	var rows = m.length-1, // Get number of rows from map
-		cols = m[0].length-1, // Number of columns from map
+	var cols = m.length-1, // Get number of rows from map
+		rows = m[0].length-1, // Number of columns from map
 		o = [], // Open Nodes
 		c = [], // Closed Nodes
 		mn = new Array(rows*cols), // Store open/closed nodes
 		g = 0,
 		h = heuristic(s, e),
 		f = g + h;
-
 
 	// Place start node onto list of open nodes
 	o.push(s);
@@ -125,7 +124,7 @@ self.addEventListener('message', function(evt) {
 
 		// Remove current node from open list
 		o.splice(best.n, 1);
-		mn[current.x + current.y * rows] = false; // Set bit to closed
+		mn[current.x + current.y * rows * cols] = false; // Set bit to closed
 
 		c.push(current);
 		// Search new nodes in all directions
@@ -138,12 +137,12 @@ self.addEventListener('message', function(evt) {
 					if (Number(m[x][y]) === 0) {
 
 						// Check if square is in closed list
-						if (mn[x + y * rows] === false) {
+						if (mn[x + y * rows * cols] === false) {
 							continue;
 						}
 
 						// If square not in open list use it
-						if (mn[x + y * rows] !== true) {
+						if (mn[x + y * rows * cols] !== true) {
 							var n = new node(x, y, c.length-1, -1, -1, -1); // Create new node
 							n.g = current.g + Math.floor(Math.sqrt(Math.pow(n.x - current.x, 2) + Math.pow(n.y-current.y, 2)));
 							n.h = heuristic(n, e);
@@ -151,13 +150,13 @@ self.addEventListener('message', function(evt) {
 
 							o.push(n); // Push node onto open list
 
-							mn[x + y * rows] = true; // Set bit into open list
+							mn[x + y * rows * cols] = true; // Set bit into open list
 						}
 
 					}
 				}
 			}
-		} 
+		}
 	}
 
 	self.postMessage([]); // No Path Found!
