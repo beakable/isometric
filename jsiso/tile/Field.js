@@ -166,15 +166,15 @@ function(EffectLoader, Emitter, utils) {
 
 
     // Used for drawing vertical shadows on top of tiles in isometric view if switched on
-    function _drawVeritcalColorOverlay(xpos, ypos, graphicValue, currStack, nextStack, shadowSettings) {
+    function _drawVeritcalColorOverlay(shadowXpos, shadowYpos, graphicValue, currStack, nextStack, resizedTileHeight, shadowSettings) {
 
-        ctx.fillStyle = 'rgba' + graphicValue;
-        ctx.beginPath();
-        ctx.moveTo(xpos + (tileHeight * curZoom), ypos - ((currStack - 1) * (tileHeight * curZoom)));
-        ctx.lineTo(xpos + (tileHeight * curZoom), ypos - ((nextStack - 1) * ((tileHeight + shadowSettings.offset) / ((tileHeight + shadowSettings.offset) / shadowSettings.offset)  * curZoom)));
-        ctx.lineTo(xpos + (tileHeight * curZoom) * 2, ypos - ((nextStack - 1) * (tileHeight + shadowSettings.offset) / ((tileHeight + shadowSettings.offset) / shadowSettings.offset) * curZoom) + (tileHeight * curZoom) / 2);
-        ctx.lineTo(xpos + (tileHeight * curZoom) * 2, ypos - ((currStack - 1) * ((tileHeight ) * curZoom)) + (tileHeight * curZoom) / 2);
-        ctx.fill();
+      ctx.fillStyle = 'rgba' + graphicValue;
+      ctx.beginPath();
+      ctx.moveTo(shadowXpos + (tileHeight * curZoom), shadowYpos + ((currStack - 1) * ((tileHeight - resizedTileHeight) * curZoom)));
+      ctx.lineTo(shadowXpos + (tileHeight * curZoom), shadowYpos - ((nextStack - 1) * ((tileHeight - shadowSettings.offset) / ((tileHeight - shadowSettings.offset) / shadowSettings.offset)  * curZoom)));
+      ctx.lineTo(shadowXpos + (tileHeight * curZoom) * 2, shadowYpos - ((nextStack - 1) * (tileHeight - shadowSettings.offset) / ((tileHeight - shadowSettings.offset) / shadowSettings.offset) * curZoom) + (tileHeight * curZoom) / 2);
+      ctx.lineTo(shadowXpos + (tileHeight * curZoom) * 2, shadowYpos + ((currStack - 1) * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom) / 2);
+      ctx.fill();
 
     }
 
@@ -455,7 +455,7 @@ function(EffectLoader, Emitter, utils) {
             // Apply Vertical shadow created from stacked tiles
             if (shadowSettings.verticalColor) {
               if (!distanceLightingSettings  || (distanceLighting < distanceLightingSettings.darkness)) {
-                _drawVeritcalColorOverlay(xpos, ypos, (typeof shadowSettings.horizontalColor === 'string' ? shadowSettings.horizontalColor : shadowSettings.horizontalColor[i][j]), currStack, nextStack, shadowSettings);
+                _drawVeritcalColorOverlay(shadowXpos, shadowYpos, (typeof shadowSettings.horizontalColor === 'string' ? shadowSettings.horizontalColor : shadowSettings.horizontalColor[i][j]), currStack, nextStack, resizedTileHeight, shadowSettings);
               }
             }
           }
