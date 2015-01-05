@@ -110,7 +110,7 @@ self.addEventListener('message', function(evt) {
 		var current  = o[best.n];
 
 		// Check if end point has been reached
-		if (current.x == e.x && current.y == e.y) {
+		if (current.x === e.x && current.y === e.y) {
 
 			var path = [{x: e.x, y: e.y}]; // Create Path 
 			// Loop back through parents to complete the path
@@ -130,7 +130,6 @@ self.addEventListener('message', function(evt) {
 		// Search new nodes in all directions
 		for (var x = Math.max(0, current.x-1), lenx = Math.min(cols, current.x+1); x <= lenx; x++) {
 			for (var y = Math.max(0, current.y-1), leny = Math.min(rows, current.y+1); y <= leny; y++) {
-
 				if (d || (diff(current.x, x) + diff(current.y, y)) <= 1) {
 
 					// Check if location square is open

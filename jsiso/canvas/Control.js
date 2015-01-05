@@ -1,5 +1,5 @@
 /*  
-Copyright (c) 2013 Iain Hamilton & Edward Smyth
+Copyright (c) 2013 Iain Hamilton
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -38,24 +38,16 @@ define(function() {
 
   var width = null;
   var height = null;
-  /***
-  * Checks that the browser supports HTML5 Canvas element
-  * @return {Boolean} determines if Canvas is supported
-  */
+
+  /**
+   * Checks if browser supports the canvas context 2
+   * @return {Boolean}
+   */
   function _supported () {
     var elem = document.createElement('canvas');
     return !!(elem.getContext && elem.getContext('2d'));
   }
 
-
-  /**
-  * Creates a Canvas object offering easy access to element manipulation 
-  * @param {String} name - to be appleid as the ID of created Canvas element
-  * @param {Number} width
-  * @param {Number} height
-  * @param {Object} style
-  * @return {Object} Canvas
-  */
 
   function _getRatio() {
     var ctx = document.createElement("canvas").getContext("2d"),
@@ -65,13 +57,13 @@ define(function() {
       ctx.msBackingStorePixelRatio ||
       ctx.oBackingStorePixelRatio ||
       ctx.backingStorePixelRatio || 1;
-
     return dpr / bsr;
   }
 
-
+ 
   function _create(name, w, h, style, element, usePixelRatio) {
     var pxRatio = 1;
+    var canvasType = null;
     if (_supported()) {
       if (usePixelRatio) {
         pxRatio = _getRatio();
@@ -80,21 +72,24 @@ define(function() {
       height = h;
       canvasElement = document.createElement('canvas');
       canvasElement.id = name;
+      canvasElement.tabindex = "1";
+      for (var s in style) {
+        canvasElement.style[s] = style[s];
+      }
+      console.log(usePixelRatio);
+      canvasType = '2d';
       canvasElement.style.width = w + "px";
       canvasElement.style.height = h + "px";
       canvasElement.width = w * pxRatio || window.innerWidth;
       canvasElement.height = h * pxRatio || window.innerHeight;
-      for (var s in style) {
-        canvasElement.style[s] = style[s];
-      }
-      canvasElement.getContext("2d").setTransform(pxRatio, 0, 0, pxRatio, 0, 0);
+      canvasElement.getContext(canvasType).setTransform(pxRatio, 0, 0, pxRatio, 0, 0);
       if (!element) {
         // Append Canvas into document body
-        return document.body.appendChild(canvasElement).getContext('2d');
+        return document.body.appendChild(canvasElement).getContext(canvasType);
       }
       else {
         // Place canvas into passed through body element
-        return document.getElementById(element).appendChild(canvasElement).getContext('2d');
+        return document.getElementById(element).appendChild(canvasElement).getContext(canvasType);
       }
     }
     else {
