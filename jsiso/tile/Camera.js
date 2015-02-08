@@ -130,8 +130,6 @@ define([], function() {
         }
       }
       if (screenWidth * (tileWidth * curZoom) > scaledMapWidth) {
-      console.log("here ", 1);
-
         for (i = 0; i < mapLayers.length; i++) {
           mapLayers[i].setOffset(Math.round(screenWidth * (tileWidth * curZoom) / 2 - scaledMapWidth / 2), Math.round(screenHeight * (tileHeight * curZoom) / 2 - mapHeight / 2));
         }
@@ -139,19 +137,13 @@ define([], function() {
       else {
         for (i = 0; i < mapLayers.length; i++) {
           if (startX < 0) {
-      console.log("here ", 2);
-            // mapLayers[i].setOffset(Math.floor(screenWidth * tileWidth / 2 - mapWidth / 2), Math.floor(screenHeight * tileHeight / 2 - mapHeight / 2));
             mapLayers[i].setOffset(Math.floor(screenWidth * (tileWidth * curZoom) / 2 - scaledMapWidth / 2), null);
           }
           else {
             if (startX + screenWidth > scaledMapWidth / (tileWidth * curZoom)) {
-      console.log("here ", 3);
-
               mapLayers[i].setOffset(-(Math.round(scaledMapWidth / (tileWidth * curZoom))  - screenWidth) * (tileWidth * curZoom), null);
             }
             else {
-      console.log("here ", 4);
-
               mapLayers[i].setOffset(Math.round(-(tileWidth * curZoom) * posX + (screenWidth / 2 * (tileHeight * curZoom))), null);
             }
           }
