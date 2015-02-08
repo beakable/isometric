@@ -60,7 +60,7 @@ define([], function() {
       screenWidth = screenW;
       screenHeight = screenH;
       scaledMapWidth = mapWidth / tileW;
-      scaledMapWidth = scaledMapHeight * (tileW * curZoom);
+      scaledMapWidth = scaledMapWidth * (tileW * curZoom);
       scaledMapHeight = mapHeight / tileW;
       scaledMapHeight = scaledMapHeight * (tileH * curZoom);
       return {
@@ -89,56 +89,70 @@ define([], function() {
     function _setFocus(posX, posY, cameraRangeX, cameraRangeY, setZoom) {
       var xyMapOffset;
       var i;
-      curZoom = setZoom || curZoom;
+
+      if (setZoom && curZoom !== setZoom) {
+        curZoom = setZoom;
+        scaledMapWidth = mapWidth / tileWidth;
+        scaledMapWidth = scaledMapWidth * (tileWidth * curZoom);
+        scaledMapHeight = mapHeight / tileHeight;
+        scaledMapHeight = scaledMapHeight * (tileHeight * curZoom);
+        screenHeight = Math.round(window.innerHeight / (tileHeight * curZoom));
+        screenWidth = Math.round(window.innerWidth / (tileWidth * curZoom));
+      }
       rangeX = cameraRangeX;
       rangeY = cameraRangeY;
 
-      startX = posX - screenWidth / 2;
-      startY = posY - screenHeight / 2;
-      screenHeight = Math.floor(window.innerHeight / (tileHeight * curZoom));
-      screenWidth = Math.floor(window.innerWidth / (tileWidth * curZoom));
-
-      scaledMapWidth = mapWidth / tileWidth;
-      scaledMapWidth = scaledMapWidth * (tileWidth * curZoom);
-      scaledMapHeight = mapHeight / tileHeight;
-      scaledMapHeight = scaledMapHeight * (tileHeight * curZoom);
+      startX = Math.round(posX - screenWidth / 2);
+      startY = Math.round(posY - screenHeight / 2);
 
       if (screenHeight * (tileHeight * curZoom) > scaledMapHeight) {
+
         for (i = 0; i < mapLayers.length; i++) {
-          mapLayers[i].setOffset(null, Math.floor(screenHeight * (tileHeight * curZoom) / 2 - scaledMapHeight / 2));
+          mapLayers[i].setOffset(null, Math.round(screenHeight * (tileHeight * curZoom) / 2 - scaledMapHeight / 2));
         }
       }
       else {
         for (i = 0; i < mapLayers.length; i++) {
           if (startY < 0) {
-            mapLayers[i].setOffset(null, Math.floor(-(tileHeight * curZoom) * posY + (posY * (tileHeight * curZoom))));
+
+            mapLayers[i].setOffset(null, Math.round(-(tileHeight * curZoom) * posY + (posY * (tileHeight * curZoom))));
           }
           else {
             if (startY + screenHeight > scaledMapHeight / (tileHeight * curZoom)) {
-              mapLayers[i].setOffset(null, Math.floor(scaledMapHeight / (tileHeight * curZoom)) - (screenHeight * (tileHeight * curZoom)) / 2) ;
+
+              mapLayers[i].setOffset(null, Math.round(scaledMapHeight / (tileHeight * curZoom)) - (screenHeight * (tileHeight * curZoom)) / 2) ;
             }
             else {
-              mapLayers[i].setOffset(null, Math.floor(-(tileHeight * curZoom) * posY + (screenHeight / 2 * (tileHeight * curZoom))));
+
+              mapLayers[i].setOffset(null, Math.round(-(tileHeight * curZoom) * posY + (screenHeight / 2 * (tileHeight * curZoom))));
             }
           }
         }
       }
       if (screenWidth * (tileWidth * curZoom) > scaledMapWidth) {
+      console.log("here ", 1);
+
         for (i = 0; i < mapLayers.length; i++) {
-          mapLayers[i].setOffset(Math.floor(screenWidth * (tileWidth * curZoom) / 2 - scaledMapWidth / 2), Math.floor(screenHeight * (tileHeight * curZoom) / 2 - mapHeight / 2));
+          mapLayers[i].setOffset(Math.round(screenWidth * (tileWidth * curZoom) / 2 - scaledMapWidth / 2), Math.round(screenHeight * (tileHeight * curZoom) / 2 - mapHeight / 2));
         }
       }
       else {
         for (i = 0; i < mapLayers.length; i++) {
           if (startX < 0) {
-            mapLayers[i].setOffset(Math.floor(-(tileWidth * curZoom) * posX + (screenWidth / 2 * (tileWidth * curZoom))), null);
+      console.log("here ", 2);
+            // mapLayers[i].setOffset(Math.floor(screenWidth * tileWidth / 2 - mapWidth / 2), Math.floor(screenHeight * tileHeight / 2 - mapHeight / 2));
+            mapLayers[i].setOffset(Math.floor(screenWidth * (tileWidth * curZoom) / 2 - scaledMapWidth / 2), null);
           }
           else {
             if (startX + screenWidth > scaledMapWidth / (tileWidth * curZoom)) {
-              mapLayers[i].setOffset(-(Math.floor(scaledMapWidth / (tileWidth * curZoom))  - screenWidth) * (tileWidth * curZoom), null);
+      console.log("here ", 3);
+
+              mapLayers[i].setOffset(-(Math.round(scaledMapWidth / (tileWidth * curZoom))  - screenWidth) * (tileWidth * curZoom), null);
             }
             else {
-              mapLayers[i].setOffset(Math.floor(-(tileWidth * curZoom) * posX + (screenWidth / 2 * (tileHeight * curZoom))), null);
+      console.log("here ", 4);
+
+              mapLayers[i].setOffset(Math.round(-(tileWidth * curZoom) * posX + (screenWidth / 2 * (tileHeight * curZoom))), null);
             }
           }
         }
