@@ -95,7 +95,7 @@ define([], function() {
       var xyMapOffset;
       var i;
 
-      if (setZoom && curZoom !== setZoom) {
+      if (setZoom !== undefined) {
         curZoom = setZoom;
         scaledMapWidth = mapWidth / tileWidth;
         scaledMapWidth = scaledMapWidth * (tileWidth * curZoom);
@@ -109,11 +109,13 @@ define([], function() {
       startX = Math.round(posX - screenWidth / 2);
       startY = Math.round(posY - screenHeight / 2);
 
-      if (startX < 0) {
-        startX = 0;
-      }
-      if (startY < 0) {
-        startY = 0;
+      if (!lockToScreen) {
+        if (startX < 0) {
+          startX = 0;
+        }
+        if (startY < 0) {
+          startY = 0;
+        }
       }
 
       if (screenHeight * tileHeight > scaledMapHeight) {
@@ -128,7 +130,7 @@ define([], function() {
           }
           else {
             if (lockToScreen && startY + screenHeight > scaledMapHeight / tileHeight) {
-              mapLayers[i].setOffset(null, Math.floor(scaledMapHeight / tileHeight) - (screenHeight * tileHeight) / 2) ;
+              mapLayers[i].setOffset(null, -(Math.round(scaledMapHeight / tileHeight) - screenHeight) * tileHeight + tileHeight);
             }
             else {
               mapLayers[i].setOffset(null, Math.round(-(tileHeight * curZoom) * posY + (screenHeight / 2 * (tileHeight * curZoom))));
@@ -151,7 +153,7 @@ define([], function() {
               mapLayers[i].setOffset(-(Math.floor(scaledMapWidth / tileWidth)  - screenWidth) * tileWidth, null);
             }
             else {
-              mapLayers[i].setOffset(Math.round(-(tileWidth * curZoom) * posX + (screenWidth / 2 * (tileHeight * curZoom))), null);
+              mapLayers[i].setOffset(Math.round(-(tileWidth * curZoom) * posX + (screenWidth / 2 * (tileWidth * curZoom))), null);
             }
           }
         }
@@ -164,13 +166,15 @@ define([], function() {
       xyNextPos = _getXYCoords(focusX - xyMapOffset.x, focusY - xyMapOffset.y);
       var startXNew = Math.floor(xyNextPos.x - rangeX / 2);
       var startYNew = Math.floor(xyNextPos.y - rangeY / 2);
-      if (startXNew < 0) {
-        startXNew = 0;
+      if (!lockToScreen) {
+        if (startXNew < 0) {
+          startXNew = 0;
+        }
+        if (startYNew < 0) {
+          startYNew = 0;
+        }
       }
-      if (startYNew < 0) {
-        startYNew = 0;
-      }
-/*      if (startXNew + screenWidth > scaledMapWidth / (tileWidth * curZoom)) {
+      /*if (startXNew + screenWidth > scaledMapWidth / (tileWidth * curZoom)) {
         startXNew = scaledMapWidth / (tileWidth * curZoom) - screenWidth;
       }
       if (startYNew + screenHeight > scaledMapHeight / (tileHeight * curZoom)) {
