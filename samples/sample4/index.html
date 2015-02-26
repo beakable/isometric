@@ -1,0 +1,288 @@
+<!--
+/*  
+Copyright (c) 2013 Iain Hamilton & Edward Smyth
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE. 
+
+- Author : Iain M Hamilton - <iain@beakable.com> - http://www.beakable.com
+
+  Twitter: @beakable
+
+*/
+-->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title></title>
+    <style type="text/css">
+      body {
+        margin: 0;
+        padding: 0;
+        background: #000022
+      }
+       .twitter-follow-button {
+        position: absolute !important;
+      }
+      a, a:visited {
+        color: #FFF;
+      }
+      .gameInfo {
+        position: absolute;
+        right: 0px;
+        top: 0px;
+        width: 200px;
+        height: 24px;
+        background: #222244;
+        text-align: center;
+        color: #FFF;
+        z-index: 400;
+      }
+    </style>
+    <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+    
+    <script data-main="../../config.js" src="../../requirejs/require.js"></script>
+
+    <script type="text/javascript">
+
+    require([
+      'jsiso/canvas/Control',
+      'jsiso/canvas/Input',
+      'jsiso/img/load',
+      'jsiso/json/load',
+      'jsiso/tile/Field',
+      'jsiso/pathfind/pathfind',
+      'jsiso/particles/EffectLoader',
+      'jsiso/utils',
+      'requirejs/domReady!'
+    ],
+    function(CanvasControl, CanvasInput, imgLoader, jsonLoader, TileField, pathfind, EffectLoader, utils) {
+
+      // -- FPS --------------------------------
+      window.requestAnimFrame = (function() {
+        return window.requestAnimationFrame || 
+        window.webkitRequestAnimationFrame  || 
+        window.mozRequestAnimationFrame     || 
+        window.oRequestAnimationFrame       ||  
+        window.msRequestAnimationFrame      || 
+        function(callback, element) {
+          window.setTimeout(callback, 1000 / 60);
+        };
+      })();
+      // ---------------------------------------
+
+      // Editor Globals ------------------------
+
+      var tileSelection = {};
+
+      // ---------------------------------------
+
+
+      function launch() {
+        jsonLoader(['map.json', 'imageFiles.json']).then(function(jsonResponse) {
+          imgLoader([{graphics: jsonResponse[1].images}]).then(function(imgResponse) {
+            var game = new main(0, 0, 14, 14);  // X & Y drawing position, and tile span to draw 
+            game.init([{
+              Title: "Graphics",
+              layout: jsonResponse[0].ground,
+              graphics: imgResponse[0].files,
+              graphicsDictionary: imgResponse[0].dictionary, 
+              heightMap: {
+                map: jsonResponse[0].height,
+                offset: -80,
+                heightTile: imgResponse[0].files["ground.png"]
+              },
+              tileHeight: 50,
+              tileWidth: 100,
+              zeroIsBlank: true
+            }])
+            addTilesToHUD("Graphics", imgResponse[0].dictionary, 1);            
+          });
+        });
+      }
+
+      function tileChoice(layer, tile) {
+        tileSelection.title = layer;
+        tileSelection.value = tile;
+      }
+
+      function addTilesToHUD(layer, dictionary, offset) {
+        var clickTile;
+        dictionary.forEach(function(tile, i) {
+          var clickTile = document.createElement("a");
+          clickTile.innerHTML += ("<img  height='50' width='50' src='../img/sample1Img/"  + tile +"' />");
+          document.getElementById("gameInfo").appendChild(clickTile);
+          clickTile.addEventListener("click", function(e){
+            tileChoice(layer, (i + offset))
+          });
+        });
+      }
+
+
+      function main(x, y, xrange, yrange) {
+        var mapLayers = [];
+        var startY = y;
+        var startX = x;
+        var rangeX = xrange;
+        var rangeY = yrange;
+        var defaultRangeY = rangeY;
+
+        var context = CanvasControl.create("canavas", 920, 600, {
+          background: "#000022",
+          display: "block",
+          marginLeft: "auto",
+          marginRight: "auto"
+        });
+        CanvasControl.fullScreen();
+        
+        var input = new CanvasInput(document, CanvasControl());
+
+        input.mouse_action(function(coords) {
+          mapLayers.map(function(layer) {
+            tile_coordinates =  layer.applyMouseFocus(coords.x, coords.y); // Get the current mouse location from X & Y Coords
+            //layer.setHeightmapTile(tile_coordinates.x, tile_coordinates.y, layer.getHeightMapTile(tile_coordinates.x, tile_coordinates.y) + 1); // Increase heightmap tile
+            layer.setTile(tile_coordinates.x, tile_coordinates.y, tileSelection.value); // Force the chaning of tile graphic
+          });
+        });
+
+        input.mouse_move(function(coords) {
+          mapLayers.map(function(layer) {
+            tile_coordinates = layer.applyMouseFocus(coords.x, coords.y); // Apply mouse rollover via mouse location X & Y
+          });
+        }); 
+
+
+        input.keyboard(function(pressed) {
+          switch(pressed) {
+            case 65:
+               mapLayers.map(function(layer) {
+                if (startY + rangeY + 1 < mapLayers[0].getLayout().length) {
+                  layer.setZoom("out");
+                  layer.align("h-center", CanvasControl().width, xrange, -60);
+                  layer.align("v-center", CanvasControl().height,  yrange, 240);
+                  rangeX +=  1
+                  rangeY +=  1
+                }
+              });
+            break;
+            case 83:
+               mapLayers.map(function(layer) {
+                if (rangeY - 1 > defaultRangeY - 1) {
+                  layer.setZoom("in");
+                  layer.align("h-center", CanvasControl().width, xrange, -60);
+                  layer.align("v-center", CanvasControl().height,  yrange, 240);
+                  rangeX -=  1
+                  rangeY -=  1
+                }
+              })
+            break;
+            case 49:
+              mapLayers.map(function(layer) {
+                layer.toggleGraphicsHide(true);
+                layer.toggleHeightShadow(true);
+              });
+            break;
+            case 50:
+              mapLayers.map(function(layer) {
+                layer.toggleGraphicsHide(false);
+                layer.toggleHeightShadow(false);
+              });
+            break;
+            case 81:
+              mapLayers.map(function(layer) {
+                layer.rotate("left");
+              });
+            break;
+            case 87:
+              mapLayers.map(function(layer) {
+                layer.rotate("right");
+              });
+            break;
+            case 75:
+              var XML = new XMLPopulate();
+              XML.saveMap(44, mapLayers[0].getLayout(), mapLayers[0].getHeightLayout(), null);
+            break;
+            case 39:
+              mapLayers.map(function(layer) {
+                layer.move("left");
+              });
+              startY ++;
+            break;
+            case 38:
+              mapLayers.map(function(layer) {
+                layer.move("down");
+              });
+              startX --;
+            break;
+            case 40:
+              mapLayers.map(function(layer) {
+                layer.move("right");
+              });
+              startX ++;
+            break;
+            case 37:
+              mapLayers.map(function(layer) {
+                layer.move("up");
+              });
+              startY --;
+            break;
+          }
+        });
+
+        
+        function draw() {
+          context.clearRect(0, 0, CanvasControl().width, CanvasControl().height);
+          for(i = startY; i < startY + rangeY; i++) {
+            for(j = startX; j < startX + rangeX; j++) {
+              mapLayers.map(function(layer) {
+                layer.draw(i,j);
+              });
+            }
+          }
+          requestAnimFrame(draw);
+        }
+        
+        return {
+          init: function(layers) {
+            startY = 20 - yrange / 2;
+            startX = 20 - xrange / 2;
+            for (var i = 0; i < 0 + layers.length; i++) {
+              mapLayers[i] = new TileField(context, CanvasControl().height, CanvasControl().width);
+              mapLayers[i].setup(layers[i]);
+              mapLayers[i].align("h-center", CanvasControl().width, xrange + startX, 0);
+              mapLayers[i].align("v-center", CanvasControl().height, yrange + startY, (yrange + startY));
+              mapLayers[i].setZoom("in");
+            };
+            draw();
+          }
+        }
+        
+      }
+
+      launch();
+
+    });
+    </script>
+  </head>
+  <body>
+    <div id="gameInfo" class="gameInfo">[A]/[S] Zoom - [Q][W] Rotate</div>
+    <a href="https://twitter.com/Beakable" class="twitter-follow-button" data-show-count="false">Follow @Beakable</a>
+  </body>
+</html>

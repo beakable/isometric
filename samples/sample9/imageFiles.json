@@ -1,0 +1,13 @@
+{
+  "ground": [
+    "../img/game/ground/0-grass.png",
+    "../img/game/ground/1-path.png",
+    "../img/game/ground/blank-block.png"
+  ],
+  "players": [
+    "../img/players/enemy1.png",
+    "../img/players/enemy2.png",
+    "../img/players/enemy3.png",
+    "../img/players/main.png"
+  ]
+}

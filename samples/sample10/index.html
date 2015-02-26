@@ -1,0 +1,262 @@
+<!--
+/*  
+Copyright (c) 2013 Iain Hamilton
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE. 
+
+- Author : Iain M Hamilton - <iain@beakable.com> - http://www.beakable.com
+
+  Twitter: @beakable
+
+*/
+-->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title></title>
+    <style type="text/css">
+       .twitter-follow-button {
+        position: absolute !important;
+      }
+    </style>
+    <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+    
+    <script data-main="../../config.js" src="../../requirejs/require.js"></script>
+
+    <script type="text/javascript">
+
+    require([
+      'jsiso/canvas/Control',
+      'jsiso/canvas/Input',
+      'jsiso/img/load',
+      'jsiso/tile/Field',
+      'requirejs/domReady!'
+    ],
+    function(CanvasControl, CanvasInput, imgLoader, TileField, pathfind) {
+
+      // -- FPS --------------------------------
+      window.requestAnimFrame = (function() {
+        return window.requestAnimationFrame || 
+        window.webkitRequestAnimationFrame  || 
+        window.mozRequestAnimationFrame     || 
+        window.oRequestAnimationFrame       ||  
+        window.msRequestAnimationFrame      || 
+        function(callback, element) {
+          window.setTimeout(callback, 1000 / 60);
+        };
+      })();
+      // ---------------------------------------
+
+
+      function launch() {
+
+        var graphics = {
+          graphics: ["../img/heightmap.jpg"]
+        }
+
+        var context = CanvasControl.create("canvasImage", 1024, 1024, {
+          display: "block",
+          marginLeft: "auto",
+          marginRight: "auto"
+        });
+
+        imgLoader([graphics]).then(function(imgResponse) {
+          context.drawImage(imgResponse[0].files[imgResponse[0].dictionary[0]], 0, 0);
+          var tileImg = [];
+          var shadowColors = [];
+          var heightImg = [];
+          var objMap = [];
+
+          var imageMap = context.getImageData(0, 0, 1024, 1024);
+            
+          for (var y = 0; y < imageMap.height; y++) {
+            tileImg[y] = [];
+            shadowColors[y] = [];
+            heightImg[y] = [];
+            objMap[y] = [];
+            for (var x = 0; x < imageMap.width; x++) {
+              var i = (y * 4) * imageMap.width + x * 4;
+              var green = (imageMap.data[i + 1]) / 1.5;
+              var red = 60;
+              var blue = 90;
+              if (green > 40) {
+                green = green;
+                red = 208;
+                blue = 118;
+              }
+              if (green > 100) {
+                green = green;
+                red = 260;
+                blue = 240;
+              }
+              tileImg[y].push("(" +  red + "," + green + 1 + "," + blue + ", 1)");
+              heightImg[y].push(Math.floor((imageMap.data[i] + imageMap.data[i + 1] + imageMap.data[i + 2])) / 20);
+              if (Math.random()*100 > 98) {
+                objMap[y].push(1)
+              }
+              else {
+                objMap[y].push(0)
+              }
+            }
+          }
+          context.putImageData(imageMap, 0, 0, 0, 0, imageMap.width, imageMap.height);
+          var elem = document.getElementById("canvasImage"); 
+          elem.parentNode.removeChild(elem);
+
+          var tileEngine = new main(0, 0, 68, 68);  // X & Y drawing position, and tile span to draw 
+            
+          tileEngine.init(
+            [{
+              layout: tileImg,
+              heightMap: {
+                map: heightImg,
+                heightMapOnTop: true,
+                offset: 100
+              },
+              applyInteractions: true,
+              tileHeight: 100,
+              tileWidth: 200
+            }]
+          );
+        });
+      }
+
+
+      function main(x, y, xrange, yrange) {
+        var mapLayers = [];
+        var rangeX = xrange;
+        var rangeY = yrange;
+        var startX = 0;
+        var startY = 0;
+        var zoomLevel = 0.01;
+        var currentView = 1;
+
+
+        var context = CanvasControl.create("canavas", 0, 0, {
+          background: "#000",
+          display: "block",
+          marginLeft: "auto",
+          marginRight: "auto"
+        });
+        CanvasControl.fullScreen();
+
+        var input = new CanvasInput(document, CanvasControl());
+        input.mouse_move(function(coords) {
+          var tileLocation = mapLayers[0].getXYCoords(coords.x, coords.y);
+          startX = tileLocation.x;
+          startY = tileLocation.y;
+        });
+
+        input.keyboard(function(key, pressed) {
+          if (!pressed) {
+            if (key === 81) {
+              mapLayers.forEach(function(layer) {
+                layer.rotate("left");
+              });
+            }
+            if (key === 87) {
+              mapLayers.forEach(function(layer) {
+                layer.rotate("right");
+              });
+            }
+            if (key === 83) {
+              if (zoomLevel < 2) {
+                zoomLevel += 0.01;
+              }
+            }
+            if (key === 32) {
+              if (currentView === 1) {
+                mapLayers.forEach(function(layer) {
+                  layer.setup({
+                    isometric: false,
+                    tileHeight: 200,
+                    tileWidth: 200
+                  });
+                });
+                currentView = 0;
+              }
+              else {
+                mapLayers.forEach(function(layer) {
+                  layer.setup({
+                    isometric: true,
+                    tileHeight: 100,
+                    tileWidth: 200
+                  });
+                });
+                currentView = 1;                
+              }
+              mapLayers.forEach(function(layer) {
+                layer.align("h-center", CanvasControl().width, xrange, 0);
+                layer.align("v-center", CanvasControl().height, yrange, CanvasControl().height * 2);
+              });
+            }
+          }
+          if (key === 65) {
+            zoomLevel -= 0.01;
+          }
+          if (zoomLevel <= 0) {
+            zoomLevel = 0.01
+          }
+          mapLayers.forEach(function(layer) {
+            layer.setZoom(zoomLevel);
+          });
+        });
+        
+        function draw() {
+          context.clearRect(0, 0, CanvasControl().width, CanvasControl().height);
+          for (var i = startX; i < startX + rangeX; i++) {
+            for (var j = startY; j < startY + rangeY; j++) {
+              mapLayers.forEach(function(layer) {
+                layer.draw(i,j); // Draw the graphics layer
+              });
+            }
+          }
+          requestAnimFrame(draw);
+        }
+
+        return {
+          init: function(layers) {
+            for (var i = 0; i < 0 + layers.length; i++) {
+              mapLayers[i] = new TileField(context, CanvasControl().height, CanvasControl().width);
+              mapLayers[i].setup(layers[i]);
+              mapLayers[i].setZoom(zoomLevel);
+              mapLayers[i].align("h-center", CanvasControl().width, xrange, 0); // Center canvas drawing X
+              mapLayers[i].align("v-center", CanvasControl().height, yrange, CanvasControl().height * 2); // Center canvas drawing Y
+            };
+            draw();
+          }
+        }  
+        
+      }
+
+      launch();
+    });
+    </script>
+  </head>
+  <body>
+    <div style="position: absolute !important; top: 0; right: 0; color: #006699">
+
+      <p>A &amp; S to zoom in and out</p>
+      <p>Q &amp; W to rotate map</p>
+    </div>
+    <a href="https://twitter.com/Beakable" class="twitter-follow-button" data-show-count="false">Follow @Beakable</a>
+  </body>
+</html>

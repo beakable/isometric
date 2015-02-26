@@ -1,0 +1,243 @@
+<!--
+/*  
+Copyright (c) 2013 Iain Hamilton & Edward Smyth
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE. 
+
+- Author : Iain M Hamilton - <iain@beakable.com> - http://www.beakable.com
+           Edward Smyth
+
+  Twitter: @beakable
+
+*/
+-->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title></title>
+    <style type="text/css">
+      .twitter-follow-button {
+        position: absolute !important;
+      }
+      body{
+        padding: 0;
+        margin: 0;
+      }
+    </style>
+    <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+    
+
+    <script data-main="../../config.js" src="../../requirejs/require.js"></script>
+
+    <script type="text/javascript">
+
+      require([
+        'jsiso/canvas/Control',
+        'jsiso/canvas/Input',
+        'jsiso/img/load',
+        'jsiso/json/load',
+        'jsiso/tile/Field',
+        'requirejs/domReady!'
+      ],
+        
+      function(CanvasControl, CanvasInput, imgLoader, jsonLoader, TileField) {
+
+        // -- FPS --------------------------------
+        window.requestAnimFrame = (function() {
+          return window.requestAnimationFrame || 
+          window.webkitRequestAnimationFrame  || 
+          window.mozRequestAnimationFrame     || 
+          window.oRequestAnimationFrame       ||  
+          window.msRequestAnimationFrame      || 
+          function(callback, element) {
+            window.setTimeout(callback, 1000 / 60);
+          };
+        })();
+        // ---------------------------------------
+
+
+        function launch() {
+
+          jsonLoader(['map.json', 'imageFiles.json']).then(function(jsonResponse) {
+            imgLoader([{graphics: jsonResponse[1].game}]).then(function(imgResponse) {
+              var game = new main(0, 0, 20, 18, imgResponse[0].files);  // X & Y drawing position, and tile span to draw 
+              game.init([{
+                title: "LayerOne",
+                layout: jsonResponse[0].game,
+                graphics: imgResponse[0].files,
+                graphicsDictionary: imgResponse[0].dictionary,
+                isometric: true, // Flag used to layout grid in isometric format
+                tileHeight: 17,
+                tileWidth: 34
+              }]);
+            });
+          });
+        }
+
+        function main(x, y, xrange, yrange, graphics) {
+          
+          var mapLayers = []; // An Array of created layers
+          var playerSnake = []; // The snake body
+          var positionTimer = null; // Timer for moving the snake
+          var snakeDirection = "right"; // Stores current direction to move the snake
+          var snakeMoved = false; // Prevents multiple direction change until the snake has moved
+          var soundPew = new Audio("/pew.wav"); // A Pew Pew sound for point collection
+          var score = 0; // Player Score
+          var point = {
+            x: 12,
+            y: 12
+          } // Defaut point position
+
+          var context = CanvasControl.create("canavas", 680, 450, {
+            display: "block",
+            marginLeft: "auto",
+            marginRight: "auto"
+          });
+
+          var input = new CanvasInput(document, CanvasControl());
+          input.keyboard(function(pressed, status) {
+            if (status) {
+              if (pressed === 37) {
+                if (snakeDirection !== "right" && snakeMoved) {
+                  snakeMoved = false;
+                  snakeDirection = "left";
+                }
+              }
+              if (pressed === 39) {
+                if (snakeDirection !== "left" && snakeMoved) {
+                  snakeMoved = false;
+                  snakeDirection = "right";
+                }
+              }
+              if (pressed === 38) {
+                if (snakeDirection !== "down" && snakeMoved) {
+                  snakeMoved = false;
+                  snakeDirection = "up";
+                }
+              }
+              if (pressed === 40) {
+                if (snakeDirection !== "up" && snakeMoved) {
+                  snakeMoved = false;
+                  snakeDirection = "down";
+                }
+              }
+            }
+          });
+
+
+          function updateSnakePositions() {
+            playerSnake.map(function(piece, i) {
+              if (i !== playerSnake.length - 1) {
+                playerSnake[i].x = playerSnake[i + 1].x;
+                playerSnake[i].y = playerSnake[i + 1].y;
+              }
+            });
+            if (snakeDirection === "left") {
+              playerSnake[playerSnake.length - 1].x -= 1;
+            }
+            if (snakeDirection === "right") {
+              playerSnake[playerSnake.length - 1].x += 1;
+            }
+            if (snakeDirection === "up") {
+              playerSnake[playerSnake.length - 1].y -= 1;
+            }
+            if (snakeDirection === "down") {
+              playerSnake[playerSnake.length - 1].y += 1;
+            }
+            if (mapLayers[0].getTile(playerSnake[playerSnake.length - 1].x, playerSnake[playerSnake.length - 1].y) === 1){
+              // End Game
+              clearInterval(positionTimer);
+            }
+            playerSnake.map(function(piece, i) {
+              if (i !== playerSnake.length - 1) {
+                if (piece.x === playerSnake[playerSnake.length - 1].x && piece.y === playerSnake[playerSnake.length - 1].y) {
+                  // End Game
+                  clearInterval(positionTimer);
+                }
+              }
+            });
+            if (point.x === playerSnake[playerSnake.length - 1].x && point.y === playerSnake[playerSnake.length - 1].y) {
+              // Update score and  reposition point
+              score ++;
+              playerSnake.push({x: point.x, y: point.y});
+              point.x = Math.floor(Math.random() * 18) + 1;
+              point.y = Math.floor(Math.random() * 16) + 1;
+              soundPew.play();
+            }
+            snakeMoved = true;
+          }
+
+          function draw() {
+            context.clearRect(0, 0, CanvasControl().width, CanvasControl().height);
+            var drawOverwrite = false;
+            for (i = x; i < 0 + xrange; i++) {
+              for (j = y; j < 0 + yrange; j++) {
+                drawOverwrite = false;
+                playerSnake.map(function(piece){
+                  if (piece.x === i && piece.y === j) {
+                     mapLayers[0].draw(i, j, graphics["1-blank.png"]); // If tile location is equal to a snake body piece send an overwrite image
+                     drawOverwrite = true;
+                  }
+                });
+                if (point.x === i && point.y === j) {
+                  mapLayers[0].draw(i, j, graphics["2-point.png"]); // If tile location is equal to the point location send overwrite image
+                  drawOverwrite = true;
+                }
+                if (!drawOverwrite) {
+                  mapLayers[0].draw(i, j);
+                }
+              }
+            }
+            context.font = "22px Georgia";
+            context.fillText(score, 27, 44);
+            requestAnimFrame(draw);
+          }
+          
+          return {
+            init: function(layers) {
+              for (var i = 0; i < 0 + layers.length; i++) {
+                mapLayers[i] = new TileField(context, CanvasControl().height, CanvasControl().width);
+                mapLayers[i].setup(layers[i]);
+
+                mapLayers[i].align("h-center", CanvasControl().width, xrange, 0);
+                mapLayers[i].align("v-center", CanvasControl().height, yrange, 0);
+              };
+              playerSnake.push({x: 4, y: 8}); // Create Initial Snake Shape
+              playerSnake.push({x: 5, y: 8});
+              playerSnake.push({x: 6, y: 8});
+              playerSnake.push({x: 7, y: 8});
+              playerSnake.push({x: 8, y: 8});
+              playerSnake.push({x: 9, y: 8});
+              draw();
+              positionTimer = setInterval(function() { updateSnakePositions(); }, 250); // Set Snake to move every 250ms
+            }
+          }
+        }
+
+        launch(); 
+
+      });
+    </script>
+  </head>
+  <body>
+    <a href="https://twitter.com/Beakable" class="twitter-follow-button" data-show-count="false">Follow @Beakable</a>
+  </body>
+</html>

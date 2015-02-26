@@ -1,0 +1,368 @@
+<!--
+/*  
+Copyright (c) 2013 Iain Hamilton & Edward Smyth
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE. 
+
+- Author : Iain M Hamilton - <iain@beakable.com> - http://www.beakable.com
+           Edward Smyth
+
+  Twitter: @beakable
+
+*/
+-->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title></title>
+    <style type="text/css">
+       .twitter-follow-button {
+        position: absolute !important;
+        z-index: 500
+      }
+      .info {
+        position: absolute;
+        top: 4px;
+        left: 150px;
+        color: #FFF;
+        z-index: 501
+      }
+    </style>
+    <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+    
+    <script data-main="../../config.js" src="../../requirejs/require.js"></script>
+
+    <script type="text/javascript">
+
+  require([
+    'jsiso/canvas/Control',
+    'jsiso/canvas/Input',
+    'jsiso/img/load',
+    'jsiso/json/load',
+    'jsiso/tile/Field',
+    'jsiso/tile/Camera',
+    'jsiso/pathfind/pathfind',
+    'jsiso/particles/Emitter',
+    'jsiso/utils',
+    'requirejs/domReady!'
+  ],
+  function(CanvasControl, CanvasInput, imgLoader, jsonLoader, TileField, Camera, pathfind, Emitter, utils) {
+
+    // -- FPS --------------------------------
+    window.requestAnimFrame = (function() {
+      return window.requestAnimationFrame ||
+      window.webkitRequestAnimationFrame  ||
+      window.mozRequestAnimationFrame     ||
+      window.oRequestAnimationFrame       ||
+      window.msRequestAnimationFrame      ||
+      function(callback, element) {
+        window.setTimeout(callback, 1000 / 60);
+      };
+    })();
+    // ---------------------------------------
+
+
+    jsonLoader(['sample16.json']).then(function(response) {
+      var zone = response[0];
+      
+      imgLoader([{graphics: ["../img/td/rabbit.png"]}]).then(function(rabbitImage) {
+        var images = [
+          {
+            graphics: ["../img/td/outside.png"],
+            spritesheet: {
+              width: zone.tilesets[0].tilewidth,
+              height: zone.tilesets[0].tileheight,
+              firstgid: zone.tilesets[0].firstgid
+            }
+          },
+          {
+            graphics: [rabbitImage[0].files[rabbitImage[0].dictionary[0]].src],
+            spritesheet: {
+              width: 50,
+              height: 50
+            }
+          }
+        ];
+
+
+        imgLoader(images).then(function(response) {
+          var tileEngine = new main(0, 0, zone.layers[0].width * 30, zone.layers[0].height * 30, 30, 30, response[1], response[2]);
+          tileEngine.init([
+            {
+              title: "Ground Layer",
+              layout: zone.layers[0].data,
+              graphics: response[0].files,
+              graphicsDictionary: response[0].dictionary,
+              tileWidth: 30,
+              tileHeight: 30,
+              width: zone.layers[0].width,
+              height: zone.layers[0].height,
+              isometric: false
+            },
+            {
+              title: "Bounds Layer",
+              layout: zone.layers[1].data,
+              tileWidth: 30,
+              tileHeight: 30,
+              width: zone.layers[0].width,
+              height: zone.layers[0].height,
+              isometric: false
+            }
+          ]);
+        });
+      });
+    });
+
+
+  function main(startX, startY, mapWidth, mapHeight, tileWidth, tileHeight, character) {
+
+    var rangeX = Math.floor(window.innerWidth / tileWidth);
+    var rangeY = Math.floor(window.innerHeight / tileHeight);
+    var screenTileWidth = Math.floor(window.innerWidth / tileWidth);
+    var screenTileHeight = Math.floor(window.innerHeight / tileHeight);
+
+    var context = CanvasControl.create("canvas", window.innerWidth, window.innerHeight, {
+      background: "#100013"
+    });
+    CanvasControl.fullScreen();
+
+    var playerCamera = new Camera();
+    var cameraPosition;
+
+    var mapLayers = [];
+
+    var xyMapOffset;
+
+    var players = [];
+
+    var selectedRabbit = 0;
+
+    var input = new CanvasInput(document, CanvasControl());
+
+    input.mouse_action(function(coords) {
+      var offset = mapLayers[1].getOffset();
+      var t = mapLayers[1].applyMouseFocus(coords.x - offset.x, coords.y - offset.y); // Apply mouse rollover via mouse location X & Y
+      players[selectedRabbit].setGoToX(t.x);
+      players[selectedRabbit].setGoToY(t.y);
+    });
+
+    input.keyboard(function(press) {
+      switch(press) {
+        case 49: selectedRabbit = 0;
+        break;
+        case 50: selectedRabbit = 1;
+        break;
+        case 51: selectedRabbit = 2;
+        break;
+        case 52: selectedRabbit = 3;
+        break;
+      }
+      for (var i =0 ; i < players.length; i++) {
+        players[i].drawBox(false);
+      }
+      players[selectedRabbit].drawBox(true);
+    });
+
+
+    function Player(positionX, positionY) {
+      var tileX = positionX;
+      var tileY = positionY;
+      var nextX = null;
+      var nextY = null;
+      var xpos = tileX * tileWidth;
+      var ypos = tileY * tileHeight;
+      var directionFrame = 0;
+      var speed = 3;
+      var charF = Math.floor(Math.random()*4);
+      var movementFrameTimer = Math.floor(Math.random()*8);
+      var id = players.length;
+
+      var drawBox = false;
+      var repositioned = 0;
+
+      var path = [];
+
+      return {
+        setGoToX: function(val) {
+          nextX = val;
+        },
+        setGoToY: function(val) {
+          nextY = val;
+        },
+        getX: function() {
+          return tileX;
+        },
+        getY: function() {
+          return tileY;
+        },
+        draw: function() {
+          var offset = mapLayers[0].getOffset();
+          context.drawImage(character.files[directionFrame + charF], xpos - character.files[0].width / 2 + offset.x, ypos - character.files[0].height / 2 - 15 + offset.y);
+          if (drawBox) {
+            context.save();
+            context.beginPath();
+            context.rect(xpos - character.files[0].width / 2 + 4 + offset.x, ypos - 7 - character.files[0].height / 2 + offset.y, character.files[0].width - 14, character.files[0].height - 7);
+            context.strokeStyle = '#FFFFFF';
+            context.stroke();
+            context.restore();
+          }
+        },
+        move: function() {
+          var inPosX = false;
+          var inPosY = false;
+          pathfind(id, [tileX, tileY], [nextX, nextY], mapLayers[1].getLayout(), true, false).then(function (data) { 
+            if (data.length > 0 && data[1] !== undefined) {
+              path = data;
+              nextX = null;
+              nextY = null;
+            }
+          });
+
+          if (path.length) {
+            movementFrameTimer ++;
+            if (movementFrameTimer >= 7) {
+              charF ++;
+              if (charF > 3) {
+                charF = 0;
+              }
+              movementFrameTimer = 0;
+            }
+            if (path[0].y > tileY) {
+              ypos += speed;
+              directionFrame = 0; 
+            }
+            if (path[0].y < tileY) {
+              ypos -= speed;
+              directionFrame = 4; 
+            }
+            if (path[0].x > tileX) {
+              xpos += speed;
+              directionFrame = 12;
+            }
+            if (path[0].x < tileX) {
+              xpos -= speed;
+              directionFrame = 8;
+            }
+
+            if (path[0].x === tileX && path[0].y === tileY) {
+              if (path.length === 1 && repositioned < 10) {
+                repositioned ++;
+                if (xpos - character.files[0].width / 2 < tileX * tileWidth + tileWidth / 2) {
+                  xpos +=  Math.floor((tileX * tileWidth + tileWidth / 2 - xpos) / 4);
+                }
+                else if (xpos + character.files[0].width / 2 > tileX * tileWidth + tileWidth / 2) {
+                  xpos -= Math.floor((xpos - tileX * tileWidth + tileWidth / 2) / 4);
+                }
+                else {
+                  inPosX = true;
+                }
+                if (ypos - character.files[0].height / 2 < tileY * tileHeight + tileHeight / 2) {
+                  ypos += Math.floor((tileY * tileHeight + tileHeight / 2 - ypos) / 4);
+                }
+                else if (ypos + character.files[0].height / 2 > tileY * tileHeight + tileHeight / 2) {
+                  ypos -= Math.floor((ypos - tileY * tileHeight + tileHeight / 2) / 4);
+                }
+                else {
+                  inPosY = true;
+                }
+                if (inPosX && inPosY) {
+                  charF = 0;
+                  inPosX = false;
+                  inPosY = false;
+                  repositioned = 0;
+                  path.shift();
+                }
+              }
+              else {
+                if (repositioned >= 10) {
+                  charF = 0;
+                  inPosX = false;
+                  inPosY = false;
+                  repositioned = 0;
+                }
+                path.shift();
+              }
+            }
+          }
+          var pos = mapLayers[0].getXYCoords(xpos, ypos);
+          tileX = pos.x;
+          tileY = pos.y;
+        },
+        drawBox: function(enable) {
+          drawBox = enable;
+        },
+        id: id
+      }
+    }
+
+    players.push(new Player(2, 10));
+    players.push(new Player(20, 5));
+    players.push(new Player(5, 2));
+    players.push(new Player(17, 18));
+    players[selectedRabbit].drawBox(true);
+    players[0].setGoToX(5);
+    players[0].setGoToY(5);
+    players[1].setGoToX(17);
+    players[1].setGoToY(18);
+    players[2].setGoToX(35);
+    players[2].setGoToY(10);
+    players[3].setGoToX(5);
+    players[3].setGoToY(6);
+    function draw() {
+      context.clearRect(0, 0, window.innerWidth, window.innerHeight);
+      for (var j = 0; j < rangeY; j++) {
+        for (var i = 0; i < rangeX; i++) {
+          mapLayers[0].draw(i, j);
+        }
+      }
+      for (var e = 0; e < players.length; e++) {
+          players[e].draw();
+          players[e].move();
+      }
+      requestAnimationFrame(draw);
+    }
+
+    return {
+      init: function(layers) {
+        for (var i = 0; i < 0 + layers.length; i++) {
+          mapLayers[i] = new TileField(context, CanvasControl().height, CanvasControl().width);
+          mapLayers[i].setup(layers[i]);
+          mapLayers[i].flip("horizontal");
+          mapLayers[i].rotate("left");
+        }
+        playerCamera.setup(mapLayers, mapWidth, mapHeight, tileWidth, tileHeight, screenTileWidth, screenTileHeight);
+        cameraPosition = playerCamera.setFocus(37, 17, rangeX, rangeY);
+        startY = cameraPosition.startY;
+        startX = cameraPosition.startX;
+        charX = cameraPosition.pinFocusX;
+        charY = cameraPosition.pinFocusY;
+        draw();
+      }
+    };
+  }
+});
+    </script>
+  </head>
+  <body>
+    <a href="https://twitter.com/Beakable" class="twitter-follow-button" data-show-count="false">Follow @Beakable</a>
+    <span class="info">[1], [2], [3] &amp; [4] to switch between Rabbits, mouse click to move</spam>
+  </body>
+</html>

@@ -1,0 +1,8 @@
+{
+  "game": [
+  "../img/snakeiso/0-screen.png",
+  "../img/snakeiso/1-blank.png",
+  "../img/snakeiso/2-point.png",
+  "../img/snakeiso/4-screen-cover.png"
+  ]
+}

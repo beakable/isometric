@@ -1,0 +1,302 @@
+
+<!--
+/*  
+Copyright (c) 2013 Iain Hamilton & Edward Smyth
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE. 
+
+- Author : Iain M Hamilton - <iain@beakable.com> - http://www.beakable.com
+           Edward Smyth
+
+  Twitter: @beakable
+
+*/
+-->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title></title>
+    <style type="text/css">
+       .twitter-follow-button {
+        position: absolute !important;
+      }
+    </style>
+    <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+    
+    <script data-main="../../config.js" src="../../requirejs/require.js"></script>
+
+    <script type="text/javascript">
+
+    require([
+      'jsiso/canvas/Control',
+      'jsiso/canvas/Input',
+      'jsiso/img/load',
+      'jsiso/json/load',
+      'jsiso/tile/Field',
+      'jsiso/tile/Camera',
+      'jsiso/pathfind/pathfind',
+      'jsiso/particles/Emitter',
+      'jsiso/utils',
+      'requirejs/domReady!'
+    ],
+    function(CanvasControl, CanvasInput, imgLoader, jsonLoader, TileField, Camera, pathfind, Emitter, utils) {
+
+
+      // -- FPS --------------------------------
+      window.requestAnimFrame = (function() {
+        return window.requestAnimationFrame || 
+        window.webkitRequestAnimationFrame  || 
+        window.mozRequestAnimationFrame     || 
+        window.oRequestAnimationFrame       ||  
+        window.msRequestAnimationFrame      || 
+        function(callback, element) {
+          window.setTimeout(callback, 1000 / 60);
+        };
+      })();
+      // ---------------------------------------
+
+
+      function launch() {
+        var tileImages = {
+          graphics: [
+            "../img/platform/Wall 1 NE.png",
+            "../img/platform/Wall 1 NW.png",
+            "../img/platform/Wall 1 SE.png",
+            "../img/platform/Wall 1 SW.png",
+            "../img/platform/Wall 2 NE.png",
+            "../img/platform/Wall 2 NW.png",
+            "../img/platform/Wall 2 SE.png",
+            "../img/platform/Wall 2 SW.png",
+            "../img/platform/Wall 3 NE.png",
+            "../img/platform/Wall 3 NW.png",
+            "../img/platform/Wall 3 SE.png",
+            "../img/platform/Wall 3 SW.png",
+            "../img/platform/Wall 4 NE.png",
+            "../img/platform/Wall 4 NW.png",
+            "../img/platform/Wall 4 SE.png",
+            "../img/platform/Wall 4 SW.png",
+            "../img/platform/Wall 5 NE.png",
+            "../img/platform/Wall 5 NW.png",
+            "../img/platform/Wall 5 SE.png",
+            "../img/platform/Wall 5 SW.png",
+            "../img/platform/diamond.png"
+          ]
+        };
+        var charImages = {
+          graphics: [
+            "../img/platform/char.png"
+          ]
+        };
+          jsonLoader(['map.json', 'sample6Particles.json']).then(function(jsonResponse) {
+            imgLoader([tileImages, charImages]).then(function(response) {
+
+              var game = new main(0, 0, jsonResponse[0].platform.length * 40, jsonResponse[0].platform[0].length * 40, 40, 40, jsonResponse[1], response[1]);  // X & Y drawing position, and tile span to draw 
+              game.init([{
+                title: "Platform Layer",
+                layout: jsonResponse[0].platform,
+                graphics: response[0].files,
+                graphicsDictionary: response[0].dictionary, 
+                isometric: false, // Flag used to layout grid in non Isometric format
+                tileHeight: 40,
+                tileWidth: 40,
+                zeroIsBlank: true
+              },
+              {
+                title: "Diamond Layer",
+                layout: jsonResponse[0].gems,
+                graphics: response[0].files,
+                graphicsDictionary: response[0].dictionary, 
+                isometric: false, // Flag used to layout grid in non Isometric format
+                tileHeight: 40,
+                tileWidth: 40,
+                zeroIsBlank: true
+              }
+              ])
+            });
+          });
+        }
+
+      function main(x, y, mapWidth, mapHeight, tileWidth, tileHeight, particleEffects, charGraphics) {
+    
+        var mapLayers = [];
+        var player = {};
+        var keyInput = []; // Array for storing current directions pressed
+        var screenTileWidth = Math.floor(window.innerWidth / tileWidth);
+        var screenTileHeight = Math.floor(window.innerHeight / tileHeight);
+        var playerCamera = new Camera();
+        var cameraPosition;
+        var gemPickup = null;
+        var soundPew = new Audio("http://opengameart.org/sites/default/files/BonusCube_0.ogg"); // A Pew Pew sound for point collection
+        var gemsCollected = 0;
+
+        var context = CanvasControl.create("canvas", 750, 740, {
+          background: "#006699"
+        });
+        CanvasControl.fullScreen();
+
+
+        // -- Player Object contains some simple settings for moving and jumping/falling
+        function PlayerObject() {
+          this.speed = 5;
+          this.jumping = false;
+          this.jumped = 0;
+          this.particle = new Emitter(context, 0, 0, particleEffects["slime"].pcount, particleEffects["slime"].loop, utils.range(0, CanvasControl().width), utils.range(0, CanvasControl().height));
+          for(var partK in particleEffects["slime"]) {
+            this.particle[partK] = particleEffects["slime"][partK];
+          }
+          this.particle.Load();
+          this.fallingSpeed = 0;
+
+          this.move = function() {
+            if (keyInput[37]) {
+              cameraPosition = playerCamera.move("left", this.speed);
+
+            }
+            if (keyInput[39]) {
+              cameraPosition = playerCamera.move("right", this.speed);
+
+            }
+            if (keyInput[38]) {
+              if (this.jumping === false && this.jumped === 0) {
+                this.jumping = true;
+                this.jumped = 1;
+              }
+            }
+            if (this.jumping === true) {
+              if (this.jumped > 0 && this.jumped < 20) {
+                this.jumped += 1;
+                cameraPosition = playerCamera.move("up", this.speed * 20 / this.jumped + 5);
+              } 
+              else {
+                this.jumping = false;
+              }
+            }
+            if (this.jumping === false) {
+              if (mapLayers[0].getTile(cameraPosition.tileX, cameraPosition.tileY + 1) === 0) {
+                this.fallingSpeed += 0.2;
+                cameraPosition = playerCamera.move("down", this.speed + this.fallingSpeed);
+                this.jumping = true;
+              }
+              else {
+                cameraPosition = playerCamera.setPinFocusY(mapLayers[0].getTilePos(cameraPosition.tileX, cameraPosition.tileY).y);
+                this.fallingSpeed = 0;
+                this.jumped = 0;
+                this.jumping = false;
+              }
+            }
+            if (mapLayers[1].getTile(cameraPosition.tileX, cameraPosition.tileY) !== 0) {
+              soundPew.currentTime = 0;
+              soundPew.play();
+              gemsCollected += 1;
+              mapLayers[1].setTile(cameraPosition.tileX, cameraPosition.tileY, 0);
+              gemPickup = new Emitter(context, 0, 0, particleEffects["gemPickup"].pcount, particleEffects["gemPickup"].loop, utils.range(0, CanvasControl().width), utils.range(0, CanvasControl().height));
+              for(var partK in particleEffects["gemPickup"]) {
+                gemPickup[partK] = particleEffects["gemPickup"][partK];
+              }
+              gemPickup.Load(cameraPosition.pinFocusX, cameraPosition.pinFocusY);
+            }
+          }
+
+          this.draw = function() {
+            if (gemPickup) {
+              gemPickup.Draw() // Do not reposition gem particle effect
+            }
+            context.drawImage(charGraphics.files["char.png"], cameraPosition.pinFocusX - 24, cameraPosition.pinFocusY - 10);
+
+            this.particle.Draw(cameraPosition.pinFocusX, cameraPosition.pinFocusY + 8); // reposition player particle effect as they move
+
+          }
+        }
+
+        var input = new CanvasInput(document, CanvasControl());
+        input.keyboard(function(pressed, status) {
+          if (status) {
+            keyInput[pressed] = true; // Set key as currently down for movement
+          }
+          else {
+            keyInput[pressed] = false; // Set key as no longer down to halt movement
+/*            if (pressed === 32) {
+              for (var i = 0; i < 0 + mapLayers.length; i++) {
+                mapLayers[i].flip("vertical");
+              };
+            }*/
+          }
+        });
+
+        input.mobile(function(coords, status) {
+          if (status) {
+            if (coords.x < 300 / 2) {
+              keyInput[37] = true; // Represent left key press
+            }
+            if (coords.x > 300 / 2) {
+              keyInput[39] = true; // Represent right key press
+            }
+            if (coords.y < 300 / 2) {
+              keyInput[38] = true; // Represent up key press
+            }
+          }
+          else {
+            keyInput[37] = false;
+            keyInput[39] = false;
+            keyInput[38] = false;
+          }
+        });
+
+        function draw() {
+          player.move();
+          context.clearRect(0, 0, CanvasControl().width, CanvasControl().height);
+          for (i = cameraPosition.tileX - screenTileWidth; i < cameraPosition.tileX + screenTileWidth; i++) {
+            for (j = cameraPosition.tileY - screenTileHeight; j < cameraPosition.tileY + screenTileHeight; j++) {
+              mapLayers[0].draw(i,j);
+              mapLayers[1].draw(i,j);
+              if (cameraPosition.tileX === i - 1 && cameraPosition.tileY === j - 1) {
+                player.draw();
+              }
+            }
+          }
+          context.font = "22px Georgia";
+          context.fillText(gemsCollected + "/" + 22, 27, 44);
+          requestAnimFrame(draw);
+        }
+        
+        return {
+          init: function(layers) {
+            for (var i = 0; i < 0 + layers.length; i++) {
+              mapLayers[i] = new TileField(context, CanvasControl().height, CanvasControl().width);
+              mapLayers[i].setup(layers[i]);
+            };
+            player = new PlayerObject();
+            playerCamera.setup(mapLayers, mapWidth, mapHeight, tileWidth, tileHeight, screenTileWidth, screenTileHeight, 1, true);
+            cameraPosition = playerCamera.setFocus(5, 13, screenTileWidth, screenTileHeight);
+            draw();
+          }
+        }
+      }
+
+      launch();
+      
+    });
+    </script>
+  </head>
+  <body>
+    <a href="https://twitter.com/Beakable" class="twitter-follow-button" data-show-count="false">Follow @Beakable</a>
+  </body>
+</html>

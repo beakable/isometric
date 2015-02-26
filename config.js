@@ -1,3 +1,3 @@
 requirejs.config({
-    baseUrl: "/js/"
+    baseUrl: "/isometric/"
 });

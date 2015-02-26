@@ -1,0 +1,29 @@
+{
+  "ground": [
+    "../img/ground/1-grass-1.png",
+    "../img/ground/1-grass-2.png",
+    "../img/ground/1-grass-3.png",
+    "../img/ground/1-grass-4.png",
+    "../img/ground/1-grass-5.png",
+    "../img/ground/1-grass-6.png",
+    "../img/ground/1-grass-7.png",
+    "../img/ground/1-grass-8.png",
+    "../img/ground/2-blue-tiles.png",
+    "../img/ground/blank-block.png",
+    "../img/ground/hole.png",
+    "../img/ground/land.png",
+    "../img/ground/marsh.png",
+    "../img/ground/path-outdoor.png",
+    "../img/ground/rock-ground.png",
+    "../img/ground/sand.png",
+    "../img/ground/swamp.png",
+    "../img/ground/water-purple.png",
+    "../img/ground/water.png"
+  ],
+  "players": [
+    "../img/players/enemy1.png",
+    "../img/players/enemy2.png",
+    "../img/players/enemy3.png",
+    "../img/players/main.png"
+  ]
+}

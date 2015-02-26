@@ -1,0 +1,348 @@
+
+<!--
+/*  
+Copyright (c) 2013 Iain Hamilton & Edward Smyth
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE. 
+
+- Author : Iain M Hamilton - <iain@beakable.com> - http://www.beakable.com
+
+  Twitter: @beakable
+
+*/
+-->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title></title>
+    <style type="text/css">
+      body {
+        margin: 0;
+        padding: 0;
+        background: #000022
+      }
+       .twitter-follow-button {
+        position: absolute !important;
+      }
+      a, a:visited {
+        color: #FFF;
+      }
+      .gameInfo {
+        position: absolute;
+        right: 0px;
+        top: 0px;
+        width: 200px;
+        height: 24px;
+        background: #222244;
+        text-align: center;
+        color: #FFF;
+      }
+    </style>
+    <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+
+
+    <script data-main="../../config.js" src="../../requirejs/require.js"></script>
+
+    <script type="text/javascript">
+
+    require([
+      'jsiso/canvas/Control',
+      'jsiso/canvas/Input',
+      'jsiso/img/load',
+      'jsiso/json/load',
+      'jsiso/tile/Field',
+      'jsiso/pathfind/pathfind',
+      'jsiso/particles/EffectLoader',
+      'jsiso/utils'
+    ],
+    function(CanvasControl, CanvasInput, imgLoader, jsonLoader, TileField, pathfind, EffectLoader, utils) {
+
+      // -- FPS --------------------------------
+      window.requestAnimFrame = (function() {
+        return window.requestAnimationFrame || 
+        window.webkitRequestAnimationFrame  || 
+        window.mozRequestAnimationFrame     || 
+        window.oRequestAnimationFrame       ||  
+        window.msRequestAnimationFrame      || 
+        function(callback, element) {
+          window.setTimeout(callback, 1000 / 60);
+        };
+      })();
+      // ---------------------------------------
+
+
+      function launch() {
+
+        jsonLoader(['map.json', 'imageFiles.json']).then(function(jsonResponse) {
+
+          var images = [
+            {
+              graphics: jsonResponse[1].groundImages,
+            },
+            {
+              graphics: jsonResponse[1].objectImages,
+            },
+            {
+              graphics: jsonResponse[1].playerImages
+            }
+          ];
+
+          imgLoader(images).then(function(imgResponse) {
+            var tileEngine = new main(0, 0, 14, 14, imgResponse[2]);
+            tileEngine.init([
+              {
+                title: "Ground Layer",
+                layout: jsonResponse[0].ground,
+                graphics: imgResponse[0].files,
+                graphicsDictionary: imgResponse[0].dictionary,
+                shadowDistance: {
+                  color: '0, 0, 33',
+                  distance: 4,
+                  darkness: 1
+                },
+                shadow: {
+                  offset: 20,
+                  verticalColor: 'rgba(5, 5, 30, 0.4)',
+                  horizontalColor: 'rgba(6, 5, 50, 0.5)'
+                },
+                lightMap: [[5, 5, 4, 1], [20, 20, 4, 1]],
+                heightMap: {
+                  map: jsonResponse[0].height,
+                  offset: 0,
+                  heightTile: imgResponse[0].files["blank-block.png"]
+                },
+                tileHeight: 50,
+                tileWidth: 100
+              },
+              {
+                title: "Object Layer",
+                layout: jsonResponse[0].objects,
+                graphics: imgResponse[1].files,
+                graphicsDictionary: imgResponse[1].dictionary,
+                zeroIsBlank: true,
+                alphaWhenFocusBehind: {
+                  objectApplied: imgResponse[2].files["main.png"],
+                  apply: true
+                },
+                shadowDistance: {
+                  color: false,
+                  distance: 4,
+                  darkness: 1
+                },
+                particleMap: jsonResponse[0].particles,
+                lightMap: [[5, 5, 4, 1], [20, 20, 4, 1]],
+                heightMap: {
+                  map: jsonResponse[0].height,
+                  offset: 20,
+                  heightMapOnTop: true
+                },
+                tileHeight: 50,
+                tileWidth: 100
+              }
+            ]);
+          });
+        });
+      }
+
+
+      function main(x, y, xrange, yrange, playerImages) {
+        self = this;
+
+        var player = {
+          image: playerImages.files["main.png"],
+          xPos: 8,
+          yPos: 8
+        };
+        var enemy = [
+          {
+            id: 0,
+            image: playerImages.files["enemy1.png"],
+            xPos: 10,
+            yPos: 8
+          },
+          {
+            id: 1,
+            image: playerImages.files["enemy1.png"],
+            xPos: 20,
+            yPos: 30
+          },
+          {
+            id: 2,
+            image: playerImages.files["enemy1.png"],
+            xPos: 30,
+            yPos: 8
+          },
+          {
+            id: 3,
+            image: playerImages.files["enemy1.png"],
+            xPos: 2,
+            yPos: 30
+          }
+        ];
+
+
+        var mapLayers = [];
+        var tile_coordinates = {};
+        var mouse_coordinates = {};
+        var startY = y;
+        var startX = x;
+        var rangeX = xrange;
+        var rangeY = yrange;
+        var calculatePaths = 0;
+
+        var rain = null;
+
+
+
+        var context = CanvasControl.create("canavas", 920, 600, {
+          background: "#000022",
+          display: "block",
+          marginLeft: "auto",
+          marginRight: "auto"
+        });
+        CanvasControl.fullScreen();
+        
+        var input = new CanvasInput(document, CanvasControl());
+        input.keyboard(function(pressed) {
+          switch(pressed) {
+            case 38:
+              if (Number(mapLayers[1].getTile([player.xPos], [player.yPos - 1])) === 0) {
+                player.yPos --;
+                mapLayers[1].applyFocus(player.xPos, player.yPos);
+                if (startX > 0 && player.yPos <= mapLayers[0].getLayout().length - 1 - rangeY / 2) {
+                  mapLayers.map(function(layer) {
+                    layer.move("down");
+                  });
+                  startX --;
+                }
+              }
+            break;
+            case 39:
+              if (Number(mapLayers[1].getTile([player.xPos + 1], [player.yPos])) === 0) {
+                player.xPos ++;
+                mapLayers[1].applyFocus(player.xPos, player.yPos);
+                if (startY + rangeY < mapLayers[0].getLayout().length && player.xPos >= 0 + 1 + rangeX / 2) {
+                  mapLayers.map(function(layer) {
+                    layer.move("left");
+                  });
+                  startY ++;
+                }
+              }
+            break;
+            case 40:
+              if (Number(mapLayers[1].getTile([player.xPos], [player.yPos + 1])) === 0) {
+                player.yPos ++;
+                mapLayers[1].applyFocus(player.xPos, player.yPos);
+                if (startX + rangeX < mapLayers[0].getLayout().length && player.yPos >= 0 + 1 + rangeY / 2 ) {
+                  mapLayers.map(function(layer) {
+                    layer.move("right");
+                  });
+                  startX ++;
+                }
+              }
+            break;
+            case 37:
+              if (Number(mapLayers[1].getTile([player.xPos - 1], [player.yPos])) === 0) {
+                player.xPos --;
+                mapLayers[1].applyFocus(player.xPos, player.yPos);
+                if (startY > 0 && player.xPos <= mapLayers[0].getLayout().length - 1 - rangeX / 2) {
+                  mapLayers.map(function(layer) {
+                    layer.move("up");
+                  });
+                  startY --;
+                }
+              }
+            break;
+            case 49:
+              mapLayers.map(function(layer) {
+                layer.toggleGraphicsHide(true);
+                layer.toggleHeightShadow(true);
+              });
+            break;
+            case 50:
+              mapLayers.map(function(layer) {
+                layer.toggleGraphicsHide(false);
+                layer.toggleHeightShadow(false);
+              });
+            break;
+          }
+        });
+        
+        function draw() {
+          context.clearRect(0, 0, CanvasControl().width, CanvasControl().height);
+          calculatePaths ++;
+           if(calculatePaths === 100) {
+              enemy.map(function(e) {
+                pathfind(e.id, [e.xPos, e.yPos], [player.xPos, player.yPos], mapLayers[1].getLayout(), false).then(function (data) { 
+                  if (data.length > 0 && data[1] !== undefined) {
+                    e.xPos = data[1].x;
+                    e.yPos = data[1].y;
+                  }
+                });
+              });
+              calculatePaths = 0;
+            }
+            for (var i = startY, n = startY + rangeY; i < n; i++) {
+              for (var j = startX, h = startX + rangeX; j < h; j++) {
+                mapLayers.map(function(layer) {
+                  layer.setLight(player.xPos, player.yPos);
+                  if (i === player.xPos  && j === player.yPos && layer.getTitle() === "Object Layer") {
+                    layer.draw(i, j, player.image);
+                  }
+                  else {
+                    layer.draw(i,j);
+                  }
+                  enemy.map(function(e) {
+                    if (i === e.xPos  && j === e.yPos  && layer.getTitle() === "Object Layer") {
+                      layer.draw(i, j, e.image);
+                    }
+                  });          
+                });
+             }
+           }
+          rain.Draw(CanvasControl().width / 4, 0);
+          requestAnimFrame(draw);
+        }
+
+        return {
+          init: function(layers) {
+            for (var i = 0; i < 0 + layers.length; i++) {
+              mapLayers[i] = new TileField(context, CanvasControl().height, CanvasControl().width);
+              mapLayers[i].setup(layers[i]);
+              mapLayers[i].align("h-center", CanvasControl().width, xrange, 0);
+              mapLayers[i].align("v-center", CanvasControl().height, yrange, 0);
+            }
+            rain = new EffectLoader().getEffect("rain", context, utils.range(-100, CanvasControl().height), utils.range(-100, CanvasControl().width));
+            draw();
+          }
+
+        }
+      }
+      launch();
+
+    });
+    </script>
+  </head>
+  <body>
+    <div id="timer" class="gameInfo">Game Time</div>
+    <a href="https://twitter.com/Beakable" class="twitter-follow-button" data-show-count="false">Follow @Beakable</a>
+  </body>
+</html>
