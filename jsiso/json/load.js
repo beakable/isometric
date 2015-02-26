@@ -1,5 +1,5 @@
 /*  
-Copyright (c) 2013 Iain Hamilton
+Copyright (c) 2013 - 2015 Iain Hamilton
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -22,8 +22,20 @@ THE SOFTWARE.
 
 
 define(function() {
+
+  /**
+  * Loads an array of JSON response paths
+  * @param  {Array} contains strings of the JSON response locations
+  * @return {Promise.<Array>}          Returns JOSN data in an array for using once fulfilled
+  */
   return function (paths) {
 
+
+/**
+ * Loads a single path that contains a JSON response
+ * @param  {String} path JSON response location
+ * @return {Promise.<Object>}      contains the loaded JSON
+ */
     function _jsonPromise(path) {
        return new Promise(function(resolve, reject) {
         var xmlhttp = new XMLHttpRequest();

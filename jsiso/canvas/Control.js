@@ -20,16 +20,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE. 
 */
 
-
-
-/*** 
-
-jsiso/canvas/Control 
-
-Allows for creation of a Canvas object that offers
-access to easy common functionality used in projects
-
-***/
 define(function() {
 
   // Private properties for Control
@@ -40,7 +30,7 @@ define(function() {
   var height = null;
 
   /**
-   * Checks if browser supports the canvas context 2
+   * Checks if browser supports the canvas context 2d
    * @return {Boolean}
    */
   function _supported () {

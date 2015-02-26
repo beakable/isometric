@@ -1,5 +1,5 @@
 /*  
-Copyright (c) 2013 Iain Hamilton
+Copyright (c) 2013 - 2015 Iain Hamilton
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -21,40 +21,38 @@ THE SOFTWARE.
 */
 
 
-
-/***
-
-jsiso/img/loader 
-
-Promise version
-
-Simply takes an array of image paths and 
-preloads them ready for use
-
-**/
 define(function() {
+
+  /**
+  * Loads an array of images or an array of spritesheets for using within JsIso
+  * @param  {Array} graphics an array of objects specifying the image locations and optional spritesheet settings
+  * @return {Promise.<Array>}          Returns images in an array for using once fulfilled
+  */
+  /* Example:
+  [{
+    graphics: ["img/sground.png"],
+    spritesheet: { // OPTIONAL spritesheet is optional for images to be auto split up
+      width: 24, 
+      height: 24, 
+      offsetX: 0, // OPTIONAL
+      offsetY: 0, // OPTIONAL
+      spacing: 0, // OPTIONAL
+      firstgid: 0 // OPTIONAL
+    }
+  }]
+  */
 
   return function(graphics) {
 
-    // graphics example =
-    /*
-    [{
-      graphics: ["img/sground.png"],
-      spritesheet: { // OPTIONAL spritesheet is optional for images to be auto split up
-        width: 24, 
-        height: 24, 
-        offsetX: 0, // OPTIONAL
-        offsetY: 0, // OPTIONAL
-        spacing: 0, // OPTIONAL
-        firstgid: 0 // OPTIONAL
-      }
-    }]
-    */
-
+/**
+ * Breaks up a solid image into smaller images via canvas and returns the individual sprite graphics and individual ones
+ * @param  {Object} spritesheet contains the spritesheet image and required paramaters for measuring the individual image locations for cropping
+ * @return {Promise.<Array>}             Returns seperated spritesheet images in array for using once fulfilled
+ */
     function _splitSpriteSheet(spritesheet) {
       return new Promise(function(resolve, reject) {
-        var _loaded = 0; // Images total the preloader has loaded
-        var _loading = 0; // Images total the preloader needs to load
+        var loaded = 0; // Images total the preloader has loaded
+        var loading = 0; // Images total the preloader needs to load
         
         var images = [];
         var ctx = document.createElement('canvas');
@@ -65,7 +63,7 @@ define(function() {
         var tileCol;
         var spritesheetCols = Math.floor(spritesheet.files[spritesheet.dictionary[0]].width / (spritesheet.width));
         var spritesheetRows = Math.floor(spritesheet.files[spritesheet.dictionary[0]].height / (spritesheet.height));
-        _loading +=  spritesheetCols * spritesheetRows;
+        loading +=  spritesheetCols * spritesheetRows;
         ctx.width = spritesheet.width;
         ctx.height = spritesheet.height;
         tileManip = ctx.getContext('2d');
@@ -77,8 +75,8 @@ define(function() {
             images[spriteID].src = ctx.toDataURL();
             tileManip.clearRect (0, 0, spritesheet.width, spritesheet.height);
             images[spriteID].onload = function () {
-              _loaded ++;
-              if (_loaded === _loading) {
+              loaded ++;
+              if (loaded === loading) {
                 resolve({files: images, dictionary: imageFilePathArray});
               }
             };
@@ -88,15 +86,19 @@ define(function() {
       });
     }
 
-
+    /**
+     * Takes an individual set of graphics whether a singular image, an array of images, or spritesheet and loads it for using within JsIso
+     * @param  {Object} graphic a single graphic set with the optional spritesheet paramaters for preloading
+     * @return {Promite.<Array>}         Contains the loaded images for use
+     */
     function _imgPromise(graphic) {
       return new Promise(function(resolve, reject) {
 
-        var _loaded = 0; // Images total the preloader has loaded
-        var _loading = 0; // Images total the preloader needs to load
+        var loaded = 0; // Images total the preloader has loaded
+        var loading = 0; // Images total the preloader needs to load
 
         var images = [];
-        _loading += graphic.graphics.length;
+        loading += graphic.graphics.length;
        
         graphic.graphics.map(function(img) {
           imgName = img;
@@ -106,8 +108,8 @@ define(function() {
           images[imgName] = new Image();
           images[imgName].src = img;
           images[imgName].onload = function() {
-            _loaded ++;
-            if (_loaded === _loading && !graphic.spritesheet) {
+            loaded ++;
+            if (loaded === loading && !graphic.spritesheet) {
               resolve({files: images, dictionary: graphic.graphics});
             }
             else {

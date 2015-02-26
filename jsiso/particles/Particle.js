@@ -89,12 +89,13 @@ function(utils) {
 
             if (Number(this.x) !== undefined &&  Number(this.y) !== undefined) {
               
-              var p = context.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.radius);
-
-              p.addColorStop(0, rgbstr);
-              p.addColorStop(1, rgbbgstr);
-              context.fillStyle = p;
-              context.fillRect(this.x - this.radius, this.y - this.radius, this.radius * 2, this.radius * 2);
+              if (this.x > this.minxb || this.x < this.maxxb || this.y > this.minyb || this.y < this.maxyb) {
+                var p = context.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.radius);
+                p.addColorStop(0, rgbstr);
+                p.addColorStop(1, rgbbgstr);
+                context.fillStyle = p;
+                context.fillRect(this.x - this.radius, this.y - this.radius, this.radius * 2, this.radius * 2);
+              }
 
 
               // Update the position base on speed and direction
@@ -117,7 +118,7 @@ function(utils) {
 
               /// Kill dead or out of bound particles
 
-              if (this.life <= 0 || this.x < this.minxb || this.x > this.maxxb || this.y < this.minyb || this.y > this.maxyb) {
+              if (this.life <= 0) {
 
                   this.active = false;
 
