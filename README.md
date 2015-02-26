@@ -9,8 +9,6 @@ This repo contains an MIT Licensed Isometric HTML5 tile engine Copyright © 2014
 
 For a list of examples and further details checkout: http://jsiso.com
 
-For a Repo containing all the samples featured on jsiso.com checkout: https://github.com/anthonymoralez/jsiso-samples
-
 ![noniso](https://cloud.githubusercontent.com/assets/1159739/4778380/9ee88a06-5be7-11e4-9237-45c3020bdc84.jpg)
 
 
@@ -38,9 +36,9 @@ Currently contained features are:
 Setup Instructions:
 -------------
 
-1: In each of the samples you'll see something like: ```<script data-main="../js/jsiso.js" src="../js/require.js"></script>```. These two paths will need to be correct in order for JsIso to work.
+1: In each of the samples .html you'll see: ```<script data-main="../../config.js" src="../../requirejs/require.js"></script>```. If you move JsIso and RequireJs location this will require updating.
 
-2: Throughout the samples it makes use of a PHP script (XMLFiles.php) to read a directory and output a XML list of image files``` XML.loadXML('../XMLFiles.php?folder=/ground/');```. This path will also need to be correct or you will need to pass an array of image paths manually through to the image loader ```imgLoader.loadImageArray(XML.getContent('files','file'), true);```. Note: The PHP script adds /img/ itself for security, enforcing only reading of the img directory.
+2: config.js contains the requirejs baseUrl set as "/isometric/" by default. Make sure this reflects your base path to the folder containing JsIso & RequireJS.
 
 3: That should be everything.
 
