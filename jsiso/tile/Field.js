@@ -167,15 +167,14 @@ function(EffectLoader, Emitter, utils) {
 
     // Used for drawing vertical shadows on top of tiles in isometric view if switched on
     function _drawVeritcalColorOverlay(shadowXpos, shadowYpos, graphicValue, currStack, nextStack, resizedTileHeight, shadowSettings) {
-
+      var  shadowHeight = tileHeight - shadowSettings.offset || 1;
       ctx.fillStyle = 'rgba' + graphicValue;
       ctx.beginPath();
       ctx.moveTo(shadowXpos + (tileHeight * curZoom), shadowYpos + ((currStack - 1) * ((tileHeight - resizedTileHeight) * curZoom)));
-      ctx.lineTo(shadowXpos + (tileHeight * curZoom), shadowYpos - ((nextStack - 1) * ((tileHeight - shadowSettings.offset) / ((tileHeight - shadowSettings.offset) / shadowSettings.offset)  * curZoom)));
-      ctx.lineTo(shadowXpos + (tileHeight * curZoom) * 2, shadowYpos - ((nextStack - 1) * (tileHeight - shadowSettings.offset) / ((tileHeight - shadowSettings.offset) / shadowSettings.offset) * curZoom) + (tileHeight * curZoom) / 2);
+      ctx.lineTo(shadowXpos + (tileHeight * curZoom), shadowYpos - ((nextStack - 1) * ((shadowHeight) / ((shadowHeight) / shadowSettings.offset)  * curZoom)));
+      ctx.lineTo(shadowXpos + (tileHeight * curZoom) * 2, shadowYpos - ((nextStack - 1) * (shadowHeight) / ((shadowHeight) / shadowSettings.offset) * curZoom) + (tileHeight * curZoom) / 2);
       ctx.lineTo(shadowXpos + (tileHeight * curZoom) * 2, shadowYpos + ((currStack - 1) * ((tileHeight - resizedTileHeight) * curZoom)) + (tileHeight * curZoom) / 2);
       ctx.fill();
-
     }
 
 
