@@ -1,4 +1,5 @@
-/*  Copyright (c) 2014 Iain Hamilton
+/*  
+Copyright (c) 2013 - 2015 Iain Hamilton
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -16,7 +17,8 @@ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE. */
+THE SOFTWARE. 
+*/
 
 define([], function() {
   return function () {
@@ -33,6 +35,9 @@ define([], function() {
     var tileHeight;
     var screenWidth;
     var screenHeight;
+
+    var domHeight;
+    var domWidth;
 
 
     var mapOffsetX;
@@ -52,7 +57,14 @@ define([], function() {
 
     var lockToScreen = false; // if set to True, tile maps larger than screen will not scroll off screen boundary
 
-    function _setup(layers, mapW, mapH, tileW, tileH, screenW, screenH, curZ, lts) {
+    // Squeeze some speed by making these cached
+    var round = Math.round;
+    var floor = Math.floor;
+
+    function _setup(layers, mapW, mapH, tileW, tileH, screenW, screenH, domW, domH, curZ, lts) {
+      if (!layers.isArray) {
+        layers = [layers];
+      }
       mapLayers = layers;
       mapWidth = mapW;
       mapHeight = mapH;
@@ -63,8 +75,12 @@ define([], function() {
       screenHeight = screenH;
       scaledMapWidth = mapWidth / tileW;
       scaledMapWidth = scaledMapWidth * (tileW * curZoom);
-      scaledMapHeight = mapHeight / tileW;
+      scaledMapHeight = mapHeight / tileH;
       scaledMapHeight = scaledMapHeight * (tileH * curZoom);
+
+      domHeight = domH;
+      domWidth = domW;
+
       if (lts) {
         lockToScreen = lts;
       }
@@ -79,14 +95,14 @@ define([], function() {
     function _getXYCoords(x, y) {
       var positionY, positionX;
       if (!isometric) {
-        positionY = Math.round((y - (tileHeight * curZoom) / 2)/ (tileHeight * curZoom));
-        positionX = Math.round((x - (tileWidth * curZoom) / 2)/ (tileWidth * curZoom));
+        positionY = round((y - (tileHeight * curZoom) / 2)/ (tileHeight * curZoom));
+        positionX = round((x - (tileWidth * curZoom) / 2)/ (tileWidth * curZoom));
       }
       else {
         positionY = (2 * (y - mapOffsetY) - x + mapOffsetX) / 2;
         positionX = x + positionY - mapOffsetX - (tileHeight * curZoom);
-        positionY = Math.round(positionY / (tileHeight * curZoom));
-        positionX = Math.round(positionX / (tileHeight * curZoom));
+        positionY = round(positionY / (tileHeight * curZoom));
+        positionX = round(positionX / (tileHeight * curZoom));
       }
       return {x: positionX, y: positionY};
     }
@@ -98,16 +114,22 @@ define([], function() {
       if (setZoom !== undefined) {
         curZoom = setZoom;
         scaledMapWidth = mapWidth / tileWidth;
-        scaledMapWidth = scaledMapWidth * (tileWidth * curZoom);
+        scaledMapWidth = round(scaledMapWidth * (tileWidth * curZoom));
         scaledMapHeight = mapHeight / tileHeight;
-        scaledMapHeight = scaledMapHeight * (tileHeight * curZoom);
-        screenHeight = Math.round(window.innerHeight / (tileHeight * curZoom));
-        screenWidth = Math.round(window.innerWidth / (tileWidth * curZoom));
+        scaledMapHeight = round(scaledMapHeight * (tileHeight * curZoom));
+        screenHeight = round(domHeight / (tileHeight * curZoom));
+        screenWidth = round(domWidth / (tileWidth * curZoom));
       }
+
+
+
+      //console.log(screenWidth, scaledMapWidth, screenHeight, scaledMapHeight)
+
       rangeX = cameraRangeX || rangeX;
       rangeY = cameraRangeY || rangeY;
-      startX = Math.round(posX - screenWidth / 2);
-      startY = Math.round(posY - screenHeight / 2);
+      startX = round(posX - screenWidth / 2);
+      startY = round(posY - screenHeight / 2);
+
 
       if (!lockToScreen) {
         if (startX < 0) {
@@ -117,43 +139,42 @@ define([], function() {
           startY = 0;
         }
       }
-
-      if (screenHeight * tileHeight > scaledMapHeight) {
+      if (lockToScreen && screenHeight * tileHeight > scaledMapHeight) {
         for (i = 0; i < mapLayers.length; i++) {
-          mapLayers[i].setOffset(null, Math.round(screenHeight * (tileHeight * curZoom) / 2 - scaledMapHeight / 2));
+          mapLayers[i].setOffset(null, round(screenHeight * (tileHeight * curZoom) / 2 - scaledMapHeight / 2));
         }
       }
       else {
         for (i = 0; i < mapLayers.length; i++) {
           if (startY < 0) {
-            mapLayers[i].setOffset(null, Math.round(-(tileHeight * curZoom) * posY + (posY * (tileHeight * curZoom))));
+            mapLayers[i].setOffset(null, round(-(tileHeight * curZoom) * posY + (posY * (tileHeight * curZoom))));
           }
           else {
             if (lockToScreen && startY + screenHeight > scaledMapHeight / tileHeight) {
-              mapLayers[i].setOffset(null, -(Math.round(scaledMapHeight / tileHeight) - screenHeight) * tileHeight + tileHeight);
+              mapLayers[i].setOffset(null, -(round(scaledMapHeight / tileHeight) - screenHeight) * tileHeight + tileHeight);
             }
             else {
-              mapLayers[i].setOffset(null, Math.round(-(tileHeight * curZoom) * posY + (screenHeight / 2 * (tileHeight * curZoom))));
+              mapLayers[i].setOffset(null, round(-(tileHeight * curZoom) * posY + (screenHeight / 2 * (tileHeight * curZoom))));
             }
           }
         }
       }
-      if (screenWidth * tileWidth > scaledMapWidth) {
+      if (lockToScreen && screenWidth * tileWidth > scaledMapWidth) {
         for (i = 0; i < mapLayers.length; i++) {
-          mapLayers[i].setOffset(Math.round(screenWidth * (tileWidth * curZoom) / 2 - scaledMapWidth / 2), null);
+          mapLayers[i].setOffset(round(screenWidth * (tileWidth * curZoom) / 2 - scaledMapWidth / 2), null);
         }
       }
       else {
         for (i = 0; i < mapLayers.length; i++) {
           if (startX < 0) {
-            mapLayers[i].setOffset(Math.floor(screenWidth * (tileWidth * curZoom) / 2 - scaledMapWidth / 2), null);
+            mapLayers[i].setOffset(floor(screenWidth * (tileWidth * curZoom) / 2 - scaledMapWidth / 2), null);
           }
           else {
             if (lockToScreen && startX + screenWidth > scaledMapWidth / tileWidth) {
-              mapLayers[i].setOffset(-(Math.floor(scaledMapWidth / tileWidth)  - screenWidth) * tileWidth, null);
+              mapLayers[i].setOffset(-(floor(scaledMapWidth / tileWidth)  - screenWidth) * tileWidth, null);
             }
             else {
-              mapLayers[i].setOffset(Math.round(-(tileWidth * curZoom) * posX + (screenWidth / 2 * (tileWidth * curZoom))), null);
+              mapLayers[i].setOffset(round(-(tileWidth * curZoom) * posX + (screenWidth / 2 * (tileWidth * curZoom))), null);
             }
           }
         }
@@ -164,9 +185,10 @@ define([], function() {
       focusX = posX * (curZoom * tileWidth) + xyMapOffset.x;
       focusY = posY * (curZoom * tileHeight) + xyMapOffset.y;
       xyNextPos = _getXYCoords(focusX - xyMapOffset.x, focusY - xyMapOffset.y);
-      var startXNew = Math.floor(xyNextPos.x - rangeX / 2);
-      var startYNew = Math.floor(xyNextPos.y - rangeY / 2);
-      if (!lockToScreen) {
+
+      var startXNew = floor(xyNextPos.x - rangeX / 2);
+      var startYNew = floor(xyNextPos.y - rangeY / 2);
+      if (lockToScreen) {
         if (startXNew < 0) {
           startXNew = 0;
         }
@@ -174,19 +196,13 @@ define([], function() {
           startYNew = 0;
         }
       }
-      /*if (startXNew + screenWidth > scaledMapWidth / (tileWidth * curZoom)) {
-        startXNew = scaledMapWidth / (tileWidth * curZoom) - screenWidth;
-      }
-      if (startYNew + screenHeight > scaledMapHeight / (tileHeight * curZoom)) {
-        startYNew = scaledMapHeight / (tileHeight * curZoom) - screenHeight;
-      }*/
       return {
         startX: startXNew,
         startY: startYNew,
-        pinFocusX: Math.floor(focusX),
-        pinFocusY: Math.floor(focusY),
-        tileX: Math.floor(posX),
-        tileY: Math.floor(posY)
+        pinFocusX: floor(focusX),
+        pinFocusY: floor(focusY),
+        tileX: floor(posX),
+        tileY: floor(posY)
       };
     }
 
@@ -238,14 +254,13 @@ define([], function() {
       }
       startX = xyNextPos.x - rangeX / 2;
       startY = xyNextPos.y - rangeY / 2;
-
       return {
-        startX: Math.floor(startX),
-        startY: Math.floor(startY),
-        pinFocusX: Math.floor(focusX),
-        pinFocusY: Math.floor(focusY),
-        tileX: Math.floor(xyNextPos.x),
-        tileY: Math.floor(xyNextPos.y)
+        startX: floor(startX),
+        startY: floor(startY),
+        pinFocusX: floor(focusX),
+        pinFocusY: floor(focusY),
+        tileX: floor(xyNextPos.x),
+        tileY: floor(xyNextPos.y)
       };
       // Returns where to start drawing the tiles from.
       // pinFocus represents a precise location withn the map.
@@ -263,35 +278,35 @@ define([], function() {
       setPinFocusY: function(y) {
         focusY = y;
         return {
-          startX: Math.floor(startX),
-          startY: Math.floor(startY),
+          startX: floor(startX),
+          startY: floor(startY),
           pinFocusX: focusX,
           pinFocusY: focusY,
-          tileX: Math.floor(xyNextPos.x),
-          tileY: Math.floor(xyNextPos.y)
+          tileX: floor(xyNextPos.x),
+          tileY: floor(xyNextPos.y)
         };
       },
 
       setPinFocusX: function(x) {
         focusX = x;
         return {
-          startX: Math.floor(startX),
-          startY: Math.floor(startY),
+          startX: floor(startX),
+          startY: floor(startY),
           pinFocusX: focusX,
           pinFocusY: focusY,
-          tileX: Math.floor(xyNextPos.x),
-          tileY: Math.floor(xyNextPos.y)
+          tileX: floor(xyNextPos.x),
+          tileY: floor(xyNextPos.y)
         };
       },
 
       getFocus: function() {
         return {
-          startX: Math.floor(startX),
-          startY: Math.floor(startY),
+          startX: floor(startX),
+          startY: floor(startY),
           pinFocusX: focusX,
           pinFocusY: focusY,
-          tileX: Math.floor(xyNextPos.x),
-          tileY: Math.floor(xyNextPos.y)
+          tileX: floor(xyNextPos.x),
+          tileY: floor(xyNextPos.y)
         };
       },
 

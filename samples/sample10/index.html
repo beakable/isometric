@@ -129,8 +129,12 @@ THE SOFTWARE.
               heightMap: {
                 map: heightImg,
                 heightMapOnTop: true,
-                offset: 100
+                offset: 1
               },
+                  shadow: {
+                  offset: 100,
+                  verticalColor: '(150, 150, 30, 0.5)'
+                },
               applyInteractions: true,
               tileHeight: 100,
               tileWidth: 200
@@ -215,18 +219,14 @@ THE SOFTWARE.
           if (zoomLevel <= 0) {
             zoomLevel = 0.01
           }
-          mapLayers.forEach(function(layer) {
-            layer.setZoom(zoomLevel);
-          });
+          mapLayers[0].setZoom(zoomLevel);
         });
         
         function draw() {
           context.clearRect(0, 0, CanvasControl().width, CanvasControl().height);
           for (var i = startX; i < startX + rangeX; i++) {
             for (var j = startY; j < startY + rangeY; j++) {
-              mapLayers.forEach(function(layer) {
-                layer.draw(i,j); // Draw the graphics layer
-              });
+              mapLayers[0].draw(i,j); // Draw the graphics layer
             }
           }
           requestAnimFrame(draw);

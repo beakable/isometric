@@ -27,6 +27,9 @@ define([
 function(EffectLoader, Emitter, utils) {
   return function(ctx, mapWidth, mapHeight, mapLayout) {
 
+
+    var _horizontalTileCache = {}; // Holds the canvas rendered tiles that are drawn via paths
+
     var title = "";
     var zeroIsBlank = false;
     var stackTiles = false;
@@ -133,17 +136,34 @@ function(EffectLoader, Emitter, utils) {
       alphaWhenFocusBehind = settings.alphaWhenFocusBehind;
     }
 
+
     // Used for drawing horizontal shadows on top of tiles or RGBA tiles when color value is passed
     function _drawHorizontalColorOverlay(xpos, ypos, graphicValue, stack, resizedTileHeight) {
 
       if (!isometric) {
-        ctx.fillStyle = 'rgba' + graphicValue;
-        ctx.beginPath();
-        ctx.moveTo(xpos, ypos);
-        ctx.lineTo(xpos + (tileWidth * curZoom), ypos);
-        ctx.lineTo(xpos + (tileWidth * curZoom), ypos + (tileHeight * curZoom));
-        ctx.lineTo(xpos, ypos + (tileHeight * curZoom));
-        ctx.fill();
+        if (_horizontalTileCache[graphicValue] && _horizontalTileCache[graphicValue][curZoom]) {
+          ctx.drawImage(_horizontalTileCache[graphicValue][curZoom], 0, 0, _horizontalTileCache[graphicValue][curZoom].width, _horizontalTileCache[graphicValue][curZoom].height, xpos, (ypos + ((tileHeight - resizedTileHeight) * curZoom)), (tileWidth * curZoom), (resizedTileHeight * curZoom));
+        }
+        else {
+          if (!_horizontalTileCache[graphicValue]) {
+            _horizontalTileCache[graphicValue] = {};
+            _horizontalTileCache[graphicValue][curZoom] = {};
+          }
+          var holderCache = document.createElement("canvas"); // Set new Buffer element
+          holderCache.width = tileWidth * curZoom;
+          holderCache.height = tileWidth * curZoom;
+          var ctxCache = holderCache.getContext('2d');
+          ctxCache.fillStyle = 'rgba' + graphicValue;
+          ctxCache.beginPath();
+          ctxCache.moveTo(0, 0);
+          ctxCache.lineTo(0 + (tileWidth * curZoom), 0);
+          ctxCache.lineTo(0 + (tileWidth * curZoom), 0 + (tileHeight * curZoom));
+          ctxCache.lineTo(0, 0 + (tileHeight * curZoom));
+          ctxCache.fill();
+          _horizontalTileCache[graphicValue][curZoom] = holderCache;
+          ctx.drawImage(holderCache, 0, 0, holderCache.width, holderCache.height, xpos, (ypos + ((tileHeight - resizedTileHeight) * curZoom)), (tileWidth * curZoom), (resizedTileHeight * curZoom));
+        }
+
       }
       else {
         var tileOffset;
@@ -153,13 +173,28 @@ function(EffectLoader, Emitter, utils) {
         else {
           tileOffset = (resizedTileHeight - tileHeight) * curZoom;
         }
-        ctx.fillStyle = 'rgba' + graphicValue;
-        ctx.beginPath();
-        ctx.moveTo(xpos, ypos + ((stack - 1) * (tileOffset)) + (tileHeight * curZoom) / 2);
-        ctx.lineTo(xpos + (tileHeight * curZoom), ypos + ((stack - 1) * (tileOffset)));
-        ctx.lineTo(xpos + (tileHeight * curZoom) * 2, ypos + ((stack - 1) * (tileOffset)) + (tileHeight * curZoom) / 2);
-        ctx.lineTo(xpos + (tileHeight * curZoom), ypos + ((stack - 1) * (tileOffset)) + (tileHeight * curZoom));
-        ctx.fill();
+        if (_horizontalTileCache[graphicValue] && _horizontalTileCache[graphicValue][curZoom]) {
+          ctx.drawImage(_horizontalTileCache[graphicValue][curZoom], 0, 0 , _horizontalTileCache[graphicValue][curZoom].width, _horizontalTileCache[graphicValue][curZoom].height,  xpos, ypos + ((stack - 1) * tileOffset), (tileWidth * curZoom), (tileHeight * curZoom));
+        }
+        else {
+          if (!_horizontalTileCache[graphicValue]) {
+            _horizontalTileCache[graphicValue] = {};
+            _horizontalTileCache[graphicValue][curZoom] = {};
+          }
+          var holderCache = document.createElement("canvas"); // Set new Buffer element
+          holderCache.width = tileWidth * curZoom;
+          holderCache.height = tileHeight * curZoom;
+          var ctxCache = holderCache.getContext('2d');
+          ctxCache.fillStyle = 'rgba' + graphicValue;
+          ctxCache.beginPath();
+          ctxCache.moveTo(0, 0 + (tileHeight * curZoom) / 2);
+          ctxCache.lineTo(0 + (tileHeight * curZoom), 0);
+          ctxCache.lineTo(0 + (tileHeight * curZoom) * 2, 0 + (tileHeight * curZoom) / 2);
+          ctxCache.lineTo(0 + (tileHeight * curZoom), 0 + (tileHeight * curZoom));
+          ctxCache.fill();
+          _horizontalTileCache[graphicValue][curZoom] = holderCache;
+          ctx.drawImage(holderCache, 0, 0, holderCache.width, holderCache.height, xpos, ypos + ((stack - 1) * tileOffset), (tileWidth * curZoom), (tileHeight * curZoom));
+        }
       }
 
     }
@@ -448,13 +483,13 @@ function(EffectLoader, Emitter, utils) {
             // Apply Horizontal shadow created from stacked tiles
             if (shadowSettings.horizontalColor) {
               if (!distanceLightingSettings  || (distanceLighting < distanceLightingSettings.darkness)) {
-                _drawHorizontalColorOverlay(shadowXpos, shadowYpos, (typeof shadowSettings.verticalColor === 'string' ? shadowSettings.verticalColor : shadowSettings.verticalColor[i][j]), currStack, resizedTileHeight);
+                _drawHorizontalColorOverlay(shadowXpos, shadowYpos, (typeof shadowSettings.horizontalColor === 'string' ? shadowSettings.horizontalColor : shadowSettings.horizontalColor[i][j]), currStack, resizedTileHeight);
               }
             }
             // Apply Vertical shadow created from stacked tiles
             if (shadowSettings.verticalColor) {
               if (!distanceLightingSettings  || (distanceLighting < distanceLightingSettings.darkness)) {
-                _drawVeritcalColorOverlay(shadowXpos, shadowYpos, (typeof shadowSettings.horizontalColor === 'string' ? shadowSettings.horizontalColor : shadowSettings.horizontalColor[i][j]), currStack, nextStack, resizedTileHeight, shadowSettings);
+                _drawVeritcalColorOverlay(shadowXpos, shadowYpos, (typeof shadowSettings.verticalColor === 'string' ? shadowSettings.verticalColor : shadowSettings.verticalColor[i][j]), currStack, nextStack, resizedTileHeight, shadowSettings);
               }
             }
           }
