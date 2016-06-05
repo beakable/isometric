@@ -61,10 +61,7 @@ define([], function() {
     var round = Math.round;
     var floor = Math.floor;
 
-    function _setup(layers, mapW, mapH, tileW, tileH, screenW, screenH, domW, domH, curZ, lts) {
-      if (!layers.isArray) {
-        layers = [layers];
-      }
+    function _setup(layers, mapW, mapH, tileW, tileH, screenW, screenH, curZ, lts, domW, domH) {
       mapLayers = layers;
       mapWidth = mapW;
       mapHeight = mapH;
@@ -78,8 +75,8 @@ define([], function() {
       scaledMapHeight = mapHeight / tileH;
       scaledMapHeight = scaledMapHeight * (tileH * curZoom);
 
-      domHeight = domH;
-      domWidth = domW;
+      domHeight = domH || window.innerHeight;
+      domWidth = domW || window.innerWidth;
 
       if (lts) {
         lockToScreen = lts;
